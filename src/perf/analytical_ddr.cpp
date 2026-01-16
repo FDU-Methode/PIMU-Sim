@@ -1,4 +1,4 @@
-#include "./perf/analytical_ddr.hpp"
+#include "../../include/perf/analytical_ddr.hpp"
 
 AnalyticalDDR::AnalyticalDDR(PerfSim* sim, const Config& cfg, Logger& logger) :
     BaseModule(sim, cfg, logger) {

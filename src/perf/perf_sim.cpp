@@ -1,4 +1,4 @@
-#include "./perf/perf_sim.hpp"
+#include "../../include/perf/perf_sim.hpp"
 
 PerfSim::PerfSim(const Config& cfg) 
 : SimBase(cfg), max_sim_cycle(cfg.max_sim_cycle), cycle(0){

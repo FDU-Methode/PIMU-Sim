@@ -1,4 +1,4 @@
-#include "./perf/detail_ddr.hpp"
+#include "../../include/perf/detail_ddr.hpp"
 
 DetailDDR::DetailDDR(PerfSim* sim, const Config& cfg, Logger& logger) :
     BaseModule(sim, cfg, logger) {

@@ -1,5 +1,5 @@
 #include <cassert>
-#include "./perf/perf_func_unit.hpp"
+#include "../../include/perf/perf_func_unit.hpp"
 
 /////////////////////////////
 //    PerfFunctionalUnit   //

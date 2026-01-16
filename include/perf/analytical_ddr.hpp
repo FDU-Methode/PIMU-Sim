@@ -2,11 +2,11 @@
 #define _ANALYTICAL_DDR_HPP__
 
 #include <queue>
-#include "util.hpp"
-// #include "base_module.hpp"
-#include "./perf/perf_sim.hpp"
-#include "config.hpp"
-#include "logger.hpp"
+#include "../util.hpp"
+#include "base_module.hpp"
+#include "perf_sim.hpp"
+#include "../config.hpp"
+#include "../logger.hpp"
 
 class PerfSim; // forward declaration
 

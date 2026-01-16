@@ -1,9 +1,9 @@
 #ifndef _FUNC_UNIT_HPP__
 #define _FUNC_UNIT_HPP__
 
-#include "logger.hpp"
-#include "regfile.hpp"
-#include "./perf/perf_sim.hpp"
+#include "../logger.hpp"
+#include "../regfile.hpp"
+#include "perf_sim.hpp"
 
 class PerfFunctionalUnit{
 protected:

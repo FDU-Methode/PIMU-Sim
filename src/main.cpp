@@ -1,9 +1,9 @@
 #include <iostream>
 #include <memory>
 
-#include "config.hpp"
-#include "func_sim.hpp"
-#include "./perf/perf_sim.hpp"
+#include "../include/config.hpp"
+#include "../include/func_sim.hpp"
+#include "../include/perf/perf_sim.hpp"
 
 int main(int argc, char* argv[]){
     // --- Process Configuration and Arguments ---

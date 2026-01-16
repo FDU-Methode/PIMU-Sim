@@ -2,9 +2,9 @@
 #define __BASE_MODULE_HPP__
 
 #include <stdexcept>
-#include "util.hpp"
-#include "config.hpp"
-#include "logger.hpp"
+#include "../util.hpp"
+#include "../config.hpp"
+#include "../logger.hpp"
 
 class PerfSim;
 

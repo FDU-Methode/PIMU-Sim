@@ -3,10 +3,10 @@
 
 #include <vector>
 #include <algorithm>
-#include "./perf/base_module.hpp"
-#include "./perf/perf_func_unit.hpp"
-#include "inst.hpp"
-#include "regfile.hpp"
+#include "base_module.hpp"
+#include "perf_func_unit.hpp"
+#include "../inst.hpp"
+#include "../regfile.hpp"
 
 class PerfSim;
 class PipelineController;

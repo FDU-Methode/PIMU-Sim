@@ -1,4 +1,4 @@
-#include "regfile.hpp"
+#include "../include/regfile.hpp"
 
 RegFile::RegFile(const Config& cfg) {
     auto get_addr = [&](const std::string& name) -> uint32_t {

@@ -1,11 +1,11 @@
 #ifndef __PERF_SIM_HPP__
 #define __PERF_SIM_HPP__
 
-#include "sim_base.hpp"
-#include "./perf/base_module.hpp"
-#include "./perf/analytical_ddr.hpp"
-#include "./perf/detail_ddr.hpp"
-#include "./perf/perf_npu_core.hpp"
+#include "../sim_base.hpp"
+#include "base_module.hpp"
+#include "analytical_ddr.hpp"
+#include "detail_ddr.hpp"
+#include "perf_npu_core.hpp"
 
 class PerfSim : public SimBase{
 private:

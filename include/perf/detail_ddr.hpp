@@ -2,11 +2,11 @@
 #define _DETAIL_DDR_HPP__
 
 #include <queue>
-#include "util.hpp"
-#include "./perf/base_module.hpp"
-#include "./perf/perf_sim.hpp"
-#include "config.hpp"
-#include "logger.hpp"
+#include "../util.hpp"
+#include "base_module.hpp"
+#include "perf_sim.hpp"
+#include "../config.hpp"
+#include "../logger.hpp"
 #include "../../external/DRAMsim3/src/dramsim3.h"
 
 using namespace dramsim3;
