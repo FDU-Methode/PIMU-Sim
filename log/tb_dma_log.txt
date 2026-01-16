@@ -1,0 +1,124 @@
+Initializing NPU Simulator...
+Creating Analytical DDR...
+----------------------------------------------------
+Initializing Analytical DDR Model
+  DDR Frequency: 3.200000 GHz
+  Base Latency: 45 in ddr cycles
+  Burst Size: 64 bytes
+  DDR request queue depth: 8
+----------------------------------------------------
+Creating NPU Core...
+----------------------------------------------------
+  NPU Core Frequency: 1.000000 GHz
+  PipelineController created!
+Loading instructions from file: ./benchmarks/tb_test/dma.txt
+Successfully loaded 7 instructions from ./benchmarks/tb_test/dma.txt
+
+Loaded 7 instructions!
+----------------------------------------------------
+Base tick = 10 ps; core_period = 100 base ticks; ddr_period = 31 base ticks
+NPU Simulator Initialized
+================================================
+Starting Simulation...
+
+[Core Cycle: 0]
+NPU Core is ticked at cycle 0
+WriteRegStage: Write Reg addr: 0xc0, Data: 0x1
+[Core Cycle: 1]
+NPU Core is ticked at cycle 1
+WriteRegStage: Write Reg addr: 0xc8, Data: 0x3f
+[Core Cycle: 2]
+NPU Core is ticked at cycle 2
+WriteRegStage: Write Reg addr: 0x0, Data: 0x0
+[Core Cycle: 3]
+NPU Core is ticked at cycle 3
+WriteRegStage: Write Reg addr: 0x8, Data: 0xfff00000000
+[Core Cycle: 4]
+NPU Core is ticked at cycle 4
+WriteRegStage: Write Reg addr: 0x20, Data: 0x1000100000000004
+[Core Cycle: 5]
+NPU Core is ticked at cycle 5
+WriteRegStage: Write Reg addr: 0x28, Data: 0x100000000
+[Core Cycle: 6]
+NPU Core is ticked at cycle 6
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x1
+[Core Cycle: 7]
+NPU Core is ticked at cycle 7
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing MVIN instruction
+[DMA] Send request to DDR, DMA set to busy
+[Core Cycle: 8]
+NPU Core is ticked at cycle 8
+ExecuteStage: waiting for completion
+[Core Cycle: 9]
+NPU Core is ticked at cycle 9
+ExecuteStage: waiting for completion
+[Core Cycle: 10]
+NPU Core is ticked at cycle 10
+ExecuteStage: waiting for completion
+[Core Cycle: 11]
+NPU Core is ticked at cycle 11
+ExecuteStage: waiting for completion
+[Core Cycle: 12]
+NPU Core is ticked at cycle 12
+ExecuteStage: waiting for completion
+[Core Cycle: 13]
+NPU Core is ticked at cycle 13
+ExecuteStage: waiting for completion
+[Core Cycle: 14]
+NPU Core is ticked at cycle 14
+ExecuteStage: waiting for completion
+[Core Cycle: 15]
+NPU Core is ticked at cycle 15
+ExecuteStage: waiting for completion
+[Core Cycle: 16]
+NPU Core is ticked at cycle 16
+ExecuteStage: waiting for completion
+[Core Cycle: 17]
+NPU Core is ticked at cycle 17
+ExecuteStage: waiting for completion
+  [PipelineController] H7 module finished
+  [PipelineController] start è"7 module
+[SPM] Start, remaining = 5
+[Core Cycle: 18]
+NPU Core is ticked at cycle 18
+ExecuteStage: waiting for completion
+[Core Cycle: 19]
+NPU Core is ticked at cycle 19
+ExecuteStage: waiting for completion
+[Core Cycle: 20]
+NPU Core is ticked at cycle 20
+ExecuteStage: waiting for completion
+[Core Cycle: 21]
+NPU Core is ticked at cycle 21
+ExecuteStage: waiting for completion
+[Core Cycle: 22]
+NPU Core is ticked at cycle 22
+ExecuteStage: waiting for completion
+  [PipelineController] è"7 module finished
+  [PipelineController] All tasks finished
+[Core Cycle: 23]
+NPU Core is ticked at cycle 23
+ExecuteStage: task execution completed, ISR register updated
+UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 23
+  Write IPR Reg addr: 0xd8, Data: 0x1
+Simulator Detectes an irq signal at cycle 24
+  IPR Reg matches expected opcode 1
+[Core Cycle: 24]
+NPU Core is ticked at cycle 24
+UpdataRegStage: IAR received for bits [0]
+IRQ signal successfully cleared at cycle 25
+NPU Core: Simulation completed at cycle 24
+Core finished execution at cycle 24
+Simulation finished early at cycle 24
+================================================
+Simulation Finished!
+Simulation Statistics:
+  Simulation time: 0.000251 s
+  Maximum cycle limit: 1000
+  Early termination: Yes
+  Final state: DONE
+  Total cycles: 24
+  Total simulated instructions: 7
+  Simulated instructions per second: 27888.446215
