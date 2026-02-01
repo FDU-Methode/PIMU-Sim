@@ -198,7 +198,8 @@ void PerfNpuCore::tick(){
             logger.log("[Core] DDR backpressure, keep req in outbox");
             break;
         }
-        logger.log("[Core] send req to DDR, type = %s, size = %d, req_size = %d", MsgTypeToStr(req.type).c_str(), req.data_size, req.request_data_size);
+        logger.log("[Core] send req to DDR, type = %s, src_addr = 0x%x, dst_addr = 0x%x, row_num = %d, col_num = %d, dram_stride = %d, sram_stride = %d, data_size = %d", 
+            MsgTypeToStr(req.type).c_str(), req.src_addr, req.dst_addr, req.row_num, req.col_num, req.dram_stride, req.sram_stride, req.data_size, req.data_size);
         outbox_.pop();
     }
 
@@ -255,12 +256,12 @@ void PerfNpuCore::checkCompletion(){
 
 void PerfNpuCore::sendMsg(Message& msg){  //DMA Controll core->sendMsg
     outbox_.push(msg);
-    logger.log("[Core] push req to outbox, type = %s, size = %d, req_size = %d", MsgTypeToStr(msg.type).c_str(), msg.data_size, msg.request_data_size);
+    logger.log("[Core] push req to outbox, type = %s, src_addr = 0x%x, dst_addr = 0x%x", MsgTypeToStr(msg.type).c_str(), msg.src_addr, msg.dst_addr);
 }
 
 bool PerfNpuCore::recvMsg(Message& msg){  //DDR Controll core->recvMsg
     inbox_.push(msg);
-    logger.log("[Core] push resp into inbox, type = %s, size = %d, req_size = %d", MsgTypeToStr(msg.type).c_str(), msg.data_size, msg.request_data_size);
+    logger.log("[Core] push resp into inbox, type = %s, src_addr = 0x%x, dst_addr = 0x%x", MsgTypeToStr(msg.type).c_str(), msg.src_addr, msg.dst_addr);
     return true;
 }
 

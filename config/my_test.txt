@@ -11,6 +11,9 @@ core_mode = 0                  # core type: 1 (analytic) or 0 (detail)
 systolic_array_size = 16       # systolic array dimension (16x16)
 npu_freq = 1.0                 # NPU Core frequency (GHz)
 
+# ---- AXI Configuration ----
+axi_data_width = 256           # AXI Data Width
+
 # ---- Regfile Address Offset ----
 mvin_rs1_reg_addr              = 32'h00
 mvin_rs2_reg_addr              = 32'h08

@@ -74,11 +74,9 @@ void PipelineController::execute(){
     if (read_start_data & (1ULL << OpBit::BIT_MVIN)){
         logger.log("[PipelineController] Configing MVIN instruction");
         task_queue.push(dma.get());
-        task_queue.push(spm.get());
     }
     if (read_start_data & (1ULL << OpBit::BIT_MVOUT)){
         logger.log("[PipelineController] Configing MVOUT instruction");
-        task_queue.push(spm.get());
         task_queue.push(dma.get());
     }
     if (read_start_data & (1ULL << OpBit::BIT_COM_SA)){
@@ -150,19 +148,56 @@ void DMA::execute(){
     bool do_mvout = (start & (1ULL << 1)) != 0;
 
     Message req{};
+    uint8_t data_precision = 0;
 
     if(do_mvin && !do_mvout){
         req.type = MsgType::LD_REQ;
-        req.dst_addr = (uint32_t)(regfile.read(regfile.mvin_rs1_reg_addr) & 0xFFFFFFFF);
-        req.request_data_size = (int)(regfile.read(regfile.mvin_rs2_reg_addr) & 0xFFFFFFFF);
+        req.row_num = (int)((regfile.read(regfile.mvin_rs1_reg_addr) >> 32) & 0xFFFF);
+        req.col_num = (int)((regfile.read(regfile.mvin_rs2_reg_addr) >> 32) & 0xFFFF);
+        req.dram_stride = (int)((regfile.read(regfile.config_mvin_rs1_reg_addr) >> 48) & 0xFFFF);
+        req.sram_stride = (int)((regfile.read(regfile.config_mvin_rs1_reg_addr) >> 32) & 0xFFFF);
+
+        data_precision |= ((regfile.read(regfile.config_mvin_rs1_reg_addr) >> 1) & 0x1) << 0;
+        data_precision |= ((regfile.read(regfile.config_mvin_rs1_reg_addr) >> 2) & 0x3) << 1;
+        data_precision |= ((regfile.read(regfile.config_mvin_rs1_reg_addr) >> 4) & 0x1) << 3;
+        switch(data_precision){
+            case 2:  req.data_size = 1; break;
+            case 4:  req.data_size = 2; break;
+            case 10: req.data_size = 4; break;
+            case 3:  req.data_size = 1; break;
+            default: req.data_size = 0; break;
+        }
+
+        req.quant = (regfile.read(regfile.config_mvin_rs1_reg_addr) >> 4) & 0x1;
+        req.src_addr = (uint32_t)(regfile.read(regfile.mvin_rs1_reg_addr) & 0xFFFFFFFF);
+        req.dst_addr = (uint32_t)(regfile.read(regfile.mvin_rs2_reg_addr) & 0xFFFFFFFF);
         expectedMsgType = MsgType::LD_RESP;
-        logger.log("[DMA] MVIN: send LD_REQ, addr = 0x%x, bytes = %d", req.dst_addr, req.request_data_size);
+        logger.log("[DMA] MVIN: send LD_REQ, src_addr = 0x%x, dst_addr = 0x%x, row_num = %d, col_num = %d, dram_stride = %d, sram_stride = %d, data_size = %d", 
+            req.src_addr, req.dst_addr, req.row_num, req.col_num, req.dram_stride, req.sram_stride, req.data_size);
     } else if(!do_mvin && do_mvout){
         req.type = MsgType::ST_REQ;
-        req.dst_addr = (uint32_t)(regfile.read(regfile.mvout_rs1_reg_addr) & 0xFFFFFFFF);
-        req.data_size = (int)(regfile.read(regfile.mvout_rs2_reg_addr) & 0xFFFFFFFF);
+        req.row_num = (int)((regfile.read(regfile.mvout_rs1_reg_addr) >> 32) & 0xFFFF);
+        req.col_num = (int)((regfile.read(regfile.mvout_rs2_reg_addr) >> 32) & 0xFFFF);
+        req.dram_stride = (int)((regfile.read(regfile.config_mvout_rs1_reg_addr) >> 48) & 0xFFFF);
+        req.sram_stride = (int)((regfile.read(regfile.config_mvout_rs1_reg_addr) >> 32) & 0xFFFF);
+
+        data_precision |= ((regfile.read(regfile.config_mvout_rs1_reg_addr) >> 1) & 0x1) << 0;
+        data_precision |= ((regfile.read(regfile.config_mvout_rs1_reg_addr) >> 2) & 0x3) << 1;
+        data_precision |= ((regfile.read(regfile.config_mvout_rs1_reg_addr) >> 4) & 0x1) << 3;
+        switch(data_precision){
+            case 2:  req.data_size = 1; break;
+            case 4:  req.data_size = 2; break;
+            case 10: req.data_size = 4; break;
+            case 3:  req.data_size = 1; break;
+            default: req.data_size = 0; break;
+        }
+
+        req.quant = (regfile.read(regfile.config_mvout_rs1_reg_addr) >> 4) & 0x1;
+        req.src_addr = (uint32_t)(regfile.read(regfile.mvout_rs1_reg_addr) & 0xFFFFFFFF);
+        req.dst_addr = (uint32_t)(regfile.read(regfile.mvout_rs2_reg_addr) & 0xFFFFFFFF);
         expectedMsgType = MsgType::ST_RESP;
-        logger.log("[DMA] MVOUT: send ST_REQ, addr = 0x%x, bytes = %d", req.dst_addr, req.request_data_size);
+        logger.log("[DMA] MVOUT: send ST_REQ, src_addr = 0x%x, dst_addr = 0x%x, row_num = %d, col_num = %d, dram_stride = %d, sram_stride = %d, data_size = %d", 
+            req.src_addr, req.dst_addr, req.row_num, req.col_num, req.dram_stride, req.sram_stride, req.data_size);
     } else{
         remaining_cycles = 10;
         logger.log("[DMA] No clear MVIN/MVOUT, fallback %d cycles", remaining_cycles);

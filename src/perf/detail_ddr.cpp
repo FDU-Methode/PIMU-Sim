@@ -54,13 +54,14 @@ void DetailDDR::tick() {
                   (msg.type == MsgType::ST_REQ ? "STORE_REQ" : "LOAD_REQ"), msg.data_size);
         
         // 计算需要的事务数量
-        int access_data_size;
-        if (msg.type == MsgType::ST_REQ) {
-            access_data_size = msg.data_size; // ST请求时，需写入data_size大小的数据
-        } else {
-            access_data_size = msg.request_data_size; // LD请求时，需从DRAM读取request_data_size大小的数据
-        }
-        int num_trans = (access_data_size + dram_unit - 1) / dram_unit;
+        // int access_data_size;
+        // if (msg.type == MsgType::ST_REQ) {
+        //     access_data_size = msg.data_size; // ST请求时，需写入data_size大小的数据
+        // } else {
+        //     access_data_size = msg.request_data_size; // LD请求时，需从DRAM读取request_data_size大小的数据
+        // }
+        // int num_trans = (access_data_size + dram_unit - 1) / dram_unit;
+        int num_trans = 1;  // update this later........
         logger.log("[DDR] Message requires %d transactions", num_trans);
         
         // 初始化新请求

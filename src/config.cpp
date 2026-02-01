@@ -73,6 +73,7 @@ Config Config::from_file(const std::string &path){
         else if (k == "enable_log") c.enable_log = std::stoi(v);
         else if (k == "ddr_mode") c.ddr_mode = std::stoi(v);
         else if (k == "dramsim_cfg_path") c.dramsim_cfg_path = v;
+        else if (k == "axi_data_width") c.axi_data_width = std::stod(v);
         else if (k.length() > 9 && k.substr(k.length() - 9) == "_reg_addr") {
             uint32_t addr = parse_number(v);
             c.reg_addr_map[k] = addr;

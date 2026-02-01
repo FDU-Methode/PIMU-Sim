@@ -14,7 +14,11 @@ enum class SimMode {
 struct Config{
     // NPU Core Config
     SimMode simulator_type = SimMode::FUNCTIONAL;
-    int systolic_array_size = 16;
+    int systolic_array_size = 32;
+
+    // AXI Config
+    int axi_data_width = 256;
+
     std::map<std::string, uint32_t> reg_addr_map;
     // Simulation Config
     std::string inst_file = "./benchmarks/tb_test/test.txt";

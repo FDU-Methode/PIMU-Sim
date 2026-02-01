@@ -19,8 +19,12 @@ enum class MsgType {
 
 struct Message {
     MsgType type;
-    int data_size = 1; // 携带的数据大小 bytes
-    int request_data_size = 1; // 所请求的数据大小 bytes，used for load request
+    int row_num = 0;
+    int col_num = 0;
+    int dram_stride = 0;
+    int sram_stride = 0;
+    int data_size = 0;
+    bool quant = 0;
     uint32_t src_addr = 0;
     uint32_t dst_addr = 0;
     // TODO: add more fields

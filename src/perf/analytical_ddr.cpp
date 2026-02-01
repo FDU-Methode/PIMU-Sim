@@ -1,4 +1,5 @@
 #include "../../include/perf/analytical_ddr.hpp"
+#include <algorithm>
 
 AnalyticalDDR::AnalyticalDDR(PerfSim* sim, const Config& cfg, Logger& logger) :
     BaseModule(sim, cfg, logger) {
@@ -41,12 +42,32 @@ bool AnalyticalDDR::recvMsg(Message& msg) {
 
 bool AnalyticalDDR::tryConsumeResp(MsgType expectedMsg, Message& getMsg) {};
 
-int AnalyticalDDR::getEstimatedLatency(const Message& msg) {
-    int data_size = msg.data_size;
-    int total_bursts = (data_size + burst_size - 1) / burst_size;
-    int bursts_per_channel = (total_bursts + cfg.ddr_channel_num - 1) / cfg.ddr_channel_num;
-    // 基础延时 + 所有通道并行传输延时（每个通道传输若干个burst，每个burst延时tBURST）
-    return base_latency + bursts_per_channel * cfg.tBURST;
+int AnalyticalDDR::getEstimatedLatency(const Message& msg, const Config& cfg) {
+    int row_num = msg.row_num + 1;
+    int col_num = msg.col_num + 1;
+    int max_byte = cfg.axi_data_width / 8;
+    int clock_count = 0;
+    for(int i = 0; i < row_num; i++) {
+        int addr = msg.src_addr + i * msg.dram_stride * msg.data_size;
+        int offset = addr % max_byte;
+        int beat_count = (offset + col_num * msg.data_size) / max_byte;
+        int remain_beat_count = beat_count;
+        int burst_count = 0;
+        uint32_t addr_aligned = addr & ~(max_byte - 1);
+        while(remain_beat_count > 0) {
+            int beats_to_4k = (4096 - addr_aligned) / max_byte;
+            int burst_beat = std::min(std::min(remain_beat_count, beats_to_4k), 256);
+            burst_count += 1;
+            remain_beat_count -= burst_beat;
+            addr_aligned += burst_beat * max_byte;
+        }
+        clock_count += beat_count + burst_count * cfg.tBURST;
+    }
+    // int data_size = msg.data_size;
+    // int total_bursts = (data_size + burst_size - 1) / burst_size;
+    // int bursts_per_channel = (total_bursts + cfg.ddr_channel_num - 1) / cfg.ddr_channel_num;
+    // // 基础延时 + 所有通道并行传输延时（每个通道传输若干个burst，每个burst延时tBURST）
+    return (base_latency + clock_count) * cfg.npu_freq / cfg.ddr_freq;
 }
 
 void AnalyticalDDR::tick() {
@@ -63,10 +84,8 @@ void AnalyticalDDR::tick() {
             Message resp_msg = current_request.msg;
             if (current_request.msg.type == MsgType::LD_REQ) {
                 resp_msg.type = MsgType::LD_RESP;
-                resp_msg.data_size = current_request.msg.request_data_size;
             } else if (current_request.msg.type == MsgType::ST_REQ) {
                 resp_msg.type = MsgType::ST_RESP;
-                resp_msg.data_size = 1; // 返回single-flit响应
             }
             sendMsg(resp_msg);
             current_request.active = false;
@@ -80,7 +99,7 @@ void AnalyticalDDR::tick() {
         Message msg = request_queue.front();
         request_queue.pop();
         current_request.msg = msg;
-        current_request.remaining_cycles = getEstimatedLatency(msg);
+        current_request.remaining_cycles = getEstimatedLatency(msg, cfg);
         current_request.active = true;
         logger.log("[DDR] start processing new request with %d estimated remaining DDR cycles", current_request.remaining_cycles);
     }
