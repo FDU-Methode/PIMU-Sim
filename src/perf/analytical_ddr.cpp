@@ -45,21 +45,21 @@ bool AnalyticalDDR::tryConsumeResp(MsgType expectedMsg, Message& getMsg) {};
 int AnalyticalDDR::getEstimatedLatency(const Message& msg, const Config& cfg) {
     int row_num = msg.row_num + 1;
     int col_num = msg.col_num + 1;
-    int max_byte = cfg.axi_data_width / 8;
+    int max_bytes = cfg.axi_data_width / 8;
     int clock_count = 0;
     for(int i = 0; i < row_num; i++) {
         int addr = msg.src_addr + i * msg.dram_stride * msg.data_size;
-        int offset = addr % max_byte;
-        int beat_count = (offset + col_num * msg.data_size) / max_byte;
+        int offset = addr % max_bytes;
+        int beat_count = (offset + (max_bytes - 1) + col_num * msg.data_size) / max_bytes;
         int remain_beat_count = beat_count;
         int burst_count = 0;
-        uint32_t addr_aligned = addr & ~(max_byte - 1);
+        uint32_t addr_aligned = addr & ~(max_bytes - 1);
         while(remain_beat_count > 0) {
-            int beats_to_4k = (4096 - addr_aligned) / max_byte;
+            int beats_to_4k = (4096 - (addr_aligned & 0xFFF)) / max_bytes;
             int burst_beat = std::min(std::min(remain_beat_count, beats_to_4k), 256);
             burst_count += 1;
             remain_beat_count -= burst_beat;
-            addr_aligned += burst_beat * max_byte;
+            addr_aligned += burst_beat * max_bytes;
         }
         clock_count += beat_count + burst_count * cfg.tBURST;
     }
