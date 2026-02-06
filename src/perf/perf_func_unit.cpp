@@ -81,18 +81,15 @@ void PipelineController::execute(){
     }
     if (read_start_data & (1ULL << OpBit::BIT_COM_SA)){
         logger.log("[PipelineController] Configing COM_SA instruction");
-        task_queue.push(spm.get());
         task_queue.push(sa.get());
         task_queue.push(acc.get());
     }
     if (read_start_data & (1ULL << OpBit::BIT_COM_MATADD)){
         logger.log("[PipelineController] Configing COM_MATADD instruction");
-        task_queue.push(spm.get());
         task_queue.push(acc.get());
     }
     if (read_start_data & (1ULL << OpBit::BIT_COM_MATVEC)){
         logger.log("[PipelineController] Configing COM_MATVEC instruction");
-        task_queue.push(spm.get());
         task_queue.push(gemv.get());
         task_queue.push(acc.get());
     }
@@ -142,7 +139,7 @@ void DMA::execute(){
     assert(state == State::IDLE);
 
     state = State::BUSY;
-    // regfile.read();
+
     uint64_t start = regfile.read(regfile.start_reg_addr);
     bool do_mvin  = (start & (1ULL << 0)) != 0;
     bool do_mvout = (start & (1ULL << 1)) != 0;
@@ -217,6 +214,8 @@ void DMA::completeInstruction(){
 //           SPM           //
 /////////////////////////////
 
+/* SPM: not used, update later */
+
 SPM::SPM(PerfSim* sim, Logger& logger, RegFile& regfile) :
     PerfFunctionalUnit(sim, logger, regfile) {
     UnitName = "SPM";
@@ -268,9 +267,19 @@ void SystolicArray::execute(){
     assert(state == State::IDLE);
 
     state = State::BUSY;
-    // regfile.read();
-    remaining_cycles = 20; // TODO: from M/N/K, core size
-    logger.log("[SystolicArray] Start, remaining = %d", remaining_cycles);
+
+    int row_num_a = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 42) & 0x1F) + 1;
+    int col_num_a = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 32) & 0x3FF) + 1;
+    int row_num_b = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 36) & 0x3FF) + 1;
+    int col_num_b = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 32) & 0x1F) + 1;
+
+    if(col_num_a != row_num_b) {
+        logger.log("[SystolicArray][ERROR] Dimension Mismatch: input_a_col_num = %d, input_b_row_num = %d", col_num_a, row_num_b);
+        assert(col_num_a == row_num_b && "SystolicArray Requires col_num_a = row_num_b");
+    }
+
+    remaining_cycles = row_num_a + col_num_a + col_num_b - 1;
+    logger.log("[SystolicArray] Start, A:%d*%d, B:%d*%d, remaining = %d", row_num_a, col_num_a, row_num_b, col_num_b, remaining_cycles);
 }
 
 void SystolicArray::completeInstruction(){

@@ -42,7 +42,7 @@ bool AnalyticalDDR::recvMsg(Message& msg) {
 
 bool AnalyticalDDR::tryConsumeResp(MsgType expectedMsg, Message& getMsg) {};
 
-int AnalyticalDDR::getEstimatedLatency(const Message& msg, const Config& cfg) {
+int AnalyticalDDR::getEstimatedLatency(const Message& msg) {
     int row_num = msg.row_num + 1;
     int col_num = msg.col_num + 1;
     int max_bytes = cfg.axi_data_width / 8;
@@ -99,7 +99,7 @@ void AnalyticalDDR::tick() {
         Message msg = request_queue.front();
         request_queue.pop();
         current_request.msg = msg;
-        current_request.remaining_cycles = getEstimatedLatency(msg, cfg);
+        current_request.remaining_cycles = getEstimatedLatency(msg);
         current_request.active = true;
         logger.log("[DDR] start processing new request with %d estimated remaining DDR cycles", current_request.remaining_cycles);
     }

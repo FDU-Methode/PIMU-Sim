@@ -8,7 +8,7 @@ max_sim_cycle = 1000           # maximum simulation cycles
 
 # ---- Core Configuration ----
 core_mode = 0                  # core type: 1 (analytic) or 0 (detail)
-systolic_array_size = 16       # systolic array dimension (16x16)
+systolic_array_size = 32       # systolic array dimension (16x16)
 npu_freq = 1.0                 # NPU Core frequency (GHz)
 
 # ---- Regfile Address Offset ----
@@ -56,7 +56,7 @@ ddr_channel_num =  4           # DRAM channel number (移动端/高端NPU的DDR�
 ddr_request_quue_depth = 8     # DRAM request queue depth
 
 # ---- File paths ----
-inst_file = ./benchmarks/tb_test/dma.txt
+inst_file = ./benchmarks/tb_test/tb_dma.txt
 enable_log = 1                 # enable log file: 1 (enable) or 0 (disable)
 log_file   = ./log/tb_dma_log.txt
 

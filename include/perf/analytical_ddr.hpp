@@ -46,7 +46,7 @@ public:
     bool tryConsumeResp(MsgType expectedMsg, Message& getMsg) override;
 
 private:
-    int getEstimatedLatency(const Message& msg, const Config& cfg);
+    int getEstimatedLatency(const Message& msg);
 };
 
 #endif

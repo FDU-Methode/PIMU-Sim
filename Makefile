@@ -2,36 +2,46 @@
 # NPU Simulator Makefile
 ########################################################
 
+# Compiler Config
 CXX = g++
 CXXFLAGS = -std=c++17 -O2 -Wall -Wextra -g
+
+# Include Directories
 INCLUDES = -I./include -I./external/DRAMsim3/src
 
-# 库路径和链接库
+# Library Paths & Linked Libraries
 # LIBS = -L./external/DRAMsim3 -ldramsim3 -lpthread
 LIBS = -L./external/DRAMsim3 -Wl,-rpath,'$$ORIGIN/../external/DRAMsim3' -ldramsim3 -lpthread
 
+# Source & Build Directories
 SRC_DIR = src
 BUILD_DIR = build
 
+# Top Selection
+TOP = dma
+TOP_CFG := ./config/$(TOP)_cfg.txt
+
+# Source Files & Object Files
 SRCS = $(shell find $(SRC_DIR) -name "*.cpp")
 OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
 
+# Final Excutable
 TARGET = $(BUILD_DIR)/npu_sim
 
 ########################################################
-# 构建规则
+# Build Rules
 ########################################################
 
-# 默认目标：编译并运行
+# Default Target: Build & Run
 all: build run
 
-# 只编译
+# Build Only
 build: $(TARGET)
 	@echo "Build complete! Generated npu simulator: $(TARGET)"
 	@echo "Run example programs with 'make run'"
 	@echo "Or run with './$(TARGET) <config_file>'"
 
-# 编译规则
+# Compile Rules
 $(TARGET): $(OBJS) $(DRAMSIM3_LIB)
 	@mkdir -p $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
@@ -40,11 +50,12 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-# 只运行（需要先编译）
+# Run Only (Requires Build First)
 run: $(TARGET)
-	@echo "Running NPU Simulator..."
-	./$(TARGET) ./config/my_test.txt
+	@echo "Running NPU Simulator... (TOP=$(TOP), CFG=$(TOP_CFG))"
+	./$(TARGET) $(TOP_CFG)
 
+# Clean Build
 clean:
 	rm -rf $(BUILD_DIR)
 
