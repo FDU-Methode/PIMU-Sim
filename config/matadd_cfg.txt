@@ -1,0 +1,65 @@
+# ==========================================================
+#  Example NPU Simulator Configuration File
+# ==========================================================
+
+# ---- "Simulator Configuration" ----
+simulator_type = PERFORMANCE
+max_sim_cycle = 1000           # maximum simulation cycles
+
+# ---- Core Configuration ----
+core_mode = 0                  # core type: 1 (analytic) or 0 (detail)
+systolic_array_size = 32       # systolic array dimension (16x16)
+npu_freq = 1.0                 # NPU Core frequency (GHz)
+
+# ---- Regfile Address Offset ----
+mvin_rs1_reg_addr              = 32'h00
+mvin_rs2_reg_addr              = 32'h08
+mvout_rs1_reg_addr             = 32'h10
+mvout_rs2_reg_addr             = 32'h18
+config_mvin_rs1_reg_addr       = 32'h20
+config_mvin_rs2_reg_addr       = 32'h28
+config_mvout_rs1_reg_addr      = 32'h30
+config_mvout_rs2_reg_addr      = 32'h38
+config_compute_rs1_reg_addr    = 32'h40
+config_compute_rs2_reg_addr    = 32'h48
+config_sfu_rs1_reg_addr        = 32'h50
+config_sfu_rs2_reg_addr        = 32'h58
+config_accumulate_rs1_reg_addr = 32'h60
+config_accumulate_rs2_reg_addr = 32'h68
+compute_sa_rs1_reg_addr        = 32'h70
+compute_sa_rs2_reg_addr        = 32'h78
+compute_matadd_rs1_reg_addr    = 32'h80
+compute_matadd_rs2_reg_addr    = 32'h88
+compute_matvec_rs1_reg_addr    = 32'h90
+compute_matvec_rs2_reg_addr    = 32'h98
+compute_sfu_rs1_reg_addr       = 32'ha0
+compute_sfu_rs2_reg_addr       = 32'ha8
+start_reg_addr                 = 32'hb0
+iar_reg_addr                   = 32'hb8
+mer_reg_addr                   = 32'hc0
+ier_reg_addr                   = 32'hc8
+isr_reg_addr                   = 32'hd0
+ipr_reg_addr                   = 32'hd8
+
+# ---- DRAM Configuration ----
+ddr_mode = 1                   # DRAM type: 1 (analytic) or 0 (detail)
+dramsim_cfg_path = ./external/DRAMsim3/configs/DDR4_8Gb_x8_3200.ini # DRAMSim3 configuration file path, only valid in detail dram mode
+ddr_freq = 3.2                 # DRAM frequency (GHz)
+ddr_bandwidth = 21.3           # DRAM bandwidth (GB/s) 注意，使用带宽估算延时不准，使用下列参数估算
+tCAS = 15                      # DRAM CAS latency (DDR cycles)
+tRCD = 15                      # DRAM RCD latency (DDR cycles)
+tRP = 15                       # DRAM RP latency (DDR cycles)
+tBURST = 4                     # DRAM burst latency (DDR cycles)
+BL = 8                         # DRAM burst length (typically 8 bits)
+ddr_bus_width = 64             # DRAM bus width (typically 64 bits)
+ddr_channel_num =  4           # DRAM channel number (移动端/高端NPU的DDR通常为2-4通道，HBM2/3通常为8通道)
+ddr_request_quue_depth = 8     # DRAM request queue depth
+
+# ---- File paths ----
+inst_file = ./benchmarks/tb_test/tb_matadd.txt
+enable_log = 1                 # enable log file: 1 (enable) or 0 (disable)
+log_file   = ./log/tb_matadd_log.txt
+
+# ---- (Optional future extension) ----
+# sram_bytes = 262144
+# core_count = 4

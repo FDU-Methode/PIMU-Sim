@@ -56,9 +56,9 @@ ddr_channel_num =  4           # DRAM channel number (移动端/高端NPU的DDR�
 ddr_request_quue_depth = 8     # DRAM request queue depth
 
 # ---- File paths ----
-inst_file = ./benchmarks/tb_test/tb_sa.txt
+inst_file = ./benchmarks/tb_test/tb_gemm.txt
 enable_log = 1                 # enable log file: 1 (enable) or 0 (disable)
-log_file   = ./log/tb_sa_log.txt
+log_file   = ./log/tb_gemm_log.txt
 
 # ---- (Optional future extension) ----
 # sram_bytes = 262144

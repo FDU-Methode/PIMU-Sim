@@ -26,6 +26,16 @@
 
 - 实现DMA建模，后续需要进一步优化和验证(后续优化burst cycle等参数)
 
-- 粗略实现SA建模，需要进行验证和考虑GEMM/CONV两种情况
+- 实现SA的GEMM建模，vcs测试周期数一致，后续加入CONV建模
+
+- 优化task_queue，删除dequant模块
 
 - 统一文件命名，`./config`文件命名`xxx_cfg.txt`，`./benchmark/tb_test`文件命名`tb_xxx.txt`，`./log`文件命名`tb_xxx_log.txt`。修改Makefile，可直接改变TOP调整仿真参数。
+
+### 2026-02-09
+
+- 实现MATADD，vcs测试周期数一致
+
+### 2026-02-11
+
+- 实现SA的CONV建模，测试一组卷积，周期数大致相近(258 / 263)
