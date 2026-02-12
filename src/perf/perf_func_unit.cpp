@@ -112,7 +112,13 @@ void PipelineController::execute(){
     }
     if (read_start_data & (1ULL << OpBit::BIT_COM_SFU)){
         logger.log("[PipelineController] Configing COM_SFU instruction");
-        task_queue.push(sfu.get());
+        bool is_quant = (regfile.read(regfile.config_sfu_rs1_reg_addr) >> 8) & 0x1;
+        if(is_quant) {
+            task_queue.push(sfu.get());
+            task_queue.push(quant.get());
+        } else {
+            task_queue.push(sfu.get());
+        }
     }
 
     // 启动第一个任务
@@ -405,8 +411,58 @@ void SFU::execute(){
     assert(state == State::IDLE);
 
     state = State::BUSY;
-    remaining_cycles = 6; // TODO: from vector length / op type
-    logger.log("[SFU] Start, remaining = %d", remaining_cycles);
+
+    uint8_t sfu_optype = (uint8_t)(regfile.read(regfile.config_sfu_rs1_reg_addr) & 0x3F);
+    int col_num = (int)((regfile.read(regfile.compute_sfu_rs1_reg_addr) >> 32) & 0xFFFF) + 1;
+    int row_num = (int)((regfile.read(regfile.compute_sfu_rs1_reg_addr) >> 48) & 0xFFFF) + 1;
+
+    switch(sfu_optype) {
+        case 0: { // softmax
+            remaining_cycles = 10;
+            logger.log("[SFU] Softmax Start, col_num=%d, row_num=%d, remaining = %d", col_num, row_num, remaining_cycles);
+            break;
+        }
+
+        case 1: { // gelu
+            int gelu_len = (col_num * row_num + 3) / 4;
+            int setup_delay = 1;
+            int gelu_delay = 55;
+            int quant_delay = 1;
+            int dequant_delay = 1;
+            remaining_cycles = setup_delay + gelu_len * (3 + dequant_delay + gelu_delay) + quant_delay;
+            logger.log("[SFU] Gelu Start, col_num=%d, row_num=%d, remaining = %d", col_num, row_num, remaining_cycles);
+            break;
+        }
+
+        case 2: { // layernorm
+            remaining_cycles = 10;
+            logger.log("[SFU] Layernorm Start, col_num=%d, row_num=%d, remaining = %d", col_num, row_num, remaining_cycles);
+            break;
+        }
+
+        case 3: { // downsample_max
+            remaining_cycles = 10;
+            logger.log("[SFU] Downsample_max Start, col_num=%d, row_num=%d, remaining = %d", col_num, row_num, remaining_cycles);
+            break;
+        }
+
+        case 4: { // downsample_avg
+            remaining_cycles = 10;
+            logger.log("[SFU] Downsample_avg Start, col_num=%d, row_num=%d, remaining = %d", col_num, row_num, remaining_cycles);
+            break;
+        }
+
+        case 8: { // transpose
+            remaining_cycles = 10;
+            logger.log("[SFU] Transpose Start, col_num=%d, row_num=%d, remaining = %d", col_num, row_num, remaining_cycles);
+            break;
+        }
+
+        default: {
+            logger.log("[SFU][ERROR] Unsupported SFU Optype = %u", (unsigned)sfu_optype);
+            throw std::runtime_error("Unsupported SFU Optype: " + std::to_string((unsigned)sfu_optype));
+        }
+    }
 }
 
 void SFU::completeInstruction(){
