@@ -424,7 +424,8 @@ void SFU::execute(){
         }
 
         case 1: { // gelu
-            int gelu_len = (col_num * row_num + 3) / 4;
+            int gelu_num = 4;
+            int gelu_len = (col_num * row_num + (gelu_num - 1)) / gelu_num;
             int setup_delay = 1;
             int gelu_delay = 55;
             int quant_delay = 1;
