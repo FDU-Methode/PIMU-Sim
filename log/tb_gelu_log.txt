@@ -55,7 +55,7 @@ NPU Core is ticked at cycle 7
 ExecuteStage: 1
 ExecuteStage: start task execution
 [PipelineController] Configing COM_SFU instruction
-[SFU] Gelu Start, col_num=15, row_num=3, remaining = 710
+[SFU] Gelu Start, col_num=15, row_num=3, remaining = 724
 
 [Core Cycle: 8]
 NPU Core is ticked at cycle 8
@@ -2896,31 +2896,87 @@ ExecuteStage: waiting for completion
 [Core Cycle: 717]
 NPU Core is ticked at cycle 717
 ExecuteStage: waiting for completion
-  [PipelineController] SFU module finished
-  [PipelineController] All tasks finished
 
 [Core Cycle: 718]
 NPU Core is ticked at cycle 718
-ExecuteStage: task execution completed, ISR register updated
-UpdataRegStage: Detected ISR Interrupt bit [5] at cycle 718
-  Write IPR Reg addr: 0xd8, Data: 0x20
-Simulator Detectes an irq signal at cycle 719
-  IPR Reg matches expected opcode 32
+ExecuteStage: waiting for completion
 
 [Core Cycle: 719]
 NPU Core is ticked at cycle 719
+ExecuteStage: waiting for completion
+
+[Core Cycle: 720]
+NPU Core is ticked at cycle 720
+ExecuteStage: waiting for completion
+
+[Core Cycle: 721]
+NPU Core is ticked at cycle 721
+ExecuteStage: waiting for completion
+
+[Core Cycle: 722]
+NPU Core is ticked at cycle 722
+ExecuteStage: waiting for completion
+
+[Core Cycle: 723]
+NPU Core is ticked at cycle 723
+ExecuteStage: waiting for completion
+
+[Core Cycle: 724]
+NPU Core is ticked at cycle 724
+ExecuteStage: waiting for completion
+
+[Core Cycle: 725]
+NPU Core is ticked at cycle 725
+ExecuteStage: waiting for completion
+
+[Core Cycle: 726]
+NPU Core is ticked at cycle 726
+ExecuteStage: waiting for completion
+
+[Core Cycle: 727]
+NPU Core is ticked at cycle 727
+ExecuteStage: waiting for completion
+
+[Core Cycle: 728]
+NPU Core is ticked at cycle 728
+ExecuteStage: waiting for completion
+
+[Core Cycle: 729]
+NPU Core is ticked at cycle 729
+ExecuteStage: waiting for completion
+
+[Core Cycle: 730]
+NPU Core is ticked at cycle 730
+ExecuteStage: waiting for completion
+
+[Core Cycle: 731]
+NPU Core is ticked at cycle 731
+ExecuteStage: waiting for completion
+  [PipelineController] SFU module finished
+  [PipelineController] All tasks finished
+
+[Core Cycle: 732]
+NPU Core is ticked at cycle 732
+ExecuteStage: task execution completed, ISR register updated
+UpdataRegStage: Detected ISR Interrupt bit [5] at cycle 732
+  Write IPR Reg addr: 0xd8, Data: 0x20
+Simulator Detectes an irq signal at cycle 733
+  IPR Reg matches expected opcode 32
+
+[Core Cycle: 733]
+NPU Core is ticked at cycle 733
 UpdataRegStage: IAR received for bits [5]
-IRQ signal successfully cleared at cycle 720
-NPU Core: Simulation completed at cycle 719
-Core finished execution at cycle 719
-Simulation finished early at cycle 719
+IRQ signal successfully cleared at cycle 734
+NPU Core: Simulation completed at cycle 733
+Core finished execution at cycle 733
+Simulation finished early at cycle 733
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.011263 s
+  Simulation time: 0.009645 s
   Maximum cycle limit: 1000
   Early termination: Yes
   Final state: DONE
-  Total cycles: 719
+  Total cycles: 733
   Total simulated instructions: 7
-  Simulated instructions per second: 621.504040
+  Simulated instructions per second: 725.764645

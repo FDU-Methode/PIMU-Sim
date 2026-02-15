@@ -424,13 +424,15 @@ void SFU::execute(){
         }
 
         case 1: { // gelu
-            int gelu_num = 4;
-            int gelu_len = (col_num * row_num + (gelu_num - 1)) / gelu_num;
-            int setup_delay = 1;
-            int gelu_delay = 55;
+            int gelu_num = 4;    // Num of gelu parallel processing units
+            int batch_num = (col_num * row_num + gelu_num - 1) / gelu_num;
+            int setup_delay = 3;
             int quant_delay = 1;
-            int dequant_delay = 1;
-            remaining_cycles = setup_delay + gelu_len * (3 + dequant_delay + gelu_delay) + quant_delay;
+            int slow_gelu_delay = 60;
+            int fast_gelu_delay = 6;
+            float p_slow = 1;    // The proportion of slow gelu (0-1)
+
+            remaining_cycles = setup_delay + batch_num * (p_slow * slow_gelu_delay + (1-p_slow) * fast_gelu_delay) + quant_delay;
             logger.log("[SFU] Gelu Start, col_num=%d, row_num=%d, remaining = %d", col_num, row_num, remaining_cycles);
             break;
         }
