@@ -18,7 +18,7 @@ SRC_DIR = src
 BUILD_DIR = build
 
 # Top Selection
-TOP = gelu
+TOP = softmax
 TOP_CFG := ./config/$(TOP)_cfg.txt
 
 # Source Files & Object Files

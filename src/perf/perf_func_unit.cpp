@@ -418,7 +418,12 @@ void SFU::execute(){
 
     switch(sfu_optype) {
         case 0: { // softmax
-            remaining_cycles = 10;
+            int batch_num = (col_num + 31) / 32;
+            int setup_delay = 1;
+            int quant_delay = 1;
+            int dequant_delay = 1;
+
+            remaining_cycles = setup_delay + row_num * (2 * batch_num + 13 + quant_delay + dequant_delay);
             logger.log("[SFU] Softmax Start, col_num=%d, row_num=%d, remaining = %d", col_num, row_num, remaining_cycles);
             break;
         }
