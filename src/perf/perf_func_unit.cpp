@@ -5,8 +5,8 @@
 //    PerfFunctionalUnit   //
 /////////////////////////////
 
-PerfFunctionalUnit::PerfFunctionalUnit(PerfSim* sim, Logger& logger, RegFile& regfile) :
-    simulator(sim), logger(logger), regfile(regfile) {}
+PerfFunctionalUnit::PerfFunctionalUnit(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
+    simulator(sim), cfg(cfg), logger(logger), regfile(regfile) {}
 
 void PerfFunctionalUnit::execute(){}  //need to complete
 void PerfFunctionalUnit::tick(){}  //need to complete
@@ -20,17 +20,17 @@ void PerfFunctionalUnit::completeInstruction(){
 //    PipelineController   //
 /////////////////////////////
 
-PipelineController::PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile) :
-    PerfFunctionalUnit(sim, logger, regfile) {
+PipelineController::PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, logger, regfile, cfg) {
 
-    dma     = std::make_unique<DMA>(sim, logger, regfile);
-    spm     = std::make_unique<SPM>(sim, logger, regfile);
-    sa      = std::make_unique<SystolicArray>(sim, logger, regfile);
-    acc     = std::make_unique<Accumulator>(sim, logger, regfile);
-    sfu     = std::make_unique<SFU>(sim, logger, regfile);
-    quant   = std::make_unique<Quant>(sim, logger, regfile);
-    im2col  = std::make_unique<Im2col>(sim, logger, regfile);
-    gemv    = std::make_unique<GEMV>(sim, logger, regfile);
+    dma     = std::make_unique<DMA>(sim, logger, regfile, cfg);
+    spm     = std::make_unique<SPM>(sim, logger, regfile, cfg);
+    sa      = std::make_unique<SystolicArray>(sim, logger, regfile, cfg);
+    acc     = std::make_unique<Accumulator>(sim, logger, regfile, cfg);
+    sfu     = std::make_unique<SFU>(sim, logger, regfile, cfg);
+    quant   = std::make_unique<Quant>(sim, logger, regfile, cfg);
+    im2col  = std::make_unique<Im2col>(sim, logger, regfile, cfg);
+    gemv    = std::make_unique<GEMV>(sim, logger, regfile, cfg);
 
 }
 
@@ -135,8 +135,8 @@ void PipelineController::execute(){
 //           DMA           //
 /////////////////////////////
 
-DMA::DMA(PerfSim* sim, Logger& logger, RegFile& regfile) :
-    PerfFunctionalUnit(sim, logger, regfile) {
+DMA::DMA(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, logger, regfile, cfg) {
     UnitName = "DMA";
 }
 
@@ -239,8 +239,8 @@ void DMA::completeInstruction(){
 
 /* SPM: not used, update later */
 
-SPM::SPM(PerfSim* sim, Logger& logger, RegFile& regfile) :
-    PerfFunctionalUnit(sim, logger, regfile) {
+SPM::SPM(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, logger, regfile, cfg) {
     UnitName = "SPM";
 }
 
@@ -270,8 +270,8 @@ void SPM::completeInstruction(){
 //      SystolicArray      //
 /////////////////////////////
 
-SystolicArray::SystolicArray(PerfSim* sim, Logger& logger, RegFile& regfile) :
-    PerfFunctionalUnit(sim, logger, regfile) {
+SystolicArray::SystolicArray(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, logger, regfile, cfg) {
     UnitName = "SystolicArray";
 }
 
@@ -291,7 +291,7 @@ void SystolicArray::execute(){
     state = State::BUSY;
 
     uint8_t optype = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 25) & 0x3);
-    
+
     if(optype == 0) {  // GEMM
 
         int col_num_a = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 32) & 0x7FF) + 1;
@@ -333,7 +333,7 @@ void SystolicArray::execute(){
         int cout = col_num_b;
         int cin = row_num_b;
         int A_row_num = (ofm_w * ofm_h) % 64;
-        remaining_cycles = 6 + A_row_num + cout + weight_shape * weight_shape * 32;
+        remaining_cycles = 6 + A_row_num + cout + weight_shape * weight_shape * cfg.systolic_array_size;
 
         logger.log("[SystolicArray] CONV Start, pad_t/b/l/r/mode=%d/%d/%d/%d/%d, weight_shape/stride/dilation=%d/%d/%d, ifm_w=%d, ifm_h=%d, cin=%d, cout=%d, remaining = %d", 
             pad_top, pad_bottom, pad_left, pad_right, pad_mode, weight_shape, weight_stride, weight_dilation, col_num_a, row_num_a, row_num_b, col_num_b, remaining_cycles);
@@ -352,8 +352,8 @@ void SystolicArray::completeInstruction(){
 //        Accumulator      //
 /////////////////////////////
 
-Accumulator::Accumulator(PerfSim* sim, Logger& logger, RegFile& regfile) :
-    PerfFunctionalUnit(sim, logger, regfile) {
+Accumulator::Accumulator(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, logger, regfile, cfg) {
     UnitName = "Accumulator";
 }
 
@@ -376,7 +376,7 @@ void Accumulator::execute(){
     if(matadd_start) {
         int row_num = (int)((regfile.read(regfile.compute_matadd_rs2_reg_addr) >> 40) & 0xFF);
         int col_num = (int)((regfile.read(regfile.compute_matadd_rs2_reg_addr) >> 32) & 0xFF);
-        remaining_cycles = (row_num * col_num + 31) / 32 + 4;
+        remaining_cycles = (row_num * col_num + cfg.systolic_array_size - 1) / cfg.systolic_array_size + 4;
         logger.log("[Accumulator] Matadd Start, row_num=%d, col_num=%d, remaining = %d", row_num, col_num, remaining_cycles);
     } else {
         remaining_cycles = 3; // TODO: from output tiles / accumaltion rounds
@@ -392,8 +392,8 @@ void Accumulator::completeInstruction(){
 //           SFU           //
 /////////////////////////////
 
-SFU::SFU(PerfSim* sim, Logger& logger, RegFile& regfile) :
-    PerfFunctionalUnit(sim, logger, regfile) {
+SFU::SFU(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, logger, regfile, cfg) {
     UnitName = "SFU";
 }
 
@@ -418,7 +418,7 @@ void SFU::execute(){
 
     switch(sfu_optype) {
         case 0: { // softmax
-            int batch_num = (col_num + 31) / 32;
+            int batch_num = (col_num + cfg.systolic_array_size - 1) / cfg.systolic_array_size;
             int setup_delay = 1;
             int quant_delay = 1;
             int dequant_delay = 1;
@@ -481,8 +481,8 @@ void SFU::completeInstruction(){
 //          Quant          //
 /////////////////////////////
 
-Quant::Quant(PerfSim* sim, Logger& logger, RegFile& regfile) :
-    PerfFunctionalUnit(sim, logger, regfile) {
+Quant::Quant(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, logger, regfile, cfg) {
     UnitName = "Quant";
 }
 
@@ -512,8 +512,8 @@ void Quant::completeInstruction(){
 //         Im2col          //
 /////////////////////////////
 
-Im2col::Im2col(PerfSim* sim, Logger& logger, RegFile& regfile) :
-    PerfFunctionalUnit(sim, logger, regfile) {
+Im2col::Im2col(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, logger, regfile, cfg) {
     UnitName = "Im2col";
 }
 
@@ -544,8 +544,8 @@ void Im2col::completeInstruction(){
 //          GEMV           //
 /////////////////////////////
 
-GEMV::GEMV(PerfSim* sim, Logger& logger, RegFile& regfile) :
-    PerfFunctionalUnit(sim, logger, regfile) {
+GEMV::GEMV(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, logger, regfile, cfg) {
     UnitName = "GEMV";
 }
 

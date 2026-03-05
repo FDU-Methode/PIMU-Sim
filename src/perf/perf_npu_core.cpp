@@ -1,7 +1,7 @@
 #include "../../include/perf/perf_npu_core.hpp"
 #include "../../include/util.hpp"
 
-PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger) 
+PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     : BaseModule(sim, cfg, logger), reg_file(cfg) {
 
     logger.log("----------------------------------------------------");
@@ -10,7 +10,7 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     irq = false;
     state = State::IDLE;
     // 初始化微结构组件
-    pipeline_controller = std::make_unique<PipelineController>(sim, logger, reg_file);
+    pipeline_controller = std::make_unique<PipelineController>(sim, logger, reg_file, cfg);
     logger.log("  PipelineController created!");
 
     logger.log("Loading instructions from file: %s", cfg.inst_file.c_str());

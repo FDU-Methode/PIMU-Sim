@@ -53,7 +53,7 @@ tBURST = 4                     # DRAM burst latency (DDR cycles)
 BL = 8                         # DRAM burst length (typically 8 bits)
 ddr_bus_width = 64             # DRAM bus width (typically 64 bits)
 ddr_channel_num =  4           # DRAM channel number (移动端/高端NPU的DDR通常为2-4通道，HBM2/3通常为8通道)
-ddr_request_quue_depth = 8     # DRAM request queue depth
+ddr_request_queue_depth = 8    # DRAM request queue depth
 
 # ---- File paths ----
 inst_file = ./benchmarks/tb_test/tb_test.txt

@@ -8,6 +8,7 @@
 class PerfFunctionalUnit{
 protected:
     PerfSim* simulator;
+    Config cfg;
     Logger& logger;
     RegFile& regfile;
     int remaining_cycles = 0;
@@ -21,7 +22,7 @@ protected:
 
     virtual void completeInstruction();
 public:
-    PerfFunctionalUnit(PerfSim* sim, Logger& logger, RegFile& regfile);
+    PerfFunctionalUnit(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
     virtual ~PerfFunctionalUnit() = default;
 
     // 状态查询
@@ -39,7 +40,7 @@ public:
 
 class DMA : public PerfFunctionalUnit{
 public:
-    DMA(PerfSim* sim, Logger& logger, RegFile& regfile);
+    DMA(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
     ~DMA() = default;
     void execute() override;
     void tick() override;
@@ -50,7 +51,7 @@ protected:
 
 class SPM : public PerfFunctionalUnit{
 public:
-    SPM(PerfSim* sim, Logger& logger, RegFile& regfile);
+    SPM(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
     ~SPM() = default;
     void execute() override;
     void tick() override;
@@ -60,7 +61,7 @@ protected:
 
 class SystolicArray : public PerfFunctionalUnit{
 public:
-    SystolicArray(PerfSim* sim, Logger& logger, RegFile& regfile);
+    SystolicArray(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
     ~SystolicArray() = default;
     void execute() override;
     void tick() override;
@@ -70,7 +71,7 @@ protected:
 
 class Accumulator : public PerfFunctionalUnit{
 public:
-    Accumulator(PerfSim* sim, Logger& logger, RegFile& regfile);
+    Accumulator(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
     ~Accumulator() = default;
     void execute() override;
     void tick() override;
@@ -80,7 +81,7 @@ protected:
 
 class SFU : public PerfFunctionalUnit{
 public:
-    SFU(PerfSim* sim, Logger& logger, RegFile& regfile);
+    SFU(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
     ~SFU() = default;
     void execute() override;
     void tick() override;
@@ -90,7 +91,7 @@ protected:
 
 class Quant : public PerfFunctionalUnit{
 public:
-    Quant(PerfSim* sim, Logger& logger, RegFile& regfile);
+    Quant(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
     ~Quant() = default;
     void execute() override;
     void tick() override;
@@ -100,7 +101,7 @@ protected:
 
 class Dequant : public PerfFunctionalUnit{
 public:
-    Dequant(PerfSim* sim, Logger& logger, RegFile& regfile);
+    Dequant(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
     ~Dequant() = default;
     void execute() override;
     void tick() override;
@@ -110,7 +111,7 @@ protected:
 
 class Im2col : public PerfFunctionalUnit{
 public:
-    Im2col(PerfSim* sim, Logger& logger, RegFile& regfile);
+    Im2col(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
     ~Im2col() = default;
     void execute() override;
     void tick() override;
@@ -120,7 +121,7 @@ protected:
 
 class GEMV : public PerfFunctionalUnit{
 public:
-    GEMV(PerfSim* sim, Logger& logger, RegFile& regfile);
+    GEMV(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
     ~GEMV() = default;
     void execute() override;
     void tick() override;
@@ -155,7 +156,7 @@ private:
     // 任务队列
     std::queue<PerfFunctionalUnit*> task_queue;
 public:
-    PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile);
+    PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
     ~PipelineController() = default;
 
     void execute() override;

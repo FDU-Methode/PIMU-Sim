@@ -47,3 +47,7 @@
 ### 2026-02-16
 
 - 实现SFU的SOFTMAX建模，vcs测试周期数一致
+
+### 2026-03-05
+
+- 修改各模块systolic_array_size为可配置(根据cfg)
