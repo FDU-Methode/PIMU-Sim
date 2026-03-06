@@ -1,0 +1,1050 @@
+Initializing NPU Simulator...
+Creating Analytical DDR...
+----------------------------------------------------
+Initializing Analytical DDR Model
+  DDR Frequency: 3.200000 GHz
+  Base Latency: 45 in ddr cycles
+  Burst Size: 64 bytes
+  DDR request queue depth: 8
+----------------------------------------------------
+Creating NPU Core...
+----------------------------------------------------
+  NPU Core Frequency: 1.000000 GHz
+  PipelineController created!
+Loading instructions from file: ./benchmarks/tb_test/tb_layernorm.txt
+Successfully loaded 7 instructions from ./benchmarks/tb_test/tb_layernorm.txt
+
+Loaded 7 instructions!
+----------------------------------------------------
+Base tick = 10 ps; core_period = 100 base ticks; ddr_period = 31 base ticks
+NPU Simulator Initialized
+================================================
+Starting Simulation...
+
+
+[Core Cycle: 0]
+NPU Core is ticked at cycle 0
+WriteRegStage: Write Reg addr: 0xc0, Data: 0x1
+
+[Core Cycle: 1]
+NPU Core is ticked at cycle 1
+WriteRegStage: Write Reg addr: 0xc8, Data: 0x3f
+
+[Core Cycle: 2]
+NPU Core is ticked at cycle 2
+WriteRegStage: Write Reg addr: 0x50, Data: 0x2
+
+[Core Cycle: 3]
+NPU Core is ticked at cycle 3
+WriteRegStage: Write Reg addr: 0x58, Data: 0x100000001
+
+[Core Cycle: 4]
+NPU Core is ticked at cycle 4
+WriteRegStage: Write Reg addr: 0xa0, Data: 0x7001800000000
+
+[Core Cycle: 5]
+NPU Core is ticked at cycle 5
+WriteRegStage: Write Reg addr: 0xa8, Data: 0x8000
+
+[Core Cycle: 6]
+NPU Core is ticked at cycle 6
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x20
+
+[Core Cycle: 7]
+NPU Core is ticked at cycle 7
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing COM_SFU instruction
+[SFU] Layernorm Start, col_num=25, row_num=8, remaining = 241
+
+[Core Cycle: 8]
+NPU Core is ticked at cycle 8
+ExecuteStage: waiting for completion
+
+[Core Cycle: 9]
+NPU Core is ticked at cycle 9
+ExecuteStage: waiting for completion
+
+[Core Cycle: 10]
+NPU Core is ticked at cycle 10
+ExecuteStage: waiting for completion
+
+[Core Cycle: 11]
+NPU Core is ticked at cycle 11
+ExecuteStage: waiting for completion
+
+[Core Cycle: 12]
+NPU Core is ticked at cycle 12
+ExecuteStage: waiting for completion
+
+[Core Cycle: 13]
+NPU Core is ticked at cycle 13
+ExecuteStage: waiting for completion
+
+[Core Cycle: 14]
+NPU Core is ticked at cycle 14
+ExecuteStage: waiting for completion
+
+[Core Cycle: 15]
+NPU Core is ticked at cycle 15
+ExecuteStage: waiting for completion
+
+[Core Cycle: 16]
+NPU Core is ticked at cycle 16
+ExecuteStage: waiting for completion
+
+[Core Cycle: 17]
+NPU Core is ticked at cycle 17
+ExecuteStage: waiting for completion
+
+[Core Cycle: 18]
+NPU Core is ticked at cycle 18
+ExecuteStage: waiting for completion
+
+[Core Cycle: 19]
+NPU Core is ticked at cycle 19
+ExecuteStage: waiting for completion
+
+[Core Cycle: 20]
+NPU Core is ticked at cycle 20
+ExecuteStage: waiting for completion
+
+[Core Cycle: 21]
+NPU Core is ticked at cycle 21
+ExecuteStage: waiting for completion
+
+[Core Cycle: 22]
+NPU Core is ticked at cycle 22
+ExecuteStage: waiting for completion
+
+[Core Cycle: 23]
+NPU Core is ticked at cycle 23
+ExecuteStage: waiting for completion
+
+[Core Cycle: 24]
+NPU Core is ticked at cycle 24
+ExecuteStage: waiting for completion
+
+[Core Cycle: 25]
+NPU Core is ticked at cycle 25
+ExecuteStage: waiting for completion
+
+[Core Cycle: 26]
+NPU Core is ticked at cycle 26
+ExecuteStage: waiting for completion
+
+[Core Cycle: 27]
+NPU Core is ticked at cycle 27
+ExecuteStage: waiting for completion
+
+[Core Cycle: 28]
+NPU Core is ticked at cycle 28
+ExecuteStage: waiting for completion
+
+[Core Cycle: 29]
+NPU Core is ticked at cycle 29
+ExecuteStage: waiting for completion
+
+[Core Cycle: 30]
+NPU Core is ticked at cycle 30
+ExecuteStage: waiting for completion
+
+[Core Cycle: 31]
+NPU Core is ticked at cycle 31
+ExecuteStage: waiting for completion
+
+[Core Cycle: 32]
+NPU Core is ticked at cycle 32
+ExecuteStage: waiting for completion
+
+[Core Cycle: 33]
+NPU Core is ticked at cycle 33
+ExecuteStage: waiting for completion
+
+[Core Cycle: 34]
+NPU Core is ticked at cycle 34
+ExecuteStage: waiting for completion
+
+[Core Cycle: 35]
+NPU Core is ticked at cycle 35
+ExecuteStage: waiting for completion
+
+[Core Cycle: 36]
+NPU Core is ticked at cycle 36
+ExecuteStage: waiting for completion
+
+[Core Cycle: 37]
+NPU Core is ticked at cycle 37
+ExecuteStage: waiting for completion
+
+[Core Cycle: 38]
+NPU Core is ticked at cycle 38
+ExecuteStage: waiting for completion
+
+[Core Cycle: 39]
+NPU Core is ticked at cycle 39
+ExecuteStage: waiting for completion
+
+[Core Cycle: 40]
+NPU Core is ticked at cycle 40
+ExecuteStage: waiting for completion
+
+[Core Cycle: 41]
+NPU Core is ticked at cycle 41
+ExecuteStage: waiting for completion
+
+[Core Cycle: 42]
+NPU Core is ticked at cycle 42
+ExecuteStage: waiting for completion
+
+[Core Cycle: 43]
+NPU Core is ticked at cycle 43
+ExecuteStage: waiting for completion
+
+[Core Cycle: 44]
+NPU Core is ticked at cycle 44
+ExecuteStage: waiting for completion
+
+[Core Cycle: 45]
+NPU Core is ticked at cycle 45
+ExecuteStage: waiting for completion
+
+[Core Cycle: 46]
+NPU Core is ticked at cycle 46
+ExecuteStage: waiting for completion
+
+[Core Cycle: 47]
+NPU Core is ticked at cycle 47
+ExecuteStage: waiting for completion
+
+[Core Cycle: 48]
+NPU Core is ticked at cycle 48
+ExecuteStage: waiting for completion
+
+[Core Cycle: 49]
+NPU Core is ticked at cycle 49
+ExecuteStage: waiting for completion
+
+[Core Cycle: 50]
+NPU Core is ticked at cycle 50
+ExecuteStage: waiting for completion
+
+[Core Cycle: 51]
+NPU Core is ticked at cycle 51
+ExecuteStage: waiting for completion
+
+[Core Cycle: 52]
+NPU Core is ticked at cycle 52
+ExecuteStage: waiting for completion
+
+[Core Cycle: 53]
+NPU Core is ticked at cycle 53
+ExecuteStage: waiting for completion
+
+[Core Cycle: 54]
+NPU Core is ticked at cycle 54
+ExecuteStage: waiting for completion
+
+[Core Cycle: 55]
+NPU Core is ticked at cycle 55
+ExecuteStage: waiting for completion
+
+[Core Cycle: 56]
+NPU Core is ticked at cycle 56
+ExecuteStage: waiting for completion
+
+[Core Cycle: 57]
+NPU Core is ticked at cycle 57
+ExecuteStage: waiting for completion
+
+[Core Cycle: 58]
+NPU Core is ticked at cycle 58
+ExecuteStage: waiting for completion
+
+[Core Cycle: 59]
+NPU Core is ticked at cycle 59
+ExecuteStage: waiting for completion
+
+[Core Cycle: 60]
+NPU Core is ticked at cycle 60
+ExecuteStage: waiting for completion
+
+[Core Cycle: 61]
+NPU Core is ticked at cycle 61
+ExecuteStage: waiting for completion
+
+[Core Cycle: 62]
+NPU Core is ticked at cycle 62
+ExecuteStage: waiting for completion
+
+[Core Cycle: 63]
+NPU Core is ticked at cycle 63
+ExecuteStage: waiting for completion
+
+[Core Cycle: 64]
+NPU Core is ticked at cycle 64
+ExecuteStage: waiting for completion
+
+[Core Cycle: 65]
+NPU Core is ticked at cycle 65
+ExecuteStage: waiting for completion
+
+[Core Cycle: 66]
+NPU Core is ticked at cycle 66
+ExecuteStage: waiting for completion
+
+[Core Cycle: 67]
+NPU Core is ticked at cycle 67
+ExecuteStage: waiting for completion
+
+[Core Cycle: 68]
+NPU Core is ticked at cycle 68
+ExecuteStage: waiting for completion
+
+[Core Cycle: 69]
+NPU Core is ticked at cycle 69
+ExecuteStage: waiting for completion
+
+[Core Cycle: 70]
+NPU Core is ticked at cycle 70
+ExecuteStage: waiting for completion
+
+[Core Cycle: 71]
+NPU Core is ticked at cycle 71
+ExecuteStage: waiting for completion
+
+[Core Cycle: 72]
+NPU Core is ticked at cycle 72
+ExecuteStage: waiting for completion
+
+[Core Cycle: 73]
+NPU Core is ticked at cycle 73
+ExecuteStage: waiting for completion
+
+[Core Cycle: 74]
+NPU Core is ticked at cycle 74
+ExecuteStage: waiting for completion
+
+[Core Cycle: 75]
+NPU Core is ticked at cycle 75
+ExecuteStage: waiting for completion
+
+[Core Cycle: 76]
+NPU Core is ticked at cycle 76
+ExecuteStage: waiting for completion
+
+[Core Cycle: 77]
+NPU Core is ticked at cycle 77
+ExecuteStage: waiting for completion
+
+[Core Cycle: 78]
+NPU Core is ticked at cycle 78
+ExecuteStage: waiting for completion
+
+[Core Cycle: 79]
+NPU Core is ticked at cycle 79
+ExecuteStage: waiting for completion
+
+[Core Cycle: 80]
+NPU Core is ticked at cycle 80
+ExecuteStage: waiting for completion
+
+[Core Cycle: 81]
+NPU Core is ticked at cycle 81
+ExecuteStage: waiting for completion
+
+[Core Cycle: 82]
+NPU Core is ticked at cycle 82
+ExecuteStage: waiting for completion
+
+[Core Cycle: 83]
+NPU Core is ticked at cycle 83
+ExecuteStage: waiting for completion
+
+[Core Cycle: 84]
+NPU Core is ticked at cycle 84
+ExecuteStage: waiting for completion
+
+[Core Cycle: 85]
+NPU Core is ticked at cycle 85
+ExecuteStage: waiting for completion
+
+[Core Cycle: 86]
+NPU Core is ticked at cycle 86
+ExecuteStage: waiting for completion
+
+[Core Cycle: 87]
+NPU Core is ticked at cycle 87
+ExecuteStage: waiting for completion
+
+[Core Cycle: 88]
+NPU Core is ticked at cycle 88
+ExecuteStage: waiting for completion
+
+[Core Cycle: 89]
+NPU Core is ticked at cycle 89
+ExecuteStage: waiting for completion
+
+[Core Cycle: 90]
+NPU Core is ticked at cycle 90
+ExecuteStage: waiting for completion
+
+[Core Cycle: 91]
+NPU Core is ticked at cycle 91
+ExecuteStage: waiting for completion
+
+[Core Cycle: 92]
+NPU Core is ticked at cycle 92
+ExecuteStage: waiting for completion
+
+[Core Cycle: 93]
+NPU Core is ticked at cycle 93
+ExecuteStage: waiting for completion
+
+[Core Cycle: 94]
+NPU Core is ticked at cycle 94
+ExecuteStage: waiting for completion
+
+[Core Cycle: 95]
+NPU Core is ticked at cycle 95
+ExecuteStage: waiting for completion
+
+[Core Cycle: 96]
+NPU Core is ticked at cycle 96
+ExecuteStage: waiting for completion
+
+[Core Cycle: 97]
+NPU Core is ticked at cycle 97
+ExecuteStage: waiting for completion
+
+[Core Cycle: 98]
+NPU Core is ticked at cycle 98
+ExecuteStage: waiting for completion
+
+[Core Cycle: 99]
+NPU Core is ticked at cycle 99
+ExecuteStage: waiting for completion
+
+[Core Cycle: 100]
+NPU Core is ticked at cycle 100
+ExecuteStage: waiting for completion
+
+[Core Cycle: 101]
+NPU Core is ticked at cycle 101
+ExecuteStage: waiting for completion
+
+[Core Cycle: 102]
+NPU Core is ticked at cycle 102
+ExecuteStage: waiting for completion
+
+[Core Cycle: 103]
+NPU Core is ticked at cycle 103
+ExecuteStage: waiting for completion
+
+[Core Cycle: 104]
+NPU Core is ticked at cycle 104
+ExecuteStage: waiting for completion
+
+[Core Cycle: 105]
+NPU Core is ticked at cycle 105
+ExecuteStage: waiting for completion
+
+[Core Cycle: 106]
+NPU Core is ticked at cycle 106
+ExecuteStage: waiting for completion
+
+[Core Cycle: 107]
+NPU Core is ticked at cycle 107
+ExecuteStage: waiting for completion
+
+[Core Cycle: 108]
+NPU Core is ticked at cycle 108
+ExecuteStage: waiting for completion
+
+[Core Cycle: 109]
+NPU Core is ticked at cycle 109
+ExecuteStage: waiting for completion
+
+[Core Cycle: 110]
+NPU Core is ticked at cycle 110
+ExecuteStage: waiting for completion
+
+[Core Cycle: 111]
+NPU Core is ticked at cycle 111
+ExecuteStage: waiting for completion
+
+[Core Cycle: 112]
+NPU Core is ticked at cycle 112
+ExecuteStage: waiting for completion
+
+[Core Cycle: 113]
+NPU Core is ticked at cycle 113
+ExecuteStage: waiting for completion
+
+[Core Cycle: 114]
+NPU Core is ticked at cycle 114
+ExecuteStage: waiting for completion
+
+[Core Cycle: 115]
+NPU Core is ticked at cycle 115
+ExecuteStage: waiting for completion
+
+[Core Cycle: 116]
+NPU Core is ticked at cycle 116
+ExecuteStage: waiting for completion
+
+[Core Cycle: 117]
+NPU Core is ticked at cycle 117
+ExecuteStage: waiting for completion
+
+[Core Cycle: 118]
+NPU Core is ticked at cycle 118
+ExecuteStage: waiting for completion
+
+[Core Cycle: 119]
+NPU Core is ticked at cycle 119
+ExecuteStage: waiting for completion
+
+[Core Cycle: 120]
+NPU Core is ticked at cycle 120
+ExecuteStage: waiting for completion
+
+[Core Cycle: 121]
+NPU Core is ticked at cycle 121
+ExecuteStage: waiting for completion
+
+[Core Cycle: 122]
+NPU Core is ticked at cycle 122
+ExecuteStage: waiting for completion
+
+[Core Cycle: 123]
+NPU Core is ticked at cycle 123
+ExecuteStage: waiting for completion
+
+[Core Cycle: 124]
+NPU Core is ticked at cycle 124
+ExecuteStage: waiting for completion
+
+[Core Cycle: 125]
+NPU Core is ticked at cycle 125
+ExecuteStage: waiting for completion
+
+[Core Cycle: 126]
+NPU Core is ticked at cycle 126
+ExecuteStage: waiting for completion
+
+[Core Cycle: 127]
+NPU Core is ticked at cycle 127
+ExecuteStage: waiting for completion
+
+[Core Cycle: 128]
+NPU Core is ticked at cycle 128
+ExecuteStage: waiting for completion
+
+[Core Cycle: 129]
+NPU Core is ticked at cycle 129
+ExecuteStage: waiting for completion
+
+[Core Cycle: 130]
+NPU Core is ticked at cycle 130
+ExecuteStage: waiting for completion
+
+[Core Cycle: 131]
+NPU Core is ticked at cycle 131
+ExecuteStage: waiting for completion
+
+[Core Cycle: 132]
+NPU Core is ticked at cycle 132
+ExecuteStage: waiting for completion
+
+[Core Cycle: 133]
+NPU Core is ticked at cycle 133
+ExecuteStage: waiting for completion
+
+[Core Cycle: 134]
+NPU Core is ticked at cycle 134
+ExecuteStage: waiting for completion
+
+[Core Cycle: 135]
+NPU Core is ticked at cycle 135
+ExecuteStage: waiting for completion
+
+[Core Cycle: 136]
+NPU Core is ticked at cycle 136
+ExecuteStage: waiting for completion
+
+[Core Cycle: 137]
+NPU Core is ticked at cycle 137
+ExecuteStage: waiting for completion
+
+[Core Cycle: 138]
+NPU Core is ticked at cycle 138
+ExecuteStage: waiting for completion
+
+[Core Cycle: 139]
+NPU Core is ticked at cycle 139
+ExecuteStage: waiting for completion
+
+[Core Cycle: 140]
+NPU Core is ticked at cycle 140
+ExecuteStage: waiting for completion
+
+[Core Cycle: 141]
+NPU Core is ticked at cycle 141
+ExecuteStage: waiting for completion
+
+[Core Cycle: 142]
+NPU Core is ticked at cycle 142
+ExecuteStage: waiting for completion
+
+[Core Cycle: 143]
+NPU Core is ticked at cycle 143
+ExecuteStage: waiting for completion
+
+[Core Cycle: 144]
+NPU Core is ticked at cycle 144
+ExecuteStage: waiting for completion
+
+[Core Cycle: 145]
+NPU Core is ticked at cycle 145
+ExecuteStage: waiting for completion
+
+[Core Cycle: 146]
+NPU Core is ticked at cycle 146
+ExecuteStage: waiting for completion
+
+[Core Cycle: 147]
+NPU Core is ticked at cycle 147
+ExecuteStage: waiting for completion
+
+[Core Cycle: 148]
+NPU Core is ticked at cycle 148
+ExecuteStage: waiting for completion
+
+[Core Cycle: 149]
+NPU Core is ticked at cycle 149
+ExecuteStage: waiting for completion
+
+[Core Cycle: 150]
+NPU Core is ticked at cycle 150
+ExecuteStage: waiting for completion
+
+[Core Cycle: 151]
+NPU Core is ticked at cycle 151
+ExecuteStage: waiting for completion
+
+[Core Cycle: 152]
+NPU Core is ticked at cycle 152
+ExecuteStage: waiting for completion
+
+[Core Cycle: 153]
+NPU Core is ticked at cycle 153
+ExecuteStage: waiting for completion
+
+[Core Cycle: 154]
+NPU Core is ticked at cycle 154
+ExecuteStage: waiting for completion
+
+[Core Cycle: 155]
+NPU Core is ticked at cycle 155
+ExecuteStage: waiting for completion
+
+[Core Cycle: 156]
+NPU Core is ticked at cycle 156
+ExecuteStage: waiting for completion
+
+[Core Cycle: 157]
+NPU Core is ticked at cycle 157
+ExecuteStage: waiting for completion
+
+[Core Cycle: 158]
+NPU Core is ticked at cycle 158
+ExecuteStage: waiting for completion
+
+[Core Cycle: 159]
+NPU Core is ticked at cycle 159
+ExecuteStage: waiting for completion
+
+[Core Cycle: 160]
+NPU Core is ticked at cycle 160
+ExecuteStage: waiting for completion
+
+[Core Cycle: 161]
+NPU Core is ticked at cycle 161
+ExecuteStage: waiting for completion
+
+[Core Cycle: 162]
+NPU Core is ticked at cycle 162
+ExecuteStage: waiting for completion
+
+[Core Cycle: 163]
+NPU Core is ticked at cycle 163
+ExecuteStage: waiting for completion
+
+[Core Cycle: 164]
+NPU Core is ticked at cycle 164
+ExecuteStage: waiting for completion
+
+[Core Cycle: 165]
+NPU Core is ticked at cycle 165
+ExecuteStage: waiting for completion
+
+[Core Cycle: 166]
+NPU Core is ticked at cycle 166
+ExecuteStage: waiting for completion
+
+[Core Cycle: 167]
+NPU Core is ticked at cycle 167
+ExecuteStage: waiting for completion
+
+[Core Cycle: 168]
+NPU Core is ticked at cycle 168
+ExecuteStage: waiting for completion
+
+[Core Cycle: 169]
+NPU Core is ticked at cycle 169
+ExecuteStage: waiting for completion
+
+[Core Cycle: 170]
+NPU Core is ticked at cycle 170
+ExecuteStage: waiting for completion
+
+[Core Cycle: 171]
+NPU Core is ticked at cycle 171
+ExecuteStage: waiting for completion
+
+[Core Cycle: 172]
+NPU Core is ticked at cycle 172
+ExecuteStage: waiting for completion
+
+[Core Cycle: 173]
+NPU Core is ticked at cycle 173
+ExecuteStage: waiting for completion
+
+[Core Cycle: 174]
+NPU Core is ticked at cycle 174
+ExecuteStage: waiting for completion
+
+[Core Cycle: 175]
+NPU Core is ticked at cycle 175
+ExecuteStage: waiting for completion
+
+[Core Cycle: 176]
+NPU Core is ticked at cycle 176
+ExecuteStage: waiting for completion
+
+[Core Cycle: 177]
+NPU Core is ticked at cycle 177
+ExecuteStage: waiting for completion
+
+[Core Cycle: 178]
+NPU Core is ticked at cycle 178
+ExecuteStage: waiting for completion
+
+[Core Cycle: 179]
+NPU Core is ticked at cycle 179
+ExecuteStage: waiting for completion
+
+[Core Cycle: 180]
+NPU Core is ticked at cycle 180
+ExecuteStage: waiting for completion
+
+[Core Cycle: 181]
+NPU Core is ticked at cycle 181
+ExecuteStage: waiting for completion
+
+[Core Cycle: 182]
+NPU Core is ticked at cycle 182
+ExecuteStage: waiting for completion
+
+[Core Cycle: 183]
+NPU Core is ticked at cycle 183
+ExecuteStage: waiting for completion
+
+[Core Cycle: 184]
+NPU Core is ticked at cycle 184
+ExecuteStage: waiting for completion
+
+[Core Cycle: 185]
+NPU Core is ticked at cycle 185
+ExecuteStage: waiting for completion
+
+[Core Cycle: 186]
+NPU Core is ticked at cycle 186
+ExecuteStage: waiting for completion
+
+[Core Cycle: 187]
+NPU Core is ticked at cycle 187
+ExecuteStage: waiting for completion
+
+[Core Cycle: 188]
+NPU Core is ticked at cycle 188
+ExecuteStage: waiting for completion
+
+[Core Cycle: 189]
+NPU Core is ticked at cycle 189
+ExecuteStage: waiting for completion
+
+[Core Cycle: 190]
+NPU Core is ticked at cycle 190
+ExecuteStage: waiting for completion
+
+[Core Cycle: 191]
+NPU Core is ticked at cycle 191
+ExecuteStage: waiting for completion
+
+[Core Cycle: 192]
+NPU Core is ticked at cycle 192
+ExecuteStage: waiting for completion
+
+[Core Cycle: 193]
+NPU Core is ticked at cycle 193
+ExecuteStage: waiting for completion
+
+[Core Cycle: 194]
+NPU Core is ticked at cycle 194
+ExecuteStage: waiting for completion
+
+[Core Cycle: 195]
+NPU Core is ticked at cycle 195
+ExecuteStage: waiting for completion
+
+[Core Cycle: 196]
+NPU Core is ticked at cycle 196
+ExecuteStage: waiting for completion
+
+[Core Cycle: 197]
+NPU Core is ticked at cycle 197
+ExecuteStage: waiting for completion
+
+[Core Cycle: 198]
+NPU Core is ticked at cycle 198
+ExecuteStage: waiting for completion
+
+[Core Cycle: 199]
+NPU Core is ticked at cycle 199
+ExecuteStage: waiting for completion
+
+[Core Cycle: 200]
+NPU Core is ticked at cycle 200
+ExecuteStage: waiting for completion
+
+[Core Cycle: 201]
+NPU Core is ticked at cycle 201
+ExecuteStage: waiting for completion
+
+[Core Cycle: 202]
+NPU Core is ticked at cycle 202
+ExecuteStage: waiting for completion
+
+[Core Cycle: 203]
+NPU Core is ticked at cycle 203
+ExecuteStage: waiting for completion
+
+[Core Cycle: 204]
+NPU Core is ticked at cycle 204
+ExecuteStage: waiting for completion
+
+[Core Cycle: 205]
+NPU Core is ticked at cycle 205
+ExecuteStage: waiting for completion
+
+[Core Cycle: 206]
+NPU Core is ticked at cycle 206
+ExecuteStage: waiting for completion
+
+[Core Cycle: 207]
+NPU Core is ticked at cycle 207
+ExecuteStage: waiting for completion
+
+[Core Cycle: 208]
+NPU Core is ticked at cycle 208
+ExecuteStage: waiting for completion
+
+[Core Cycle: 209]
+NPU Core is ticked at cycle 209
+ExecuteStage: waiting for completion
+
+[Core Cycle: 210]
+NPU Core is ticked at cycle 210
+ExecuteStage: waiting for completion
+
+[Core Cycle: 211]
+NPU Core is ticked at cycle 211
+ExecuteStage: waiting for completion
+
+[Core Cycle: 212]
+NPU Core is ticked at cycle 212
+ExecuteStage: waiting for completion
+
+[Core Cycle: 213]
+NPU Core is ticked at cycle 213
+ExecuteStage: waiting for completion
+
+[Core Cycle: 214]
+NPU Core is ticked at cycle 214
+ExecuteStage: waiting for completion
+
+[Core Cycle: 215]
+NPU Core is ticked at cycle 215
+ExecuteStage: waiting for completion
+
+[Core Cycle: 216]
+NPU Core is ticked at cycle 216
+ExecuteStage: waiting for completion
+
+[Core Cycle: 217]
+NPU Core is ticked at cycle 217
+ExecuteStage: waiting for completion
+
+[Core Cycle: 218]
+NPU Core is ticked at cycle 218
+ExecuteStage: waiting for completion
+
+[Core Cycle: 219]
+NPU Core is ticked at cycle 219
+ExecuteStage: waiting for completion
+
+[Core Cycle: 220]
+NPU Core is ticked at cycle 220
+ExecuteStage: waiting for completion
+
+[Core Cycle: 221]
+NPU Core is ticked at cycle 221
+ExecuteStage: waiting for completion
+
+[Core Cycle: 222]
+NPU Core is ticked at cycle 222
+ExecuteStage: waiting for completion
+
+[Core Cycle: 223]
+NPU Core is ticked at cycle 223
+ExecuteStage: waiting for completion
+
+[Core Cycle: 224]
+NPU Core is ticked at cycle 224
+ExecuteStage: waiting for completion
+
+[Core Cycle: 225]
+NPU Core is ticked at cycle 225
+ExecuteStage: waiting for completion
+
+[Core Cycle: 226]
+NPU Core is ticked at cycle 226
+ExecuteStage: waiting for completion
+
+[Core Cycle: 227]
+NPU Core is ticked at cycle 227
+ExecuteStage: waiting for completion
+
+[Core Cycle: 228]
+NPU Core is ticked at cycle 228
+ExecuteStage: waiting for completion
+
+[Core Cycle: 229]
+NPU Core is ticked at cycle 229
+ExecuteStage: waiting for completion
+
+[Core Cycle: 230]
+NPU Core is ticked at cycle 230
+ExecuteStage: waiting for completion
+
+[Core Cycle: 231]
+NPU Core is ticked at cycle 231
+ExecuteStage: waiting for completion
+
+[Core Cycle: 232]
+NPU Core is ticked at cycle 232
+ExecuteStage: waiting for completion
+
+[Core Cycle: 233]
+NPU Core is ticked at cycle 233
+ExecuteStage: waiting for completion
+
+[Core Cycle: 234]
+NPU Core is ticked at cycle 234
+ExecuteStage: waiting for completion
+
+[Core Cycle: 235]
+NPU Core is ticked at cycle 235
+ExecuteStage: waiting for completion
+
+[Core Cycle: 236]
+NPU Core is ticked at cycle 236
+ExecuteStage: waiting for completion
+
+[Core Cycle: 237]
+NPU Core is ticked at cycle 237
+ExecuteStage: waiting for completion
+
+[Core Cycle: 238]
+NPU Core is ticked at cycle 238
+ExecuteStage: waiting for completion
+
+[Core Cycle: 239]
+NPU Core is ticked at cycle 239
+ExecuteStage: waiting for completion
+
+[Core Cycle: 240]
+NPU Core is ticked at cycle 240
+ExecuteStage: waiting for completion
+
+[Core Cycle: 241]
+NPU Core is ticked at cycle 241
+ExecuteStage: waiting for completion
+
+[Core Cycle: 242]
+NPU Core is ticked at cycle 242
+ExecuteStage: waiting for completion
+
+[Core Cycle: 243]
+NPU Core is ticked at cycle 243
+ExecuteStage: waiting for completion
+
+[Core Cycle: 244]
+NPU Core is ticked at cycle 244
+ExecuteStage: waiting for completion
+
+[Core Cycle: 245]
+NPU Core is ticked at cycle 245
+ExecuteStage: waiting for completion
+
+[Core Cycle: 246]
+NPU Core is ticked at cycle 246
+ExecuteStage: waiting for completion
+
+[Core Cycle: 247]
+NPU Core is ticked at cycle 247
+ExecuteStage: waiting for completion
+
+[Core Cycle: 248]
+NPU Core is ticked at cycle 248
+ExecuteStage: waiting for completion
+  [PipelineController] SFU module finished
+  [PipelineController] All tasks finished
+
+[Core Cycle: 249]
+NPU Core is ticked at cycle 249
+ExecuteStage: task execution completed, ISR register updated
+UpdataRegStage: Detected ISR Interrupt bit [5] at cycle 249
+  Write IPR Reg addr: 0xd8, Data: 0x20
+Simulator Detectes an irq signal at cycle 250
+  IPR Reg matches expected opcode 32
+
+[Core Cycle: 250]
+NPU Core is ticked at cycle 250
+UpdataRegStage: IAR received for bits [5]
+IRQ signal successfully cleared at cycle 251
+NPU Core: Simulation completed at cycle 250
+Core finished execution at cycle 250
+Simulation finished early at cycle 250
+================================================
+Simulation Finished!
+Simulation Statistics:
+  Simulation time: 0.003683 s
+  Maximum cycle limit: 1000
+  Early termination: Yes
+  Final state: DONE
+  Total cycles: 250
+  Total simulated instructions: 7
+  Simulated instructions per second: 1900.624491

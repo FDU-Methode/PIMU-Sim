@@ -51,3 +51,7 @@
 ### 2026-03-05
 
 - 修改各模块systolic_array_size为可配置(根据cfg)
+
+### 2026-03-06
+
+- 实现SFU的LAYERNORM、POOLMAX、TRANSPOSE建模，vcs测试周期数一致
