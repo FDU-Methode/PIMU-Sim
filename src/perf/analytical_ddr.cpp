@@ -46,14 +46,21 @@ int AnalyticalDDR::getEstimatedLatency(const Message& msg) {
     int row_num = msg.row_num + 1;
     int col_num = msg.col_num + 1;
     int max_bytes = cfg.axi_data_width / 8;
-    int clock_count = 0;
+
+    uint32_t dram_base_addr = (msg.type == MsgType::ST_REQ) ? msg.dst_addr : msg.src_addr;
+
+    int transfer_cycles = 0;
+    int total_burst_count = 0;
+
     for(int i = 0; i < row_num; i++) {
-        int addr = msg.src_addr + i * msg.dram_stride * msg.data_size;
+        uint32_t addr = dram_base_addr + i * msg.dram_stride * msg.data_size;
         int offset = addr % max_bytes;
         int beat_count = (offset + (max_bytes - 1) + col_num * msg.data_size) / max_bytes;
+        
         int remain_beat_count = beat_count;
         int burst_count = 0;
-        uint32_t addr_aligned = addr & ~(max_bytes - 1);
+        uint32_t addr_aligned = addr &~(max_bytes - 1);
+
         while(remain_beat_count > 0) {
             int beats_to_4k = (4096 - (addr_aligned & 0xFFF)) / max_bytes;
             int burst_beat = std::min(std::min(remain_beat_count, beats_to_4k), 256);
@@ -61,13 +68,19 @@ int AnalyticalDDR::getEstimatedLatency(const Message& msg) {
             remain_beat_count -= burst_beat;
             addr_aligned += burst_beat * max_bytes;
         }
-        clock_count += beat_count + burst_count * cfg.tBURST;
+
+        transfer_cycles += beat_count + burst_count * cfg.tBURST;
+        total_burst_count += burst_count;
     }
-    // int data_size = msg.data_size;
-    // int total_bursts = (data_size + burst_size - 1) / burst_size;
-    // int bursts_per_channel = (total_bursts + cfg.ddr_channel_num - 1) / cfg.ddr_channel_num;
-    // // 基础延时 + 所有通道并行传输延时（每个通道传输若干个burst，每个burst延时tBURST）
-    return (base_latency + clock_count) * cfg.npu_freq / cfg.ddr_freq;
+    // Fixed req->start cycles: mvin-1 mvout-2
+    int setup_cycles = (msg.type == MsgType::LD_REQ) ? 1 : (msg.type == MsgType::ST_REQ) ? 2 : 0;
+
+    // MVOUT done waits outstanding write responses to drain, approximate by 1 extra cycle
+    int write_resp_drain_cycles = (msg.type == MsgType::ST_REQ) ? total_burst_count : 0;
+
+    int ddr_cycles = base_latency + transfer_cycles + setup_cycles + write_resp_drain_cycles;
+
+    return ddr_cycles * cfg.npu_freq / cfg.ddr_freq;
 }
 
 void AnalyticalDDR::tick() {

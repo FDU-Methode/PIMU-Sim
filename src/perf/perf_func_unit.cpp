@@ -332,8 +332,13 @@ void SystolicArray::execute(){
         int ofm_h = ((row_num_a + pad_top + pad_bottom - k_eff) / weight_stride) + 1;
         int cout = col_num_b;
         int cin = row_num_b;
-        int A_row_num = (ofm_w * ofm_h) % 64;
-        remaining_cycles = 6 + A_row_num + cout + weight_shape * weight_shape * cfg.systolic_array_size;
+        // Sa_a_row_num is truncated to 6 bits: sa_a_row_num = sa_ofm_size[$clog2(ARRAY_HEIGHT):0]
+        // Input_a_row_num used by SA timing is (ofm_w * ofm_h) mod 64
+        int input_a_row_num = (ofm_w * ofm_h) & 0x3F;
+        int input_a_col_num = weight_shape * weight_shape * cfg.systolic_array_size;
+        int input_b_col_num = cout;
+
+        remaining_cycles = input_a_row_num + input_b_col_num + input_a_col_num + 2;
 
         logger.log("[SystolicArray] CONV Start, pad_t/b/l/r/mode=%d/%d/%d/%d/%d, weight_shape/stride/dilation=%d/%d/%d, ifm_w=%d, ifm_h=%d, cin=%d, cout=%d, remaining = %d", 
             pad_top, pad_bottom, pad_left, pad_right, pad_mode, weight_shape, weight_stride, weight_dilation, col_num_a, row_num_a, row_num_b, col_num_b, remaining_cycles);
@@ -379,7 +384,7 @@ void Accumulator::execute(){
         remaining_cycles = (row_num * col_num + cfg.systolic_array_size - 1) / cfg.systolic_array_size + 4;
         logger.log("[Accumulator] Matadd Start, row_num=%d, col_num=%d, remaining = %d", row_num, col_num, remaining_cycles);
     } else {
-        remaining_cycles = 3; // TODO: from output tiles / accumaltion rounds
+        remaining_cycles = 3;
         logger.log("[Accumulator] Start, remaining = %d", remaining_cycles);
     }
 }
@@ -556,8 +561,11 @@ void Im2col::execute(){
 
     state = State::BUSY;
 
-    remaining_cycles = 8; // TODO: from H/W/K/C stride etc.
-    logger.log("[Im2col] Start, remaining = %d", remaining_cycles);
+    // Serial queue model： model only the blocking startup delay from im2col request to first data
+    // available for SA start, rather than full im2col completion.
+    int startup_delay = 6;
+    remaining_cycles = startup_delay;
+    logger.log("[Im2col] Start (startup-only model), remaining = %d", remaining_cycles);
 }
 
 void Im2col::completeInstruction(){

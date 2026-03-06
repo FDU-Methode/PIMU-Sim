@@ -18,7 +18,7 @@ SRC_DIR = src
 BUILD_DIR = build
 
 # Top Selection
-TOP = transpose
+TOP = conv
 TOP_CFG := ./config/$(TOP)_cfg.txt
 
 # Source Files & Object Files

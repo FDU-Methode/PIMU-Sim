@@ -63,7 +63,7 @@ NPU Core is ticked at cycle 9
 ExecuteStage: 1
 ExecuteStage: start task execution
 [PipelineController] Configing COM_SA instruction
-[Im2col] Start, remaining = 8
+[Im2col] Start (startup-only model), remaining = 6
 
 [Core Cycle: 10]
 NPU Core is ticked at cycle 10
@@ -88,6 +88,9 @@ ExecuteStage: waiting for completion
 [Core Cycle: 15]
 NPU Core is ticked at cycle 15
 ExecuteStage: waiting for completion
+  [PipelineController] Im2col module finished
+  [PipelineController] start SystolicArray module
+[SystolicArray] CONV Start, pad_t/b/l/r/mode=1/1/1/1/0, weight_shape/stride/dilation=3/1/1, ifm_w=8, ifm_h=4, cin=32, cout=32, remaining = 354
 
 [Core Cycle: 16]
 NPU Core is ticked at cycle 16
@@ -96,9 +99,6 @@ ExecuteStage: waiting for completion
 [Core Cycle: 17]
 NPU Core is ticked at cycle 17
 ExecuteStage: waiting for completion
-  [PipelineController] Im2col module finished
-  [PipelineController] start SystolicArray module
-[SystolicArray] CONV Start, pad_t/b/l/r/mode=1/1/1/1/0, weight_shape/stride/dilation=3/1/1, ifm_w=8, ifm_h=4, cin=32, cout=32, remaining = 358
 
 [Core Cycle: 18]
 NPU Core is ticked at cycle 18
@@ -1507,6 +1507,9 @@ ExecuteStage: waiting for completion
 [Core Cycle: 369]
 NPU Core is ticked at cycle 369
 ExecuteStage: waiting for completion
+  [PipelineController] SystolicArray module finished
+  [PipelineController] start Accumulator module
+[Accumulator] Start, remaining = 3
 
 [Core Cycle: 370]
 NPU Core is ticked at cycle 370
@@ -1519,65 +1522,38 @@ ExecuteStage: waiting for completion
 [Core Cycle: 372]
 NPU Core is ticked at cycle 372
 ExecuteStage: waiting for completion
-
-[Core Cycle: 373]
-NPU Core is ticked at cycle 373
-ExecuteStage: waiting for completion
-
-[Core Cycle: 374]
-NPU Core is ticked at cycle 374
-ExecuteStage: waiting for completion
-
-[Core Cycle: 375]
-NPU Core is ticked at cycle 375
-ExecuteStage: waiting for completion
-  [PipelineController] SystolicArray module finished
-  [PipelineController] start Accumulator module
-[Accumulator] Start, remaining = 3
-
-[Core Cycle: 376]
-NPU Core is ticked at cycle 376
-ExecuteStage: waiting for completion
-
-[Core Cycle: 377]
-NPU Core is ticked at cycle 377
-ExecuteStage: waiting for completion
-
-[Core Cycle: 378]
-NPU Core is ticked at cycle 378
-ExecuteStage: waiting for completion
   [PipelineController] Accumulator module finished
   [PipelineController] start Quant module
 [Quant] Start, remaining = 1
 
-[Core Cycle: 379]
-NPU Core is ticked at cycle 379
+[Core Cycle: 373]
+NPU Core is ticked at cycle 373
 ExecuteStage: waiting for completion
   [PipelineController] Quant module finished
   [PipelineController] All tasks finished
 
-[Core Cycle: 380]
-NPU Core is ticked at cycle 380
+[Core Cycle: 374]
+NPU Core is ticked at cycle 374
 ExecuteStage: task execution completed, ISR register updated
-UpdataRegStage: Detected ISR Interrupt bit [2] at cycle 380
+UpdataRegStage: Detected ISR Interrupt bit [2] at cycle 374
   Write IPR Reg addr: 0xd8, Data: 0x4
-Simulator Detectes an irq signal at cycle 381
+Simulator Detectes an irq signal at cycle 375
   IPR Reg matches expected opcode 4
 
-[Core Cycle: 381]
-NPU Core is ticked at cycle 381
+[Core Cycle: 375]
+NPU Core is ticked at cycle 375
 UpdataRegStage: IAR received for bits [2]
-IRQ signal successfully cleared at cycle 382
-NPU Core: Simulation completed at cycle 381
-Core finished execution at cycle 381
-Simulation finished early at cycle 381
+IRQ signal successfully cleared at cycle 376
+NPU Core: Simulation completed at cycle 375
+Core finished execution at cycle 375
+Simulation finished early at cycle 375
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.002022 s
+  Simulation time: 0.002974 s
   Maximum cycle limit: 1000
   Early termination: Yes
   Final state: DONE
-  Total cycles: 381
+  Total cycles: 375
   Total simulated instructions: 9
-  Simulated instructions per second: 4451.038576
+  Simulated instructions per second: 3026.227303
