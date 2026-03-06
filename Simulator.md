@@ -55,3 +55,7 @@
 ### 2026-03-06
 
 - 实现SFU的LAYERNORM、POOLMAX、TRANSPOSE建模，vcs测试周期数一致
+
+- 修改CONV和vcs仿真周期数一致，优化DMA
+
+- `perf_func_unit.cpp`拆分为各组件单独文件，位于`src/perf/func_units`路径下

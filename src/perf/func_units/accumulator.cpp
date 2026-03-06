@@ -1,0 +1,38 @@
+#include <cassert>
+#include "../../../include/perf/perf_func_unit.hpp"
+
+Accumulator::Accumulator(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, logger, regfile, cfg) {
+    UnitName = "Accumulator";
+}
+
+void Accumulator::tick(){
+    if(isBusy()){
+        remaining_cycles--;
+        if(remaining_cycles == 0){
+            completeInstruction();
+        }
+    }
+}
+
+void Accumulator::execute(){
+    assert(!isBusy() && !isFinish());
+    assert(state == State::IDLE);
+
+    state = State::BUSY;
+
+    uint8_t matadd_start = (regfile.read(regfile.start_reg_addr) >> 3) & 0x1;
+    if(matadd_start) {
+        int row_num = (int)((regfile.read(regfile.compute_matadd_rs2_reg_addr) >> 40) & 0xFF);
+        int col_num = (int)((regfile.read(regfile.compute_matadd_rs2_reg_addr) >> 32) & 0xFF);
+        remaining_cycles = (row_num * col_num + cfg.systolic_array_size - 1) / cfg.systolic_array_size + 4;
+        logger.log("[Accumulator] Matadd Start, row_num=%d, col_num=%d, remaining = %d", row_num, col_num, remaining_cycles);
+    } else {
+        remaining_cycles = 3;
+        logger.log("[Accumulator] Start, remaining = %d", remaining_cycles);
+    }
+}
+
+void Accumulator::completeInstruction(){
+    PerfFunctionalUnit::completeInstruction();
+}
