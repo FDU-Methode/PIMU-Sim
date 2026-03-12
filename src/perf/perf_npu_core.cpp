@@ -189,7 +189,7 @@ void PerfNpuCore::UpdataRegStage(){
 void PerfNpuCore::tick(){
     logger.log("NPU Core is ticked at cycle %d", getCycle());
 
-    //Connect DMA To DDR
+    // Connect DMA To DDR
     while(!outbox_.empty()){
         Message& req = outbox_.front();
         auto DDR = sim->getDDR();
