@@ -121,22 +121,6 @@ protected:
 };
 
 //
-// Quant
-//
-
-class Quant : public PerfFunctionalUnit{
-public:
-    Quant(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
-    ~Quant() = default;
-
-    void execute() override;
-    void tick() override;
-
-protected:
-    void completeInstruction() override;
-};
-
-//
 // Im2col
 //
 
@@ -189,7 +173,6 @@ private:
     std::unique_ptr<SystolicArray> sa;
     std::unique_ptr<Accumulator> acc;
     std::unique_ptr<SFU> sfu;
-    std::unique_ptr<Quant> quant;
     std::unique_ptr<Im2col> im2col;
     std::unique_ptr<GEMV> gemv;
 

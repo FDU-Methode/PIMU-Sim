@@ -40,7 +40,7 @@ bool AnalyticalDDR::recvMsg(Message& msg) {
     }
 }
 
-bool AnalyticalDDR::tryConsumeResp(MsgType expectedMsg, Message& getMsg) {};
+bool AnalyticalDDR::tryConsumeResp(MsgType expectedMsg, Message& getMsg) { return false; };
 
 int AnalyticalDDR::getEstimatedLatency(const Message& msg) {
     int row_num = msg.row_num + 1;
@@ -78,9 +78,11 @@ int AnalyticalDDR::getEstimatedLatency(const Message& msg) {
     // MVOUT done waits outstanding write responses to drain, approximate by 1 extra cycle
     int write_resp_drain_cycles = (msg.type == MsgType::ST_REQ) ? total_burst_count : 0;
 
-    int ddr_cycles = base_latency + transfer_cycles + setup_cycles + write_resp_drain_cycles;
+    int core_cycles = base_latency + transfer_cycles + setup_cycles + write_resp_drain_cycles;
 
-    return ddr_cycles * cfg.npu_freq / cfg.ddr_freq;
+    int ddr_cycles = (core_cycles + msg.quant) * cfg.npu_freq / cfg.ddr_freq;
+
+    return ddr_cycles;
 }
 
 void AnalyticalDDR::tick() {

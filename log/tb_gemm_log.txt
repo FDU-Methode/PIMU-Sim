@@ -338,7 +338,7 @@ NPU Core is ticked at cycle 77
 ExecuteStage: waiting for completion
   [PipelineController] SystolicArray module finished
   [PipelineController] start Accumulator module
-[Accumulator] Start, remaining = 3
+[Accumulator] Start, remaining = 4
 
 [Core Cycle: 78]
 NPU Core is ticked at cycle 78
@@ -351,14 +351,11 @@ ExecuteStage: waiting for completion
 [Core Cycle: 80]
 NPU Core is ticked at cycle 80
 ExecuteStage: waiting for completion
-  [PipelineController] Accumulator module finished
-  [PipelineController] start Quant module
-[Quant] Start, remaining = 1
 
 [Core Cycle: 81]
 NPU Core is ticked at cycle 81
 ExecuteStage: waiting for completion
-  [PipelineController] Quant module finished
+  [PipelineController] Accumulator module finished
   [PipelineController] All tasks finished
 
 [Core Cycle: 82]
@@ -379,10 +376,10 @@ Simulation finished early at cycle 83
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.001330 s
+  Simulation time: 0.000525 s
   Maximum cycle limit: 1000
   Early termination: Yes
   Final state: DONE
   Total cycles: 83
   Total simulated instructions: 9
-  Simulated instructions per second: 6766.917293
+  Simulated instructions per second: 17142.857143

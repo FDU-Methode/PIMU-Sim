@@ -121,10 +121,10 @@ Simulation finished early at cycle 20
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.000137 s
+  Simulation time: 0.000135 s
   Maximum cycle limit: 1000
   Early termination: Yes
   Final state: DONE
   Total cycles: 20
   Total simulated instructions: 7
-  Simulated instructions per second: 51094.890511
+  Simulated instructions per second: 51851.851852

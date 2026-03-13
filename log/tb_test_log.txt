@@ -630,7 +630,7 @@ NPU Core is ticked at cycle 121
 ExecuteStage: waiting for completion
   [PipelineController] SystolicArray module finished
   [PipelineController] start Accumulator module
-[Accumulator] Start, remaining = 3
+[Accumulator] Start, remaining = 4
 
 [Core Cycle: 122]
 NPU Core is ticked at cycle 122
@@ -643,14 +643,11 @@ ExecuteStage: waiting for completion
 [Core Cycle: 124]
 NPU Core is ticked at cycle 124
 ExecuteStage: waiting for completion
-  [PipelineController] Accumulator module finished
-  [PipelineController] start Quant module
-[Quant] Start, remaining = 1
 
 [Core Cycle: 125]
 NPU Core is ticked at cycle 125
 ExecuteStage: waiting for completion
-  [PipelineController] Quant module finished
+  [PipelineController] Accumulator module finished
   [PipelineController] All tasks finished
 
 [Core Cycle: 126]
@@ -687,7 +684,7 @@ NPU Core is ticked at cycle 132
 ExecuteStage: 1
 ExecuteStage: start task execution
 [PipelineController] Configing COM_MATADD instruction
-[Accumulator] Matadd Start, row_num=16, col_num=15, remaining = 12
+[Accumulator] Matadd Start, row_num=16, col_num=15, remaining = 13
 
 [Core Cycle: 133]
 NPU Core is ticked at cycle 133
@@ -736,14 +733,11 @@ ExecuteStage: waiting for completion
 [Core Cycle: 144]
 NPU Core is ticked at cycle 144
 ExecuteStage: waiting for completion
-  [PipelineController] Accumulator module finished
-  [PipelineController] start Quant module
-[Quant] Start, remaining = 1
 
 [Core Cycle: 145]
 NPU Core is ticked at cycle 145
 ExecuteStage: waiting for completion
-  [PipelineController] Quant module finished
+  [PipelineController] Accumulator module finished
   [PipelineController] All tasks finished
 
 [Core Cycle: 146]
@@ -2980,10 +2974,10 @@ Simulation finished early at cycle 674
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.008956 s
+  Simulation time: 0.013352 s
   Maximum cycle limit: 1000
   Early termination: Yes
   Final state: DONE
   Total cycles: 674
   Total simulated instructions: 38
-  Simulated instructions per second: 4242.965610
+  Simulated instructions per second: 2846.015578

@@ -59,3 +59,7 @@
 - 修改CONV和vcs仿真周期数一致，优化DMA
 
 - `perf_func_unit.cpp`拆分为各组件单独文件，位于`src/perf/func_units`路径下
+
+### 2026-03-13
+
+- 删除`Quant`模块，更改其他所有模块，测试结果一致

@@ -105,7 +105,7 @@ bool DetailDDR::recvMsg(Message& msg) {
     }
 }
 
-bool DetailDDR::tryConsumeResp(MsgType expectedMsg, Message& getMsg) {};
+bool DetailDDR::tryConsumeResp(MsgType expectedMsg, Message& getMsg) { return false; };
 
 void DetailDDR::readComplete(uint64_t addr) {
     logger.log("[DDR] Read request completed");
