@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "base_module.hpp"
 #include "perf_func_unit.hpp"
+#include "pipeline_controller.hpp"
 #include "../inst.hpp"
 #include "../regfile.hpp"
 

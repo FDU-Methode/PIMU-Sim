@@ -1,8 +1,9 @@
 #include <cassert>
 #include "../../../include/perf/perf_func_unit.hpp"
+#include "../../../include/perf/perf_sim.hpp"
 
-DMA::DMA(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, logger, regfile, cfg) {
+DMA::DMA(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, controller, logger, regfile, cfg) {
     UnitName = "DMA";
 }
 

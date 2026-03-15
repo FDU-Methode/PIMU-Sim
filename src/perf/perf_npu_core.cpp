@@ -1,4 +1,5 @@
 #include "../../include/perf/perf_npu_core.hpp"
+#include "../../include/perf/perf_sim.hpp"
 #include "../../include/util.hpp"
 
 PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)

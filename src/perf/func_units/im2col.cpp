@@ -1,8 +1,8 @@
 #include <cassert>
 #include "../../../include/perf/perf_func_unit.hpp"
 
-Im2col::Im2col(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, logger, regfile, cfg) {
+Im2col::Im2col(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, controller, logger, regfile, cfg) {
     UnitName = "Im2col";
 }
 

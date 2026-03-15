@@ -3,8 +3,8 @@
 
 /* SPM: not used, update later */
 
-SPM::SPM(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, logger, regfile, cfg) {
+SPM::SPM(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, controller, logger, regfile, cfg) {
     UnitName = "SPM";
 }
 

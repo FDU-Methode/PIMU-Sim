@@ -1,13 +1,18 @@
 #ifndef _FUNC_UNIT_HPP__
 #define _FUNC_UNIT_HPP__
 
+#include "../util.hpp"
 #include "../logger.hpp"
 #include "../regfile.hpp"
-#include "perf_sim.hpp"
+// #include "perf_sim.hpp"
+
+class PerfSim;
+class PipelineController;
 
 class PerfFunctionalUnit{
 protected:
     PerfSim* simulator;
+    PipelineController* controller;
     Config cfg;
     Logger& logger;
     RegFile& regfile;
@@ -23,7 +28,7 @@ protected:
     virtual void completeInstruction();
 
 public:
-    PerfFunctionalUnit(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
+    PerfFunctionalUnit(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
     virtual ~PerfFunctionalUnit() = default;
 
     // 状态查询
@@ -45,7 +50,7 @@ public:
 
 class DMA : public PerfFunctionalUnit{
 public:
-    DMA(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
+    DMA(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
     ~DMA() = default;
 
     void execute() override;
@@ -62,7 +67,7 @@ protected:
 
 class SPM : public PerfFunctionalUnit{
 public:
-    SPM(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
+    SPM(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
     ~SPM() = default;
 
     void execute() override;
@@ -78,7 +83,7 @@ protected:
 
 class SystolicArray : public PerfFunctionalUnit{
 public:
-    SystolicArray(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
+    SystolicArray(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
     ~SystolicArray() = default;
 
     void execute() override;
@@ -94,7 +99,7 @@ protected:
 
 class Accumulator : public PerfFunctionalUnit{
 public:
-    Accumulator(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
+    Accumulator(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
     ~Accumulator() = default;
 
     void execute() override;
@@ -110,7 +115,7 @@ protected:
 
 class SFU : public PerfFunctionalUnit{
 public:
-    SFU(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
+    SFU(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
     ~SFU() = default;
 
     void execute() override;
@@ -126,7 +131,7 @@ protected:
 
 class Im2col : public PerfFunctionalUnit{
 public:
-    Im2col(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
+    Im2col(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
     ~Im2col() = default;
 
     void execute() override;
@@ -142,46 +147,8 @@ protected:
 
 class GEMV : public PerfFunctionalUnit{
 public:
-    GEMV(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
+    GEMV(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
     ~GEMV() = default;
-
-    void execute() override;
-    void tick() override;
-
-protected:
-    void completeInstruction() override;
-};
-
-//
-// PipelineController
-//
-
-class PipelineController : public PerfFunctionalUnit{
-private:
-    enum OpBit{
-        BIT_MVIN       = 0,
-        BIT_MVOUT      = 1,
-        BIT_COM_SA     = 2,
-        BIT_COM_MATADD = 3,
-        BIT_COM_MATVEC = 4,
-        BIT_COM_SFU    = 5
-    };
-
-    // 功能单元组件
-    std::unique_ptr<DMA> dma;
-    std::unique_ptr<SPM> spm;
-    std::unique_ptr<SystolicArray> sa;
-    std::unique_ptr<Accumulator> acc;
-    std::unique_ptr<SFU> sfu;
-    std::unique_ptr<Im2col> im2col;
-    std::unique_ptr<GEMV> gemv;
-
-    // 任务队列
-    std::queue<PerfFunctionalUnit*> task_queue;
-
-public:
-    PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
-    ~PipelineController() = default;
 
     void execute() override;
     void tick() override;

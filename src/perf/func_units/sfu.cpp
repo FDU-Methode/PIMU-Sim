@@ -1,8 +1,8 @@
 #include <cassert>
 #include "../../../include/perf/perf_func_unit.hpp"
 
-SFU::SFU(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, logger, regfile, cfg) {
+SFU::SFU(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, controller, logger, regfile, cfg) {
     UnitName = "SFU";
 }
 

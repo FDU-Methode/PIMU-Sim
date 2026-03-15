@@ -17,6 +17,10 @@ enum class MsgType {
     LD_REQ, LD_RESP, ST_REQ, ST_RESP
 };
 
+enum class UnitType {
+    DMA, SPM, SystolicArray, Accumulator, SFU, Im2col, GEMV
+};
+
 struct Message {
     MsgType type;
     int row_num = 0;

@@ -1,21 +1,22 @@
 #include <cassert>
-#include "../../include/perf/perf_func_unit.hpp"
+#include "../../include/perf/pipeline_controller.hpp"
 
 PipelineController::PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, logger, regfile, cfg) {
+    simulator(sim), cfg(cfg), logger(logger), regfile(regfile) {
 
-    dma     = std::make_unique<DMA>(sim, logger, regfile, cfg);
-    spm     = std::make_unique<SPM>(sim, logger, regfile, cfg);
-    sa      = std::make_unique<SystolicArray>(sim, logger, regfile, cfg);
-    acc     = std::make_unique<Accumulator>(sim, logger, regfile, cfg);
-    sfu     = std::make_unique<SFU>(sim, logger, regfile, cfg);
-    im2col  = std::make_unique<Im2col>(sim, logger, regfile, cfg);
-    gemv    = std::make_unique<GEMV>(sim, logger, regfile, cfg);
+    dma     = std::make_unique<DMA>(sim, this, logger, regfile, cfg);
+    spm     = std::make_unique<SPM>(sim, this, logger, regfile, cfg);
+    sa      = std::make_unique<SystolicArray>(sim, this, logger, regfile, cfg);
+    acc     = std::make_unique<Accumulator>(sim, this, logger, regfile, cfg);
+    sfu     = std::make_unique<SFU>(sim, this, logger, regfile, cfg);
+    im2col  = std::make_unique<Im2col>(sim, this, logger, regfile, cfg);
+    gemv    = std::make_unique<GEMV>(sim, this, logger, regfile, cfg);
 
 }
 
 void PipelineController::completeInstruction(){
-    PerfFunctionalUnit::completeInstruction();
+    assert(state == State::BUSY);
+    state = State::FINISH;
 }
 
 void PipelineController::tick(){
@@ -86,5 +87,18 @@ void PipelineController::execute(){
         PerfFunctionalUnit* task = task_queue.front();
         assert(task->isIdle());
         task->execute();
+    }
+}
+
+PerfFunctionalUnit* PipelineController::getUnit(UnitType name) {
+    switch(name) {
+        case UnitType::DMA           : return dma.get();
+        case UnitType::SPM           : return spm.get();
+        case UnitType::SystolicArray : return sa.get();
+        case UnitType::Accumulator   : return acc.get();
+        case UnitType::SFU           : return sfu.get();
+        case UnitType::Im2col        : return im2col.get();
+        case UnitType::GEMV          : return gemv.get();
+        default                      : return nullptr;
     }
 }
