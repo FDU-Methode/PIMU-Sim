@@ -3,9 +3,7 @@
 
 #include <memory>
 #include <queue>
-// #include "../logger.hpp"
-// #include "../regfile.hpp"
-// #include "perf_sim.hpp"
+#include "hw_utilization.hpp"
 #include "perf_func_unit.hpp"
 
 class PerfSim;
@@ -21,23 +19,25 @@ private:
         BIT_COM_SFU    = 5
     };
 
-    // 功能单元组件
+    // Function Units
     std::unique_ptr<DMA> dma;
     std::unique_ptr<SPM> spm;
     std::unique_ptr<SystolicArray> sa;
     std::unique_ptr<Accumulator> acc;
     std::unique_ptr<SFU> sfu;
-    std::unique_ptr<Im2col> im2col;
     std::unique_ptr<GEMV> gemv;
 
-    // 任务队列
-    std::queue<PerfFunctionalUnit*> task_queue;
+    // Task Vector
+    std::vector<PerfFunctionalUnit*> task_queue;
 
 protected:
     PerfSim* simulator;
     Config cfg;
     Logger& logger;
     RegFile& regfile;
+
+    // Util Tracker
+    HardWareUtilizationTracker* util_tracker;
 
     enum State{
         IDLE,
@@ -48,7 +48,7 @@ protected:
     void completeInstruction();
 
 public:
-    PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg);
+    PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg, HardWareUtilizationTracker* util_tracker);
     virtual ~PipelineController() = default;
 
     bool isIdle() const { return state == IDLE; };

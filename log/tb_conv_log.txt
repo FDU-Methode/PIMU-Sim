@@ -10,6 +10,7 @@ Initializing Analytical DDR Model
 Creating NPU Core...
 ----------------------------------------------------
   NPU Core Frequency: 1.000000 GHz
+  HardWare Utilization Tracker created!
   PipelineController created!
 Loading instructions from file: ./benchmarks/tb_test/tb_conv.txt
 Successfully loaded 9 instructions from ./benchmarks/tb_test/tb_conv.txt
@@ -63,7 +64,7 @@ NPU Core is ticked at cycle 9
 ExecuteStage: 1
 ExecuteStage: start task execution
 [PipelineController] Configing COM_SA instruction
-[Im2col] Start (startup-only model), remaining = 6
+[SystolicArray] CONV Start, pad_t/b/l/r/mode=1/1/1/1/0, weight_shape/stride/dilation=3/1/1, ifm_w=8, ifm_h=4, cin=32, cout=32, remaining = 360, remaining start acc = 327
 
 [Core Cycle: 10]
 NPU Core is ticked at cycle 10
@@ -88,9 +89,6 @@ ExecuteStage: waiting for completion
 [Core Cycle: 15]
 NPU Core is ticked at cycle 15
 ExecuteStage: waiting for completion
-  [PipelineController] Im2col module finished
-  [PipelineController] start SystolicArray module
-[SystolicArray] CONV Start, pad_t/b/l/r/mode=1/1/1/1/0, weight_shape/stride/dilation=3/1/1, ifm_w=8, ifm_h=4, cin=32, cout=32, remaining = 354
 
 [Core Cycle: 16]
 NPU Core is ticked at cycle 16
@@ -1379,6 +1377,8 @@ ExecuteStage: waiting for completion
 [Core Cycle: 337]
 NPU Core is ticked at cycle 337
 ExecuteStage: waiting for completion
+  [SystolicArray] start Accumulator
+[Accumulator] CONV Start, ifm=8x4, cin=32, cout=32, k=3, s=1, d=1, ofm=8x4, sa_row_num=32, remaining = 36
 
 [Core Cycle: 338]
 NPU Core is ticked at cycle 338
@@ -1508,8 +1508,6 @@ ExecuteStage: waiting for completion
 NPU Core is ticked at cycle 369
 ExecuteStage: waiting for completion
   [PipelineController] SystolicArray module finished
-  [PipelineController] start Accumulator module
-[Accumulator] Start, remaining = 4
 
 [Core Cycle: 370]
 NPU Core is ticked at cycle 370
@@ -1547,10 +1545,22 @@ Simulation finished early at cycle 375
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.001918 s
+  Simulation time: 0.005642 s
   Maximum cycle limit: 1000
   Early termination: Yes
   Final state: DONE
   Total cycles: 375
   Total simulated instructions: 9
-  Simulated instructions per second: 4692.387904
+  Simulated instructions per second: 1595.179015
++------------------+--------------+--------------+------------+
+|                    HW Utilization Report                    |
++------------------+--------------+--------------+------------+
+| Module           |  Busy Cycles | Total Cycles |    Util(%) |
++------------------+--------------+--------------+------------+
+| DMA              |            0 |          364 |       0.00 |
+| SPM              |            0 |          364 |       0.00 |
+| SystolicArray    |          360 |          364 |      98.90 |
+| Accumulator      |           36 |          364 |       9.89 |
+| SFU              |            0 |          364 |       0.00 |
+| GEMV             |            0 |          364 |       0.00 |
++------------------+--------------+--------------+------------+

@@ -10,6 +10,7 @@ Initializing Analytical DDR Model
 Creating NPU Core...
 ----------------------------------------------------
   NPU Core Frequency: 1.000000 GHz
+  HardWare Utilization Tracker created!
   PipelineController created!
 Loading instructions from file: ./benchmarks/tb_test/tb_test.txt
 Successfully loaded 38 instructions from ./benchmarks/tb_test/tb_test.txt
@@ -355,7 +356,7 @@ NPU Core is ticked at cycle 53
 ExecuteStage: 1
 ExecuteStage: start task execution
 [PipelineController] Configing COM_SA instruction
-[SystolicArray] GEMM Start, A:15*24, B:24*27, remaining = 68
+[SystolicArray] GEMM Start, A:15*24, B:24*27, remaining = 68, remaining start acc = 52
 
 [Core Cycle: 54]
 NPU Core is ticked at cycle 54
@@ -568,6 +569,8 @@ ExecuteStage: waiting for completion
 [Core Cycle: 106]
 NPU Core is ticked at cycle 106
 ExecuteStage: waiting for completion
+  [SystolicArray] start Accumulator
+[Accumulator] GEMM Start, M=15, K=24, N=27, remaining = 19
 
 [Core Cycle: 107]
 NPU Core is ticked at cycle 107
@@ -629,8 +632,6 @@ ExecuteStage: waiting for completion
 NPU Core is ticked at cycle 121
 ExecuteStage: waiting for completion
   [PipelineController] SystolicArray module finished
-  [PipelineController] start Accumulator module
-[Accumulator] Start, remaining = 4
 
 [Core Cycle: 122]
 NPU Core is ticked at cycle 122
@@ -2974,10 +2975,22 @@ Simulation finished early at cycle 674
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.011823 s
+  Simulation time: 0.011126 s
   Maximum cycle limit: 1000
   Early termination: Yes
   Final state: DONE
   Total cycles: 674
   Total simulated instructions: 38
-  Simulated instructions per second: 3214.074262
+  Simulated instructions per second: 3415.423333
++------------------+--------------+--------------+------------+
+|                    HW Utilization Report                    |
++------------------+--------------+--------------+------------+
+| Module           |  Busy Cycles | Total Cycles |    Util(%) |
++------------------+--------------+--------------+------------+
+| DMA              |           50 |          616 |       8.12 |
+| SPM              |            0 |          616 |       0.00 |
+| SystolicArray    |           68 |          616 |      11.04 |
+| Accumulator      |           32 |          616 |       5.19 |
+| SFU              |          481 |          616 |      78.08 |
+| GEMV             |            0 |          616 |       0.00 |
++------------------+--------------+--------------+------------+

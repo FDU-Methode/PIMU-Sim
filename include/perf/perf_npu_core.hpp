@@ -6,6 +6,7 @@
 #include "base_module.hpp"
 #include "perf_func_unit.hpp"
 #include "pipeline_controller.hpp"
+#include "hw_utilization.hpp"
 #include "../inst.hpp"
 #include "../regfile.hpp"
 
@@ -16,6 +17,8 @@ class PerfNpuCore : public BaseModule{
 private:
     RegFile reg_file;
     std::unique_ptr<PipelineController> pipeline_controller;
+    std::unique_ptr<HardWareUtilizationTracker> util_tracker;
+
     bool irq;
     uint64_t opcode;
     enum State {IDLE, BUSY, DONE} state;
@@ -39,6 +42,8 @@ public:
     void WriteRegStage();
     void ExecuteStage();
     void UpdataRegStage();
+
+    HardWareUtilizationTracker* getUtilTracker();
 
 //Add DMA Connect To DDR
 private:

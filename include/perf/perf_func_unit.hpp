@@ -90,6 +90,8 @@ public:
     void tick() override;
 
 protected:
+    bool acc_started = false;
+    int remaining_start_acc_cycles = -1;
     void completeInstruction() override;
 };
 
@@ -117,22 +119,6 @@ class SFU : public PerfFunctionalUnit{
 public:
     SFU(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
     ~SFU() = default;
-
-    void execute() override;
-    void tick() override;
-
-protected:
-    void completeInstruction() override;
-};
-
-//
-// Im2col
-//
-
-class Im2col : public PerfFunctionalUnit{
-public:
-    Im2col(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
-    ~Im2col() = default;
 
     void execute() override;
     void tick() override;

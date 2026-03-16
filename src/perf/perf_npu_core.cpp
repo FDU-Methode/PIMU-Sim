@@ -10,8 +10,13 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
 
     irq = false;
     state = State::IDLE;
-    // 初始化微结构组件
-    pipeline_controller = std::make_unique<PipelineController>(sim, logger, reg_file, cfg);
+
+    // Initialize MicroArchitecture Components
+    util_tracker = std::make_unique<HardWareUtilizationTracker>(logger);
+    util_tracker->reset();
+    logger.log("  HardWare Utilization Tracker created!");
+
+    pipeline_controller = std::make_unique<PipelineController>(sim, logger, reg_file, cfg, util_tracker.get());
     logger.log("  PipelineController created!");
 
     logger.log("Loading instructions from file: %s", cfg.inst_file.c_str());
@@ -251,6 +256,10 @@ void PerfNpuCore::checkCompletion(){
         _stats.inst_num = pc;
         logger.log("NPU Core: Simulation timeout at cycle %d", getCycle());
     }
+}
+
+HardWareUtilizationTracker* PerfNpuCore::getUtilTracker() {
+    return util_tracker.get();
 }
 
 //Connect DMA To DDR

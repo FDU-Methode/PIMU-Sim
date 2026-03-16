@@ -106,7 +106,12 @@ void PerfSim::print_stats() {
     std::cout << "  Total simulated instructions: " << sim_inst_num << std::endl;
     std::cout << "  Simulated instructions per second: " << ips << std::endl;
 
+    if(auto* perf_core = dynamic_cast<PerfNpuCore*>(core.get())) {
+        if(HardWareUtilizationTracker* util_tracker = perf_core->getUtilTracker()) {
+            util_tracker->report();
+        }
+    }
+
     // TODO
     // DDR带宽利用率
-    // 计算资源利用率
 }

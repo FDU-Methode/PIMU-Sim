@@ -10,6 +10,7 @@ Initializing Analytical DDR Model
 Creating NPU Core...
 ----------------------------------------------------
   NPU Core Frequency: 1.000000 GHz
+  HardWare Utilization Tracker created!
   PipelineController created!
 Loading instructions from file: ./benchmarks/tb_test/tb_gemm.txt
 Successfully loaded 9 instructions from ./benchmarks/tb_test/tb_gemm.txt
@@ -63,7 +64,7 @@ NPU Core is ticked at cycle 9
 ExecuteStage: 1
 ExecuteStage: start task execution
 [PipelineController] Configing COM_SA instruction
-[SystolicArray] GEMM Start, A:15*24, B:24*27, remaining = 68
+[SystolicArray] GEMM Start, A:15*24, B:24*27, remaining = 68, remaining start acc = 52
 
 [Core Cycle: 10]
 NPU Core is ticked at cycle 10
@@ -276,6 +277,8 @@ ExecuteStage: waiting for completion
 [Core Cycle: 62]
 NPU Core is ticked at cycle 62
 ExecuteStage: waiting for completion
+  [SystolicArray] start Accumulator
+[Accumulator] GEMM Start, M=15, K=24, N=27, remaining = 19
 
 [Core Cycle: 63]
 NPU Core is ticked at cycle 63
@@ -337,8 +340,6 @@ ExecuteStage: waiting for completion
 NPU Core is ticked at cycle 77
 ExecuteStage: waiting for completion
   [PipelineController] SystolicArray module finished
-  [PipelineController] start Accumulator module
-[Accumulator] Start, remaining = 4
 
 [Core Cycle: 78]
 NPU Core is ticked at cycle 78
@@ -376,10 +377,22 @@ Simulation finished early at cycle 83
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.000525 s
+  Simulation time: 0.001353 s
   Maximum cycle limit: 1000
   Early termination: Yes
   Final state: DONE
   Total cycles: 83
   Total simulated instructions: 9
-  Simulated instructions per second: 17142.857143
+  Simulated instructions per second: 6651.884701
++------------------+--------------+--------------+------------+
+|                    HW Utilization Report                    |
++------------------+--------------+--------------+------------+
+| Module           |  Busy Cycles | Total Cycles |    Util(%) |
++------------------+--------------+--------------+------------+
+| DMA              |            0 |           72 |       0.00 |
+| SPM              |            0 |           72 |       0.00 |
+| SystolicArray    |           68 |           72 |      94.44 |
+| Accumulator      |           19 |           72 |      26.39 |
+| SFU              |            0 |           72 |       0.00 |
+| GEMV             |            0 |           72 |       0.00 |
++------------------+--------------+--------------+------------+

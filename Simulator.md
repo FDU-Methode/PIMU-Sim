@@ -63,3 +63,13 @@
 ### 2026-03-13
 
 - 删除`Quant`模块，更改其他所有模块，测试结果一致
+
+### 2026-01-16
+
+- `Im2col`模块并入`SystolicArray`模块
+
+- 修改`PipelineController`单独放在`PerfNpuCore`和`PerfFuncUnit`之间，修改`task_queue`，每次`tick()`推进所有处于`Busy`模块，实现模块并行
+
+- 重新建模`SystolicArray`和`Accumulator`模块，测试结果和串行一致
+
+- 添加硬件利用率模块`HardWareUtilizationTracker`，对各算子和`test`进行测试

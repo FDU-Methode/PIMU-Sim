@@ -10,6 +10,7 @@ Initializing Analytical DDR Model
 Creating NPU Core...
 ----------------------------------------------------
   NPU Core Frequency: 1.000000 GHz
+  HardWare Utilization Tracker created!
   PipelineController created!
 Loading instructions from file: ./benchmarks/tb_test/tb_matadd.txt
 Successfully loaded 9 instructions from ./benchmarks/tb_test/tb_matadd.txt
@@ -149,10 +150,22 @@ Simulation finished early at cycle 27
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.000563 s
+  Simulation time: 0.000491 s
   Maximum cycle limit: 1000
   Early termination: Yes
   Final state: DONE
   Total cycles: 27
   Total simulated instructions: 9
-  Simulated instructions per second: 15985.790409
+  Simulated instructions per second: 18329.938900
++------------------+--------------+--------------+------------+
+|                    HW Utilization Report                    |
++------------------+--------------+--------------+------------+
+| Module           |  Busy Cycles | Total Cycles |    Util(%) |
++------------------+--------------+--------------+------------+
+| DMA              |            0 |           16 |       0.00 |
+| SPM              |            0 |           16 |       0.00 |
+| SystolicArray    |            0 |           16 |       0.00 |
+| Accumulator      |           16 |           16 |     100.00 |
+| SFU              |            0 |           16 |       0.00 |
+| GEMV             |            0 |           16 |       0.00 |
++------------------+--------------+--------------+------------+
