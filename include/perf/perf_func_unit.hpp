@@ -57,8 +57,10 @@ public:
     void tick() override;
 
 protected:
-    void completeInstruction() override;
+    bool mvin_start = false;
+    bool mvout_start = false;
     MsgType expectedMsgType;
+    void completeInstruction() override;
 };
 
 //
@@ -108,6 +110,8 @@ public:
     void tick() override;
 
 protected:
+    bool matadd_start = false;
+    bool sa_start = false;
     void completeInstruction() override;
 };
 

@@ -109,4 +109,10 @@ void SFU::execute(){
 
 void SFU::completeInstruction(){
     PerfFunctionalUnit::completeInstruction();
+
+    // Update ISR Reg
+    uint64_t isr_val = regfile.read(regfile.isr_reg_addr);
+    isr_val |= (1ULL << 5);
+    regfile.write(regfile.isr_reg_addr, isr_val);
+    logger.log("[SFU] ISR Reg[5] Updated");
 }

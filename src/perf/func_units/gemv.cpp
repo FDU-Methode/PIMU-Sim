@@ -26,4 +26,10 @@ void GEMV::execute(){
 
 void GEMV::completeInstruction(){
     PerfFunctionalUnit::completeInstruction();
+
+    // Update ISR Reg
+    uint64_t isr_val = regfile.read(regfile.isr_reg_addr);
+    isr_val |= (1ULL << 4);
+    regfile.write(regfile.isr_reg_addr, isr_val);
+    logger.log("[GEMV] ISR Reg[4] Updated");
 }

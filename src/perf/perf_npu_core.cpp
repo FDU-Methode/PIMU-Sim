@@ -126,12 +126,12 @@ void PerfNpuCore::ExecuteStage(){
         logger.log("ExecuteStage: start task execution");
         pipeline_controller->execute();
     } else if(pipeline_controller->isFinish()){
-        // 更新 ISR 寄存器，产生活跃中断
-        uint64_t read_start_data = reg_file.read(reg_file.start_reg_addr);
-        uint64_t isr_val = read_start_data;
+        // // 更新 ISR 寄存器，产生活跃中断
+        // uint64_t read_start_data = reg_file.read(reg_file.start_reg_addr);
+        // uint64_t isr_val = read_start_data;
 
-        logger.log("ExecuteStage: task execution completed, ISR register updated");
-        reg_file.write(reg_file.isr_reg_addr, isr_val);
+        // logger.log("ExecuteStage: task execution completed, ISR register updated");
+        // reg_file.write(reg_file.isr_reg_addr, isr_val);
         pipeline_controller->setIdle();
     }
 }

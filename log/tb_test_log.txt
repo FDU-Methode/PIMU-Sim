@@ -196,41 +196,41 @@ ExecuteStage: waiting for completion
 NPU Core is ticked at cycle 26
 ExecuteStage: waiting for completion
 [DMA] get expected resp type = LD_RESP, DMA complete
+[DMA] ISR Reg[0] Updated
   [PipelineController] DMA module finished
   [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 26
+  Write IPR Reg addr: 0xd8, Data: 0x1
+Simulator Detectes an irq signal at cycle 27
+  IPR Reg matches expected opcode 1
 
 [Core Cycle: 27]
 NPU Core is ticked at cycle 27
-ExecuteStage: task execution completed, ISR register updated
-UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 27
-  Write IPR Reg addr: 0xd8, Data: 0x1
-Simulator Detectes an irq signal at cycle 28
-  IPR Reg matches expected opcode 1
+UpdataRegStage: IAR received for bits [0]
+IRQ signal successfully cleared at cycle 28
 
 [Core Cycle: 28]
 NPU Core is ticked at cycle 28
-UpdataRegStage: IAR received for bits [0]
-IRQ signal successfully cleared at cycle 29
+WriteRegStage: Write Reg addr: 0x0, Data: 0x1000
 
 [Core Cycle: 29]
 NPU Core is ticked at cycle 29
-WriteRegStage: Write Reg addr: 0x0, Data: 0x1000
+WriteRegStage: Write Reg addr: 0x8, Data: 0x3ff00000000
 
 [Core Cycle: 30]
 NPU Core is ticked at cycle 30
-WriteRegStage: Write Reg addr: 0x8, Data: 0x3ff00000000
+WriteRegStage: Write Reg addr: 0x20, Data: 0x400040000000026
 
 [Core Cycle: 31]
 NPU Core is ticked at cycle 31
-WriteRegStage: Write Reg addr: 0x20, Data: 0x400040000000026
+WriteRegStage: Write Reg addr: 0x28, Data: 0x100000000
 
 [Core Cycle: 32]
 NPU Core is ticked at cycle 32
-WriteRegStage: Write Reg addr: 0x28, Data: 0x100000000
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x1
 
 [Core Cycle: 33]
 NPU Core is ticked at cycle 33
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x1
 
 [Core Cycle: 34]
 NPU Core is ticked at cycle 34
@@ -307,49 +307,49 @@ ExecuteStage: waiting for completion
 NPU Core is ticked at cycle 43
 ExecuteStage: waiting for completion
 [DMA] get expected resp type = LD_RESP, DMA complete
+[DMA] ISR Reg[0] Updated
   [PipelineController] DMA module finished
   [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 43
+  Write IPR Reg addr: 0xd8, Data: 0x1
+Simulator Detectes an irq signal at cycle 44
+  IPR Reg matches expected opcode 1
 
 [Core Cycle: 44]
 NPU Core is ticked at cycle 44
-ExecuteStage: task execution completed, ISR register updated
-UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 44
-  Write IPR Reg addr: 0xd8, Data: 0x1
-Simulator Detectes an irq signal at cycle 45
-  IPR Reg matches expected opcode 1
+UpdataRegStage: IAR received for bits [0]
+IRQ signal successfully cleared at cycle 45
 
 [Core Cycle: 45]
 NPU Core is ticked at cycle 45
-UpdataRegStage: IAR received for bits [0]
-IRQ signal successfully cleared at cycle 46
+WriteRegStage: Write Reg addr: 0x40, Data: 0x1
 
 [Core Cycle: 46]
 NPU Core is ticked at cycle 46
-WriteRegStage: Write Reg addr: 0x40, Data: 0x1
+WriteRegStage: Write Reg addr: 0x48, Data: 0x100000000
 
 [Core Cycle: 47]
 NPU Core is ticked at cycle 47
-WriteRegStage: Write Reg addr: 0x48, Data: 0x100000000
+WriteRegStage: Write Reg addr: 0x60, Data: 0x0
 
 [Core Cycle: 48]
 NPU Core is ticked at cycle 48
-WriteRegStage: Write Reg addr: 0x60, Data: 0x0
+WriteRegStage: Write Reg addr: 0x68, Data: 0xf00001000
 
 [Core Cycle: 49]
 NPU Core is ticked at cycle 49
-WriteRegStage: Write Reg addr: 0x68, Data: 0xf00001000
+WriteRegStage: Write Reg addr: 0x70, Data: 0x60701700000000
 
 [Core Cycle: 50]
 NPU Core is ticked at cycle 50
-WriteRegStage: Write Reg addr: 0x70, Data: 0x60701700000000
+WriteRegStage: Write Reg addr: 0x78, Data: 0x2002fa00004000
 
 [Core Cycle: 51]
 NPU Core is ticked at cycle 51
-WriteRegStage: Write Reg addr: 0x78, Data: 0x2002fa00004000
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x4
 
 [Core Cycle: 52]
 NPU Core is ticked at cycle 52
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x4
 
 [Core Cycle: 53]
 NPU Core is ticked at cycle 53
@@ -648,37 +648,37 @@ ExecuteStage: waiting for completion
 [Core Cycle: 125]
 NPU Core is ticked at cycle 125
 ExecuteStage: waiting for completion
+[Accumulator] ISR Reg[2] Updated
   [PipelineController] Accumulator module finished
   [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [2] at cycle 125
+  Write IPR Reg addr: 0xd8, Data: 0x4
+Simulator Detectes an irq signal at cycle 126
+  IPR Reg matches expected opcode 4
 
 [Core Cycle: 126]
 NPU Core is ticked at cycle 126
-ExecuteStage: task execution completed, ISR register updated
-UpdataRegStage: Detected ISR Interrupt bit [2] at cycle 126
-  Write IPR Reg addr: 0xd8, Data: 0x4
-Simulator Detectes an irq signal at cycle 127
-  IPR Reg matches expected opcode 4
+UpdataRegStage: IAR received for bits [2]
+IRQ signal successfully cleared at cycle 127
 
 [Core Cycle: 127]
 NPU Core is ticked at cycle 127
-UpdataRegStage: IAR received for bits [2]
-IRQ signal successfully cleared at cycle 128
+WriteRegStage: Write Reg addr: 0x80, Data: 0x100000000000
 
 [Core Cycle: 128]
 NPU Core is ticked at cycle 128
-WriteRegStage: Write Reg addr: 0x80, Data: 0x100000000000
+WriteRegStage: Write Reg addr: 0x88, Data: 0x100f00001000
 
 [Core Cycle: 129]
 NPU Core is ticked at cycle 129
-WriteRegStage: Write Reg addr: 0x88, Data: 0x100f00001000
+WriteRegStage: Write Reg addr: 0x48, Data: 0xfff8000100000000
 
 [Core Cycle: 130]
 NPU Core is ticked at cycle 130
-WriteRegStage: Write Reg addr: 0x48, Data: 0xfff8000100000000
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x8
 
 [Core Cycle: 131]
 NPU Core is ticked at cycle 131
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x8
 
 [Core Cycle: 132]
 NPU Core is ticked at cycle 132
@@ -738,41 +738,41 @@ ExecuteStage: waiting for completion
 [Core Cycle: 145]
 NPU Core is ticked at cycle 145
 ExecuteStage: waiting for completion
+[Accumulator] ISR Reg[3] Updated
   [PipelineController] Accumulator module finished
   [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [3] at cycle 145
+  Write IPR Reg addr: 0xd8, Data: 0x8
+Simulator Detectes an irq signal at cycle 146
+  IPR Reg matches expected opcode 8
 
 [Core Cycle: 146]
 NPU Core is ticked at cycle 146
-ExecuteStage: task execution completed, ISR register updated
-UpdataRegStage: Detected ISR Interrupt bit [3] at cycle 146
-  Write IPR Reg addr: 0xd8, Data: 0x8
-Simulator Detectes an irq signal at cycle 147
-  IPR Reg matches expected opcode 8
+UpdataRegStage: IAR received for bits [3]
+IRQ signal successfully cleared at cycle 147
 
 [Core Cycle: 147]
 NPU Core is ticked at cycle 147
-UpdataRegStage: IAR received for bits [3]
-IRQ signal successfully cleared at cycle 148
+WriteRegStage: Write Reg addr: 0xa0, Data: 0xf000e00001000
 
 [Core Cycle: 148]
 NPU Core is ticked at cycle 148
-WriteRegStage: Write Reg addr: 0xa0, Data: 0xf000e00001000
+WriteRegStage: Write Reg addr: 0xa8, Data: 0x2000
 
 [Core Cycle: 149]
 NPU Core is ticked at cycle 149
-WriteRegStage: Write Reg addr: 0xa8, Data: 0x2000
+WriteRegStage: Write Reg addr: 0x50, Data: 0x2
 
 [Core Cycle: 150]
 NPU Core is ticked at cycle 150
-WriteRegStage: Write Reg addr: 0x50, Data: 0x2
+WriteRegStage: Write Reg addr: 0x58, Data: 0x1fffc0001
 
 [Core Cycle: 151]
 NPU Core is ticked at cycle 151
-WriteRegStage: Write Reg addr: 0x58, Data: 0x1fffc0001
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x20
 
 [Core Cycle: 152]
 NPU Core is ticked at cycle 152
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x20
 
 [Core Cycle: 153]
 NPU Core is ticked at cycle 153
@@ -2704,41 +2704,41 @@ ExecuteStage: waiting for completion
 [Core Cycle: 634]
 NPU Core is ticked at cycle 634
 ExecuteStage: waiting for completion
+[SFU] ISR Reg[5] Updated
   [PipelineController] SFU module finished
   [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [5] at cycle 634
+  Write IPR Reg addr: 0xd8, Data: 0x20
+Simulator Detectes an irq signal at cycle 635
+  IPR Reg matches expected opcode 32
 
 [Core Cycle: 635]
 NPU Core is ticked at cycle 635
-ExecuteStage: task execution completed, ISR register updated
-UpdataRegStage: Detected ISR Interrupt bit [5] at cycle 635
-  Write IPR Reg addr: 0xd8, Data: 0x20
-Simulator Detectes an irq signal at cycle 636
-  IPR Reg matches expected opcode 32
+UpdataRegStage: IAR received for bits [5]
+IRQ signal successfully cleared at cycle 636
 
 [Core Cycle: 636]
 NPU Core is ticked at cycle 636
-UpdataRegStage: IAR received for bits [5]
-IRQ signal successfully cleared at cycle 637
+WriteRegStage: Write Reg addr: 0x10, Data: 0x3000
 
 [Core Cycle: 637]
 NPU Core is ticked at cycle 637
-WriteRegStage: Write Reg addr: 0x10, Data: 0x3000
+WriteRegStage: Write Reg addr: 0x18, Data: 0xef00002000
 
 [Core Cycle: 638]
 NPU Core is ticked at cycle 638
-WriteRegStage: Write Reg addr: 0x18, Data: 0xef00002000
+WriteRegStage: Write Reg addr: 0x30, Data: 0xf000f000000004
 
 [Core Cycle: 639]
 NPU Core is ticked at cycle 639
-WriteRegStage: Write Reg addr: 0x30, Data: 0xf000f000000004
+WriteRegStage: Write Reg addr: 0x38, Data: 0x100000000
 
 [Core Cycle: 640]
 NPU Core is ticked at cycle 640
-WriteRegStage: Write Reg addr: 0x38, Data: 0x100000000
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x2
 
 [Core Cycle: 641]
 NPU Core is ticked at cycle 641
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x2
 
 [Core Cycle: 642]
 NPU Core is ticked at cycle 642
@@ -2800,41 +2800,41 @@ ExecuteStage: waiting for completion
 NPU Core is ticked at cycle 649
 ExecuteStage: waiting for completion
 [DMA] get expected resp type = ST_RESP, DMA complete
+[DMA] ISR Reg[1] Updated
   [PipelineController] DMA module finished
   [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 649
+  Write IPR Reg addr: 0xd8, Data: 0x2
+Simulator Detectes an irq signal at cycle 650
+  IPR Reg matches expected opcode 2
 
 [Core Cycle: 650]
 NPU Core is ticked at cycle 650
-ExecuteStage: task execution completed, ISR register updated
-UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 650
-  Write IPR Reg addr: 0xd8, Data: 0x2
-Simulator Detectes an irq signal at cycle 651
-  IPR Reg matches expected opcode 2
+UpdataRegStage: IAR received for bits [1]
+IRQ signal successfully cleared at cycle 651
 
 [Core Cycle: 651]
 NPU Core is ticked at cycle 651
-UpdataRegStage: IAR received for bits [1]
-IRQ signal successfully cleared at cycle 652
+WriteRegStage: Write Reg addr: 0x10, Data: 0xf00003000
 
 [Core Cycle: 652]
 NPU Core is ticked at cycle 652
-WriteRegStage: Write Reg addr: 0x10, Data: 0xf00003000
+WriteRegStage: Write Reg addr: 0x18, Data: 0xf00001000
 
 [Core Cycle: 653]
 NPU Core is ticked at cycle 653
-WriteRegStage: Write Reg addr: 0x18, Data: 0xf00001000
+WriteRegStage: Write Reg addr: 0x30, Data: 0x20002000000004
 
 [Core Cycle: 654]
 NPU Core is ticked at cycle 654
-WriteRegStage: Write Reg addr: 0x30, Data: 0x20002000000004
+WriteRegStage: Write Reg addr: 0x38, Data: 0x100000000
 
 [Core Cycle: 655]
 NPU Core is ticked at cycle 655
-WriteRegStage: Write Reg addr: 0x38, Data: 0x100000000
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x2
 
 [Core Cycle: 656]
 NPU Core is ticked at cycle 656
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x2
 
 [Core Cycle: 657]
 NPU Core is ticked at cycle 657
@@ -2954,34 +2954,31 @@ ExecuteStage: waiting for completion
 NPU Core is ticked at cycle 672
 ExecuteStage: waiting for completion
 [DMA] get expected resp type = ST_RESP, DMA complete
+[DMA] ISR Reg[1] Updated
   [PipelineController] DMA module finished
   [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 672
+  Write IPR Reg addr: 0xd8, Data: 0x2
+Simulator Detectes an irq signal at cycle 673
+  IPR Reg matches expected opcode 2
 
 [Core Cycle: 673]
 NPU Core is ticked at cycle 673
-ExecuteStage: task execution completed, ISR register updated
-UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 673
-  Write IPR Reg addr: 0xd8, Data: 0x2
-Simulator Detectes an irq signal at cycle 674
-  IPR Reg matches expected opcode 2
-
-[Core Cycle: 674]
-NPU Core is ticked at cycle 674
 UpdataRegStage: IAR received for bits [1]
-IRQ signal successfully cleared at cycle 675
-NPU Core: Simulation completed at cycle 674
-Core finished execution at cycle 674
-Simulation finished early at cycle 674
+IRQ signal successfully cleared at cycle 674
+NPU Core: Simulation completed at cycle 673
+Core finished execution at cycle 673
+Simulation finished early at cycle 673
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.011126 s
+  Simulation time: 0.005196 s
   Maximum cycle limit: 1000
   Early termination: Yes
   Final state: DONE
-  Total cycles: 674
+  Total cycles: 673
   Total simulated instructions: 38
-  Simulated instructions per second: 3415.423333
+  Simulated instructions per second: 7313.317937
 +------------------+--------------+--------------+------------+
 |                    HW Utilization Report                    |
 +------------------+--------------+--------------+------------+
