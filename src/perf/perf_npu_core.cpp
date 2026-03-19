@@ -16,7 +16,10 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     util_tracker->reset();
     logger.log("  HardWare Utilization Tracker created!");
 
-    pipeline_controller = std::make_unique<PipelineController>(sim, logger, reg_file, cfg, util_tracker.get());
+    spm = std::make_unique<Scratchpad>(logger, cfg);
+    logger.log("  Scratchpad created!");
+
+    pipeline_controller = std::make_unique<PipelineController>(sim, logger, reg_file, cfg, util_tracker.get(), spm.get());
     logger.log("  PipelineController created!");
 
     logger.log("Loading instructions from file: %s", cfg.inst_file.c_str());
@@ -208,6 +211,10 @@ void PerfNpuCore::tick(){
             MsgTypeToStr(req.type).c_str(), req.src_addr, req.dst_addr, req.row_num, req.col_num, req.dram_stride, req.sram_stride, req.data_size, req.data_size);
         outbox_.pop();
     }
+
+    // Set SPM Idle
+    spm->setReadIdle();
+    spm->setWriteIdle();
 
     // 执行指令
     ExecuteStage();

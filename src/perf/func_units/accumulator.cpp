@@ -1,5 +1,6 @@
 #include <cassert>
 #include "../../../include/perf/perf_func_unit.hpp"
+#include "../../../include/perf/pipeline_controller.hpp"
 
 Accumulator::Accumulator(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg) :
     PerfFunctionalUnit(sim, controller, logger, regfile, cfg) {
@@ -7,11 +8,23 @@ Accumulator::Accumulator(PerfSim* sim, PipelineController* controller, Logger& l
 }
 
 void Accumulator::tick(){
-    if(isBusy()){
-        remaining_cycles--;
-        if(remaining_cycles == 0){
-            completeInstruction();
+    if(!isBusy()) return;
+
+    Scratchpad* spm = controller->getSpm();
+    assert(spm && "Accumulator requires a valid Scratchpad");
+
+    if(matadd_start || (sa_start && !acc_dest)) {
+        if(total_cycles - remaining_cycles >= 4) {
+            int write_beat = total_cycles - remaining_cycles - 4;
+            int write_base_addr = matadd_start ? matadd_output_base_addr : sa_output_base_addr;
+            bool write_status = spm->WriteMemory(write_base_addr + static_cast<uint32_t>(write_beat) * cfg.systolic_array_size * cfg.sram_data_width / 8);
+            assert(write_status && "[Accumulator] SPM Write Request Failed");
         }
+    }
+
+    remaining_cycles--;
+    if(remaining_cycles == 0){
+        completeInstruction();
     }
 }
 
@@ -25,7 +38,9 @@ void Accumulator::execute(){
     sa_start     = (regfile.read(regfile.start_reg_addr) >> 2) & 0x1;
 
     uint8_t optype = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 25) & 0x3);
-    bool acc_dest = (regfile.read(regfile.config_compute_rs1_reg_addr) >> 27) & 0x1;
+    acc_dest = (regfile.read(regfile.config_compute_rs1_reg_addr) >> 27) & 0x1;
+    sa_output_base_addr = (regfile.read(regfile.config_accumulate_rs2_reg_addr)) & 0xFFFF;
+    matadd_output_base_addr = (regfile.read(regfile.compute_matadd_rs2_reg_addr)) & 0xFFFF;
 
     const int tail_cycles = acc_dest ? 3 : 4;
 
@@ -33,6 +48,7 @@ void Accumulator::execute(){
         int row_num = (int)((regfile.read(regfile.compute_matadd_rs2_reg_addr) >> 40) & 0xFF);
         int col_num = (int)((regfile.read(regfile.compute_matadd_rs2_reg_addr) >> 32) & 0xFF);
         remaining_cycles = (row_num * col_num + cfg.systolic_array_size - 1) / cfg.systolic_array_size + 5;
+        total_cycles = remaining_cycles;
         logger.log("[Accumulator] Matadd Start, row_num=%d, col_num=%d, remaining = %d", row_num, col_num, remaining_cycles);
         return;
     }
@@ -50,6 +66,7 @@ void Accumulator::execute(){
             }
 
             remaining_cycles = row_num_a + tail_cycles;
+            total_cycles = remaining_cycles;
 
             logger.log("[Accumulator] GEMM Start, M=%d, K=%d, N=%d, remaining = %d",
                         row_num_a, col_num_a, col_num_b, remaining_cycles);
@@ -83,6 +100,7 @@ void Accumulator::execute(){
             int sa_row_num = (ofm_w * ofm_h) & 0x3F;
 
             remaining_cycles = sa_row_num + tail_cycles;
+            total_cycles = remaining_cycles;
 
             logger.log("[Accumulator] CONV Start, ifm=%dx%d, cin=%d, cout=%d, k=%d, s=%d, d=%d, "
                         "ofm=%dx%d, sa_row_num=%d, remaining = %d",
@@ -98,6 +116,7 @@ void Accumulator::execute(){
 
 void Accumulator::completeInstruction(){
     PerfFunctionalUnit::completeInstruction();
+    total_cycles = 0;
 
     // Update ISR Reg
     assert((matadd_start || sa_start) && "Accumulator No ISR Reg Write");

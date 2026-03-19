@@ -4,7 +4,6 @@
 #include "../util.hpp"
 #include "../logger.hpp"
 #include "../regfile.hpp"
-// #include "perf_sim.hpp"
 
 class PerfSim;
 class PipelineController;
@@ -60,22 +59,21 @@ protected:
     bool mvin_start = false;
     bool mvout_start = false;
     MsgType expectedMsgType;
-    void completeInstruction() override;
-};
 
-//
-// SPM
-//
+    bool resp_done = false;
 
-class SPM : public PerfFunctionalUnit{
-public:
-    SPM(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
-    ~SPM() = default;
+    uint32_t spm_base_addr = 0;
+    int spm_row_stride_bytes = 0;
+    int axi_beat_bytes = 0;
 
-    void execute() override;
-    void tick() override;
+    std::vector<int> row_beat_plan;
+    std::vector<int> burst_beat_plan;
 
-protected:
+    size_t current_row_idx = 0;
+    int current_row_beat_idx = 0;
+    size_t current_burst_idx = 0;
+    int current_burst_beats_remaining = 0;
+
     void completeInstruction() override;
 };
 
@@ -112,6 +110,10 @@ public:
 protected:
     bool matadd_start = false;
     bool sa_start = false;
+    bool acc_dest = false;
+    int total_cycles = 0;
+    uint32_t sa_output_base_addr = 0;
+    uint32_t matadd_output_base_addr = 0;
     void completeInstruction() override;
 };
 
@@ -128,6 +130,36 @@ public:
     void tick() override;
 
 protected:
+    int sfu_cycle = 0;
+    uint8_t sfu_optype = 0;
+
+    uint32_t spm_input_base_addr = 0;
+    uint32_t spm_output_base_addr = 0;
+
+    int spm_expected_reads = 0;
+    int spm_expected_writes = 0;
+    int spm_issued_reads = 0;
+    int spm_issued_writes = 0;
+
+    int spm_setup_delay = 0;
+    int spm_batch_num = 0;
+    int spm_row_num = 0;
+    int spm_core_delay = 0;
+    int spm_done_delay = 0;
+
+    int spm_tile_num = 0;
+    int spm_tile_stage_cycles = 0;
+    int spm_gelu_vector_period = 0;
+
+    int spm_elem_bytes = 1;
+    int spm_vector_stride_bytes = 0;
+    int spm_row_stride_bytes = 0;
+    int spm_gelu_group_stride_bytes = 0;
+
+    int spm_transpose_tile_col_num = 0;
+    int spm_transpose_tile_row_num = 0;
+    int spm_transpose_output_row_stride_bytes = 0;
+
     void completeInstruction() override;
 };
 

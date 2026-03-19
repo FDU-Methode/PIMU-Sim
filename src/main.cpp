@@ -19,7 +19,7 @@ int main(int argc, char* argv[]){
     int max_sim_cycle = cfg.max_sim_cycle;
     std::string inst_file = cfg.inst_file;
     std::string log_file = cfg.log_file;
-    std::cout << "Starting to create simulator..." << std::endl;
+    std::cout << "Starting to create simulator... Max sim cycle = " << max_sim_cycle << std::endl;
 
     // --- Initialize Simulator ---
     std::unique_ptr<SimBase> simulator;

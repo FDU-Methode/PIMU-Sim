@@ -6,6 +6,7 @@
 #include "base_module.hpp"
 #include "perf_func_unit.hpp"
 #include "pipeline_controller.hpp"
+#include "scratchpad.hpp"
 #include "hw_utilization.hpp"
 #include "../inst.hpp"
 #include "../regfile.hpp"
@@ -17,6 +18,7 @@ class PerfNpuCore : public BaseModule{
 private:
     RegFile reg_file;
     std::unique_ptr<PipelineController> pipeline_controller;
+    std::unique_ptr<Scratchpad> spm;
     std::unique_ptr<HardWareUtilizationTracker> util_tracker;
 
     bool irq;

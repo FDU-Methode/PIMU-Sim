@@ -64,7 +64,7 @@
 
 - 删除`Quant`模块，更改其他所有模块，测试结果一致
 
-### 2026-01-16
+### 2026-03-16
 
 - `Im2col`模块并入`SystolicArray`模块
 
@@ -73,3 +73,11 @@
 - 重新建模`SystolicArray`和`Accumulator`模块，测试结果和串行一致
 
 - 添加硬件利用率模块`HardWareUtilizationTracker`，对各算子和`test`进行测试
+
+### 2026-03-18
+
+- 修改中断产生和消除方式，由模块执行完成产生中断
+
+### 2026-03-19
+
+- 添加`SPM`建模，添加`SystolicArray`、`Accumulator`、`DMA`、`SFU`对SPM访问(`ReadMemory`、`WriteMemory`)

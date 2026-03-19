@@ -21,29 +21,6 @@ double HardWareUtilizationTracker::utilization(UnitType unit) {
     return 100 * static_cast<double>(busyCycles(unit)) / static_cast<double>(total_cycles);
 }
 
-// void HardWareUtilizationTracker::report() {
-//     std::cout << "================ HW Utilization ================\n";
-//     logger.log("================ HW Utilization ================");
-
-//     std::cout << "Total Cycles: " << total_cycles << "\n";
-//     logger.log("Total Cycles: %d", total_cycles);
-
-//     const UnitType units[] = {
-//         UnitType::DMA, UnitType::SPM, UnitType::SystolicArray,
-//         UnitType::Accumulator, UnitType::SFU, UnitType::GEMV
-//     };
-
-//     for(UnitType unit : units) {
-//         std::cout << " " << UnitTypeToStr(unit) << " BusyCycles=" << busyCycles(unit)
-//         << ", util=" << utilization(unit) << "%\n";
-
-//         logger.log(" %s BusyCycles=%d , util=%.2f%%", UnitTypeToStr(unit).c_str(), busyCycles(unit), utilization(unit));
-//     }
-
-//     std::cout << "===============================================\n";
-//     logger.log("===============================================");
-// }
-
 void HardWareUtilizationTracker::report() {
     const int w_unit  = 16;
     const int w_busy  = 12;

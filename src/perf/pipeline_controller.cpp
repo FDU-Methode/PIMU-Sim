@@ -1,11 +1,10 @@
 #include <cassert>
 #include "../../include/perf/pipeline_controller.hpp"
 
-PipelineController::PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg, HardWareUtilizationTracker* util_tracker) :
-    simulator(sim), cfg(cfg), logger(logger), regfile(regfile), util_tracker(util_tracker) {
+PipelineController::PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg, HardWareUtilizationTracker* util_tracker, Scratchpad* spm) :
+    simulator(sim), cfg(cfg), logger(logger), regfile(regfile), util_tracker(util_tracker), spm(spm) {
 
     dma     = std::make_unique<DMA>(sim, this, logger, regfile, cfg);
-    spm     = std::make_unique<SPM>(sim, this, logger, regfile, cfg);
     sa      = std::make_unique<SystolicArray>(sim, this, logger, regfile, cfg);
     acc     = std::make_unique<Accumulator>(sim, this, logger, regfile, cfg);
     sfu     = std::make_unique<SFU>(sim, this, logger, regfile, cfg);
@@ -20,20 +19,20 @@ void PipelineController::completeInstruction(){
 void PipelineController::tick(){
     if (task_queue.empty()) return;
 
-    util_tracker->sample({
-        dma->isBusy(),
-        spm->isBusy(),
-        sa->isBusy(),
-        acc->isBusy(),
-        sfu->isBusy(),
-        gemv->isBusy()
-    });
-
     for(int i = task_queue.size() - 1; i >= 0; --i) {
         if(task_queue[i]->isBusy()) {
             task_queue[i]->tick();
         }
     }
+
+    util_tracker->sample({
+        dma->isBusy(),
+        spm ? (spm->isReadBusy() || spm->isWriteBusy()) : false,
+        sa->isBusy(),
+        acc->isBusy(),
+        sfu->isBusy(),
+        gemv->isBusy()
+    });
 
     for(int i = 0; i < task_queue.size(); ) {
         if(task_queue[i]->isFinish()) {
@@ -98,11 +97,14 @@ void PipelineController::execute(){
 PerfFunctionalUnit* PipelineController::getUnit(UnitType name) {
     switch(name) {
         case UnitType::DMA           : return dma.get();
-        case UnitType::SPM           : return spm.get();
         case UnitType::SystolicArray : return sa.get();
         case UnitType::Accumulator   : return acc.get();
         case UnitType::SFU           : return sfu.get();
         case UnitType::GEMV          : return gemv.get();
         default                      : return nullptr;
     }
+}
+
+Scratchpad* PipelineController::getSpm() {
+    return spm;
 }

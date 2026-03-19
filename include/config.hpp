@@ -46,6 +46,16 @@ struct Config{
     int ddr_channel_num = 4; // DDR通道数 (移动端至高端NPU的DDR通常为2-4通道，HBM2/3通常为8通道)
     int ddr_request_queue_depth = 8; // DDR请求队列深度
 
+    // SPM Config
+    int sram_bytes = 262144;
+    int sram_ports = 2;
+    int sram_data_width = 8;
+
+    // ACC Config
+    int acc_bytes = 262144;
+    int acc_ports = 2;
+    int acc_data_width = 32;
+
     /*Add more configuration options here*/
 
     static Config from_file(const std::string &path);

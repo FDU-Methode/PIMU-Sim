@@ -4,7 +4,7 @@
 
 # ---- "Simulator Configuration" ----
 simulator_type = PERFORMANCE
-max_sim_cycle = 1000           # maximum simulation cycles
+max_sim_cycle = 10000          # maximum simulation cycles
 
 # ---- Core Configuration ----
 core_mode = 0                  # core type: 1 (analytic) or 0 (detail)
@@ -55,11 +55,20 @@ ddr_bus_width = 64             # DRAM bus width (typically 64 bits)
 ddr_channel_num =  4           # DRAM channel number (移动端/高端NPU的DDR通常为2-4通道，HBM2/3通常为8通道)
 ddr_request_queue_depth = 8    # DRAM request queue depth
 
+# ---- SRAM Configuration ----
+sram_bytes = 262144
+sram_ports = 2
+sram_data_width = 8;
+
+# ---- ACC Configuration ----
+acc_bytes = 262144
+acc_ports = 2
+acc_data_width = 32;
+
 # ---- File paths ----
 inst_file = ./benchmarks/tb_test/tb_poolmax.txt
 enable_log = 1                 # enable log file: 1 (enable) or 0 (disable)
 log_file   = ./log/tb_poolmax_log.txt
 
 # ---- (Optional future extension) ----
-# sram_bytes = 262144
 # core_count = 4

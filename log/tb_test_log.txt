@@ -11,6 +11,7 @@ Creating NPU Core...
 ----------------------------------------------------
   NPU Core Frequency: 1.000000 GHz
   HardWare Utilization Tracker created!
+  Scratchpad created!
   PipelineController created!
 Loading instructions from file: ./benchmarks/tb_test/tb_test.txt
 Successfully loaded 38 instructions from ./benchmarks/tb_test/tb_test.txt
@@ -195,168 +196,115 @@ ExecuteStage: waiting for completion
 [Core Cycle: 26]
 NPU Core is ticked at cycle 26
 ExecuteStage: waiting for completion
-[DMA] get expected resp type = LD_RESP, DMA complete
-[DMA] ISR Reg[0] Updated
-  [PipelineController] DMA module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 26
-  Write IPR Reg addr: 0xd8, Data: 0x1
-Simulator Detectes an irq signal at cycle 27
-  IPR Reg matches expected opcode 1
+[DMA] get expected resp type = LD_RESP
 
 [Core Cycle: 27]
 NPU Core is ticked at cycle 27
-UpdataRegStage: IAR received for bits [0]
-IRQ signal successfully cleared at cycle 28
+ExecuteStage: waiting for completion
 
 [Core Cycle: 28]
 NPU Core is ticked at cycle 28
-WriteRegStage: Write Reg addr: 0x0, Data: 0x1000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 29]
 NPU Core is ticked at cycle 29
-WriteRegStage: Write Reg addr: 0x8, Data: 0x3ff00000000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 30]
 NPU Core is ticked at cycle 30
-WriteRegStage: Write Reg addr: 0x20, Data: 0x400040000000026
+ExecuteStage: waiting for completion
 
 [Core Cycle: 31]
 NPU Core is ticked at cycle 31
-WriteRegStage: Write Reg addr: 0x28, Data: 0x100000000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 32]
 NPU Core is ticked at cycle 32
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x1
+ExecuteStage: waiting for completion
 
 [Core Cycle: 33]
 NPU Core is ticked at cycle 33
+ExecuteStage: waiting for completion
 
 [Core Cycle: 34]
 NPU Core is ticked at cycle 34
-ExecuteStage: 1
-ExecuteStage: start task execution
-[PipelineController] Configing MVIN instruction
-[DMA] MVIN: send LD_REQ, src_addr = 0x1000, dst_addr = 0x0, row_num = 0, col_num = 1023, dram_stride = 1024, sram_stride = 1024, data_size = 1
-[Core] push req to outbox, type = LD_REQ, src_addr = 0x1000, dst_addr = 0x0
-[DMA] Send request to DDR, DMA set to busy
+ExecuteStage: waiting for completion
 
 [Core Cycle: 35]
 NPU Core is ticked at cycle 35
-[DDR] received request from core
-[Core] send req to DDR, type = LD_REQ, src_addr = 0x1000, dst_addr = 0x0, row_num = 0, col_num = 1023, dram_stride = 1024, sram_stride = 1024, data_size = 1
 ExecuteStage: waiting for completion
-[DDR] start processing new request with 25 estimated remaining DDR cycles
-[DDR] processing request, remaining 24 cycles...
-[DDR] processing request, remaining 23 cycles...
-[DDR] processing request, remaining 22 cycles...
 
 [Core Cycle: 36]
 NPU Core is ticked at cycle 36
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 21 cycles...
-[DDR] processing request, remaining 20 cycles...
-[DDR] processing request, remaining 19 cycles...
 
 [Core Cycle: 37]
 NPU Core is ticked at cycle 37
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 18 cycles...
-[DDR] processing request, remaining 17 cycles...
-[DDR] processing request, remaining 16 cycles...
 
 [Core Cycle: 38]
 NPU Core is ticked at cycle 38
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 15 cycles...
-[DDR] processing request, remaining 14 cycles...
-[DDR] processing request, remaining 13 cycles...
 
 [Core Cycle: 39]
 NPU Core is ticked at cycle 39
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 12 cycles...
-[DDR] processing request, remaining 11 cycles...
-[DDR] processing request, remaining 10 cycles...
-[DDR] processing request, remaining 9 cycles...
 
 [Core Cycle: 40]
 NPU Core is ticked at cycle 40
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 8 cycles...
-[DDR] processing request, remaining 7 cycles...
-[DDR] processing request, remaining 6 cycles...
 
 [Core Cycle: 41]
 NPU Core is ticked at cycle 41
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 5 cycles...
-[DDR] processing request, remaining 4 cycles...
-[DDR] processing request, remaining 3 cycles...
 
 [Core Cycle: 42]
 NPU Core is ticked at cycle 42
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 2 cycles...
-[DDR] processing request, remaining 1 cycles...
-[DDR] processing request, remaining 0 cycles...
-[DDR] finish processing current request
-[Core] push resp into inbox, type = LD_RESP, src_addr = 0x1000, dst_addr = 0x0
 
 [Core Cycle: 43]
 NPU Core is ticked at cycle 43
 ExecuteStage: waiting for completion
-[DMA] get expected resp type = LD_RESP, DMA complete
-[DMA] ISR Reg[0] Updated
-  [PipelineController] DMA module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 43
-  Write IPR Reg addr: 0xd8, Data: 0x1
-Simulator Detectes an irq signal at cycle 44
-  IPR Reg matches expected opcode 1
 
 [Core Cycle: 44]
 NPU Core is ticked at cycle 44
-UpdataRegStage: IAR received for bits [0]
-IRQ signal successfully cleared at cycle 45
+ExecuteStage: waiting for completion
 
 [Core Cycle: 45]
 NPU Core is ticked at cycle 45
-WriteRegStage: Write Reg addr: 0x40, Data: 0x1
+ExecuteStage: waiting for completion
 
 [Core Cycle: 46]
 NPU Core is ticked at cycle 46
-WriteRegStage: Write Reg addr: 0x48, Data: 0x100000000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 47]
 NPU Core is ticked at cycle 47
-WriteRegStage: Write Reg addr: 0x60, Data: 0x0
+ExecuteStage: waiting for completion
 
 [Core Cycle: 48]
 NPU Core is ticked at cycle 48
-WriteRegStage: Write Reg addr: 0x68, Data: 0xf00001000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 49]
 NPU Core is ticked at cycle 49
-WriteRegStage: Write Reg addr: 0x70, Data: 0x60701700000000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 50]
 NPU Core is ticked at cycle 50
-WriteRegStage: Write Reg addr: 0x78, Data: 0x2002fa00004000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 51]
 NPU Core is ticked at cycle 51
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x4
+ExecuteStage: waiting for completion
 
 [Core Cycle: 52]
 NPU Core is ticked at cycle 52
+ExecuteStage: waiting for completion
 
 [Core Cycle: 53]
 NPU Core is ticked at cycle 53
-ExecuteStage: 1
-ExecuteStage: start task execution
-[PipelineController] Configing COM_SA instruction
-[SystolicArray] GEMM Start, A:15*24, B:24*27, remaining = 68, remaining start acc = 52
+ExecuteStage: waiting for completion
 
 [Core Cycle: 54]
 NPU Core is ticked at cycle 54
@@ -569,8 +517,6 @@ ExecuteStage: waiting for completion
 [Core Cycle: 106]
 NPU Core is ticked at cycle 106
 ExecuteStage: waiting for completion
-  [SystolicArray] start Accumulator
-[Accumulator] GEMM Start, M=15, K=24, N=27, remaining = 19
 
 [Core Cycle: 107]
 NPU Core is ticked at cycle 107
@@ -631,7 +577,6 @@ ExecuteStage: waiting for completion
 [Core Cycle: 121]
 NPU Core is ticked at cycle 121
 ExecuteStage: waiting for completion
-  [PipelineController] SystolicArray module finished
 
 [Core Cycle: 122]
 NPU Core is ticked at cycle 122
@@ -648,44 +593,34 @@ ExecuteStage: waiting for completion
 [Core Cycle: 125]
 NPU Core is ticked at cycle 125
 ExecuteStage: waiting for completion
-[Accumulator] ISR Reg[2] Updated
-  [PipelineController] Accumulator module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [2] at cycle 125
-  Write IPR Reg addr: 0xd8, Data: 0x4
-Simulator Detectes an irq signal at cycle 126
-  IPR Reg matches expected opcode 4
 
 [Core Cycle: 126]
 NPU Core is ticked at cycle 126
-UpdataRegStage: IAR received for bits [2]
-IRQ signal successfully cleared at cycle 127
+ExecuteStage: waiting for completion
 
 [Core Cycle: 127]
 NPU Core is ticked at cycle 127
-WriteRegStage: Write Reg addr: 0x80, Data: 0x100000000000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 128]
 NPU Core is ticked at cycle 128
-WriteRegStage: Write Reg addr: 0x88, Data: 0x100f00001000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 129]
 NPU Core is ticked at cycle 129
-WriteRegStage: Write Reg addr: 0x48, Data: 0xfff8000100000000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 130]
 NPU Core is ticked at cycle 130
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x8
+ExecuteStage: waiting for completion
 
 [Core Cycle: 131]
 NPU Core is ticked at cycle 131
+ExecuteStage: waiting for completion
 
 [Core Cycle: 132]
 NPU Core is ticked at cycle 132
-ExecuteStage: 1
-ExecuteStage: start task execution
-[PipelineController] Configing COM_MATADD instruction
-[Accumulator] Matadd Start, row_num=16, col_num=15, remaining = 13
+ExecuteStage: waiting for completion
 
 [Core Cycle: 133]
 NPU Core is ticked at cycle 133
@@ -698,88 +633,122 @@ ExecuteStage: waiting for completion
 [Core Cycle: 135]
 NPU Core is ticked at cycle 135
 ExecuteStage: waiting for completion
+[DMA] DDR response and SPM transfer both completed, DMA complete
+[DMA] ISR Reg[0] Updated
+  [PipelineController] DMA module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 135
+  Write IPR Reg addr: 0xd8, Data: 0x1
+Simulator Detectes an irq signal at cycle 136
+  IPR Reg matches expected opcode 1
 
 [Core Cycle: 136]
 NPU Core is ticked at cycle 136
-ExecuteStage: waiting for completion
+UpdataRegStage: IAR received for bits [0]
+IRQ signal successfully cleared at cycle 137
 
 [Core Cycle: 137]
 NPU Core is ticked at cycle 137
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x0, Data: 0x1000
 
 [Core Cycle: 138]
 NPU Core is ticked at cycle 138
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x8, Data: 0x3ff00000000
 
 [Core Cycle: 139]
 NPU Core is ticked at cycle 139
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x20, Data: 0x400040000000026
 
 [Core Cycle: 140]
 NPU Core is ticked at cycle 140
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x28, Data: 0x100000000
 
 [Core Cycle: 141]
 NPU Core is ticked at cycle 141
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x1
 
 [Core Cycle: 142]
 NPU Core is ticked at cycle 142
-ExecuteStage: waiting for completion
 
 [Core Cycle: 143]
 NPU Core is ticked at cycle 143
-ExecuteStage: waiting for completion
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing MVIN instruction
+[DMA] MVIN: send LD_REQ, src_addr = 0x1000, dst_addr = 0x0, row_num = 0, col_num = 1023, dram_stride = 1024, sram_stride = 1024, data_size = 1
+[Core] push req to outbox, type = LD_REQ, src_addr = 0x1000, dst_addr = 0x0
+[DMA] Send request to DDR, DMA set to busy
 
 [Core Cycle: 144]
 NPU Core is ticked at cycle 144
+[DDR] received request from core
+[Core] send req to DDR, type = LD_REQ, src_addr = 0x1000, dst_addr = 0x0, row_num = 0, col_num = 1023, dram_stride = 1024, sram_stride = 1024, data_size = 1
 ExecuteStage: waiting for completion
+[DDR] start processing new request with 25 estimated remaining DDR cycles
+[DDR] processing request, remaining 24 cycles...
+[DDR] processing request, remaining 23 cycles...
 
 [Core Cycle: 145]
 NPU Core is ticked at cycle 145
 ExecuteStage: waiting for completion
-[Accumulator] ISR Reg[3] Updated
-  [PipelineController] Accumulator module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [3] at cycle 145
-  Write IPR Reg addr: 0xd8, Data: 0x8
-Simulator Detectes an irq signal at cycle 146
-  IPR Reg matches expected opcode 8
+[DDR] processing request, remaining 22 cycles...
+[DDR] processing request, remaining 21 cycles...
+[DDR] processing request, remaining 20 cycles...
 
 [Core Cycle: 146]
 NPU Core is ticked at cycle 146
-UpdataRegStage: IAR received for bits [3]
-IRQ signal successfully cleared at cycle 147
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 19 cycles...
+[DDR] processing request, remaining 18 cycles...
+[DDR] processing request, remaining 17 cycles...
+[DDR] processing request, remaining 16 cycles...
 
 [Core Cycle: 147]
 NPU Core is ticked at cycle 147
-WriteRegStage: Write Reg addr: 0xa0, Data: 0xf000e00001000
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 15 cycles...
+[DDR] processing request, remaining 14 cycles...
+[DDR] processing request, remaining 13 cycles...
 
 [Core Cycle: 148]
 NPU Core is ticked at cycle 148
-WriteRegStage: Write Reg addr: 0xa8, Data: 0x2000
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 12 cycles...
+[DDR] processing request, remaining 11 cycles...
+[DDR] processing request, remaining 10 cycles...
 
 [Core Cycle: 149]
 NPU Core is ticked at cycle 149
-WriteRegStage: Write Reg addr: 0x50, Data: 0x2
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 9 cycles...
+[DDR] processing request, remaining 8 cycles...
+[DDR] processing request, remaining 7 cycles...
 
 [Core Cycle: 150]
 NPU Core is ticked at cycle 150
-WriteRegStage: Write Reg addr: 0x58, Data: 0x1fffc0001
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 6 cycles...
+[DDR] processing request, remaining 5 cycles...
+[DDR] processing request, remaining 4 cycles...
+[DDR] processing request, remaining 3 cycles...
 
 [Core Cycle: 151]
 NPU Core is ticked at cycle 151
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x20
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 2 cycles...
+[DDR] processing request, remaining 1 cycles...
+[DDR] processing request, remaining 0 cycles...
+[DDR] finish processing current request
+[Core] push resp into inbox, type = LD_RESP, src_addr = 0x1000, dst_addr = 0x0
 
 [Core Cycle: 152]
 NPU Core is ticked at cycle 152
+ExecuteStage: waiting for completion
+[DMA] get expected resp type = LD_RESP
 
 [Core Cycle: 153]
 NPU Core is ticked at cycle 153
-ExecuteStage: 1
-ExecuteStage: start task execution
-[PipelineController] Configing COM_SFU instruction
-[SFU] Layernorm Start, col_num=15, row_num=16, remaining = 481
+ExecuteStage: waiting for completion
 
 [Core Cycle: 154]
 NPU Core is ticked at cycle 154
@@ -868,46 +837,57 @@ ExecuteStage: waiting for completion
 [Core Cycle: 175]
 NPU Core is ticked at cycle 175
 ExecuteStage: waiting for completion
+[DMA] DDR response and SPM transfer both completed, DMA complete
+[DMA] ISR Reg[0] Updated
+  [PipelineController] DMA module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 175
+  Write IPR Reg addr: 0xd8, Data: 0x1
+Simulator Detectes an irq signal at cycle 176
+  IPR Reg matches expected opcode 1
 
 [Core Cycle: 176]
 NPU Core is ticked at cycle 176
-ExecuteStage: waiting for completion
+UpdataRegStage: IAR received for bits [0]
+IRQ signal successfully cleared at cycle 177
 
 [Core Cycle: 177]
 NPU Core is ticked at cycle 177
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x40, Data: 0x1
 
 [Core Cycle: 178]
 NPU Core is ticked at cycle 178
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x48, Data: 0x100000000
 
 [Core Cycle: 179]
 NPU Core is ticked at cycle 179
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x60, Data: 0x0
 
 [Core Cycle: 180]
 NPU Core is ticked at cycle 180
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x68, Data: 0xf00001000
 
 [Core Cycle: 181]
 NPU Core is ticked at cycle 181
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x70, Data: 0x60701700000000
 
 [Core Cycle: 182]
 NPU Core is ticked at cycle 182
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x78, Data: 0x2002fa00004000
 
 [Core Cycle: 183]
 NPU Core is ticked at cycle 183
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x4
 
 [Core Cycle: 184]
 NPU Core is ticked at cycle 184
-ExecuteStage: waiting for completion
 
 [Core Cycle: 185]
 NPU Core is ticked at cycle 185
-ExecuteStage: waiting for completion
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing COM_SA instruction
+[SystolicArray] GEMM Start, A:15*24, B:24*27, remaining = 68, remaining start acc = 52
 
 [Core Cycle: 186]
 NPU Core is ticked at cycle 186
@@ -1120,6 +1100,8 @@ ExecuteStage: waiting for completion
 [Core Cycle: 238]
 NPU Core is ticked at cycle 238
 ExecuteStage: waiting for completion
+  [SystolicArray] start Accumulator
+[Accumulator] GEMM Start, M=15, K=24, N=27, remaining = 19
 
 [Core Cycle: 239]
 NPU Core is ticked at cycle 239
@@ -1180,6 +1162,7 @@ ExecuteStage: waiting for completion
 [Core Cycle: 253]
 NPU Core is ticked at cycle 253
 ExecuteStage: waiting for completion
+  [PipelineController] SystolicArray module finished
 
 [Core Cycle: 254]
 NPU Core is ticked at cycle 254
@@ -1196,34 +1179,44 @@ ExecuteStage: waiting for completion
 [Core Cycle: 257]
 NPU Core is ticked at cycle 257
 ExecuteStage: waiting for completion
+[Accumulator] ISR Reg[2] Updated
+  [PipelineController] Accumulator module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [2] at cycle 257
+  Write IPR Reg addr: 0xd8, Data: 0x4
+Simulator Detectes an irq signal at cycle 258
+  IPR Reg matches expected opcode 4
 
 [Core Cycle: 258]
 NPU Core is ticked at cycle 258
-ExecuteStage: waiting for completion
+UpdataRegStage: IAR received for bits [2]
+IRQ signal successfully cleared at cycle 259
 
 [Core Cycle: 259]
 NPU Core is ticked at cycle 259
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x80, Data: 0x100000000000
 
 [Core Cycle: 260]
 NPU Core is ticked at cycle 260
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x88, Data: 0x100f00001000
 
 [Core Cycle: 261]
 NPU Core is ticked at cycle 261
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x48, Data: 0xfff8000100000000
 
 [Core Cycle: 262]
 NPU Core is ticked at cycle 262
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x8
 
 [Core Cycle: 263]
 NPU Core is ticked at cycle 263
-ExecuteStage: waiting for completion
 
 [Core Cycle: 264]
 NPU Core is ticked at cycle 264
-ExecuteStage: waiting for completion
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing COM_MATADD instruction
+[Accumulator] Matadd Start, row_num=16, col_num=15, remaining = 13
 
 [Core Cycle: 265]
 NPU Core is ticked at cycle 265
@@ -1276,38 +1269,48 @@ ExecuteStage: waiting for completion
 [Core Cycle: 277]
 NPU Core is ticked at cycle 277
 ExecuteStage: waiting for completion
+[Accumulator] ISR Reg[3] Updated
+  [PipelineController] Accumulator module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [3] at cycle 277
+  Write IPR Reg addr: 0xd8, Data: 0x8
+Simulator Detectes an irq signal at cycle 278
+  IPR Reg matches expected opcode 8
 
 [Core Cycle: 278]
 NPU Core is ticked at cycle 278
-ExecuteStage: waiting for completion
+UpdataRegStage: IAR received for bits [3]
+IRQ signal successfully cleared at cycle 279
 
 [Core Cycle: 279]
 NPU Core is ticked at cycle 279
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0xa0, Data: 0xf000e00001000
 
 [Core Cycle: 280]
 NPU Core is ticked at cycle 280
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0xa8, Data: 0x2000
 
 [Core Cycle: 281]
 NPU Core is ticked at cycle 281
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x50, Data: 0x2
 
 [Core Cycle: 282]
 NPU Core is ticked at cycle 282
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x58, Data: 0x1fffc0001
 
 [Core Cycle: 283]
 NPU Core is ticked at cycle 283
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x20
 
 [Core Cycle: 284]
 NPU Core is ticked at cycle 284
-ExecuteStage: waiting for completion
 
 [Core Cycle: 285]
 NPU Core is ticked at cycle 285
-ExecuteStage: waiting for completion
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing COM_SFU instruction
+[SFU] Layernorm Start, col_num=15, row_num=16, remaining = 481
 
 [Core Cycle: 286]
 NPU Core is ticked at cycle 286
@@ -2704,44 +2707,572 @@ ExecuteStage: waiting for completion
 [Core Cycle: 634]
 NPU Core is ticked at cycle 634
 ExecuteStage: waiting for completion
-[SFU] ISR Reg[5] Updated
-  [PipelineController] SFU module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [5] at cycle 634
-  Write IPR Reg addr: 0xd8, Data: 0x20
-Simulator Detectes an irq signal at cycle 635
-  IPR Reg matches expected opcode 32
 
 [Core Cycle: 635]
 NPU Core is ticked at cycle 635
-UpdataRegStage: IAR received for bits [5]
-IRQ signal successfully cleared at cycle 636
+ExecuteStage: waiting for completion
 
 [Core Cycle: 636]
 NPU Core is ticked at cycle 636
-WriteRegStage: Write Reg addr: 0x10, Data: 0x3000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 637]
 NPU Core is ticked at cycle 637
-WriteRegStage: Write Reg addr: 0x18, Data: 0xef00002000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 638]
 NPU Core is ticked at cycle 638
-WriteRegStage: Write Reg addr: 0x30, Data: 0xf000f000000004
+ExecuteStage: waiting for completion
 
 [Core Cycle: 639]
 NPU Core is ticked at cycle 639
-WriteRegStage: Write Reg addr: 0x38, Data: 0x100000000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 640]
 NPU Core is ticked at cycle 640
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x2
+ExecuteStage: waiting for completion
 
 [Core Cycle: 641]
 NPU Core is ticked at cycle 641
+ExecuteStage: waiting for completion
 
 [Core Cycle: 642]
 NPU Core is ticked at cycle 642
+ExecuteStage: waiting for completion
+
+[Core Cycle: 643]
+NPU Core is ticked at cycle 643
+ExecuteStage: waiting for completion
+
+[Core Cycle: 644]
+NPU Core is ticked at cycle 644
+ExecuteStage: waiting for completion
+
+[Core Cycle: 645]
+NPU Core is ticked at cycle 645
+ExecuteStage: waiting for completion
+
+[Core Cycle: 646]
+NPU Core is ticked at cycle 646
+ExecuteStage: waiting for completion
+
+[Core Cycle: 647]
+NPU Core is ticked at cycle 647
+ExecuteStage: waiting for completion
+
+[Core Cycle: 648]
+NPU Core is ticked at cycle 648
+ExecuteStage: waiting for completion
+
+[Core Cycle: 649]
+NPU Core is ticked at cycle 649
+ExecuteStage: waiting for completion
+
+[Core Cycle: 650]
+NPU Core is ticked at cycle 650
+ExecuteStage: waiting for completion
+
+[Core Cycle: 651]
+NPU Core is ticked at cycle 651
+ExecuteStage: waiting for completion
+
+[Core Cycle: 652]
+NPU Core is ticked at cycle 652
+ExecuteStage: waiting for completion
+
+[Core Cycle: 653]
+NPU Core is ticked at cycle 653
+ExecuteStage: waiting for completion
+
+[Core Cycle: 654]
+NPU Core is ticked at cycle 654
+ExecuteStage: waiting for completion
+
+[Core Cycle: 655]
+NPU Core is ticked at cycle 655
+ExecuteStage: waiting for completion
+
+[Core Cycle: 656]
+NPU Core is ticked at cycle 656
+ExecuteStage: waiting for completion
+
+[Core Cycle: 657]
+NPU Core is ticked at cycle 657
+ExecuteStage: waiting for completion
+
+[Core Cycle: 658]
+NPU Core is ticked at cycle 658
+ExecuteStage: waiting for completion
+
+[Core Cycle: 659]
+NPU Core is ticked at cycle 659
+ExecuteStage: waiting for completion
+
+[Core Cycle: 660]
+NPU Core is ticked at cycle 660
+ExecuteStage: waiting for completion
+
+[Core Cycle: 661]
+NPU Core is ticked at cycle 661
+ExecuteStage: waiting for completion
+
+[Core Cycle: 662]
+NPU Core is ticked at cycle 662
+ExecuteStage: waiting for completion
+
+[Core Cycle: 663]
+NPU Core is ticked at cycle 663
+ExecuteStage: waiting for completion
+
+[Core Cycle: 664]
+NPU Core is ticked at cycle 664
+ExecuteStage: waiting for completion
+
+[Core Cycle: 665]
+NPU Core is ticked at cycle 665
+ExecuteStage: waiting for completion
+
+[Core Cycle: 666]
+NPU Core is ticked at cycle 666
+ExecuteStage: waiting for completion
+
+[Core Cycle: 667]
+NPU Core is ticked at cycle 667
+ExecuteStage: waiting for completion
+
+[Core Cycle: 668]
+NPU Core is ticked at cycle 668
+ExecuteStage: waiting for completion
+
+[Core Cycle: 669]
+NPU Core is ticked at cycle 669
+ExecuteStage: waiting for completion
+
+[Core Cycle: 670]
+NPU Core is ticked at cycle 670
+ExecuteStage: waiting for completion
+
+[Core Cycle: 671]
+NPU Core is ticked at cycle 671
+ExecuteStage: waiting for completion
+
+[Core Cycle: 672]
+NPU Core is ticked at cycle 672
+ExecuteStage: waiting for completion
+
+[Core Cycle: 673]
+NPU Core is ticked at cycle 673
+ExecuteStage: waiting for completion
+
+[Core Cycle: 674]
+NPU Core is ticked at cycle 674
+ExecuteStage: waiting for completion
+
+[Core Cycle: 675]
+NPU Core is ticked at cycle 675
+ExecuteStage: waiting for completion
+
+[Core Cycle: 676]
+NPU Core is ticked at cycle 676
+ExecuteStage: waiting for completion
+
+[Core Cycle: 677]
+NPU Core is ticked at cycle 677
+ExecuteStage: waiting for completion
+
+[Core Cycle: 678]
+NPU Core is ticked at cycle 678
+ExecuteStage: waiting for completion
+
+[Core Cycle: 679]
+NPU Core is ticked at cycle 679
+ExecuteStage: waiting for completion
+
+[Core Cycle: 680]
+NPU Core is ticked at cycle 680
+ExecuteStage: waiting for completion
+
+[Core Cycle: 681]
+NPU Core is ticked at cycle 681
+ExecuteStage: waiting for completion
+
+[Core Cycle: 682]
+NPU Core is ticked at cycle 682
+ExecuteStage: waiting for completion
+
+[Core Cycle: 683]
+NPU Core is ticked at cycle 683
+ExecuteStage: waiting for completion
+
+[Core Cycle: 684]
+NPU Core is ticked at cycle 684
+ExecuteStage: waiting for completion
+
+[Core Cycle: 685]
+NPU Core is ticked at cycle 685
+ExecuteStage: waiting for completion
+
+[Core Cycle: 686]
+NPU Core is ticked at cycle 686
+ExecuteStage: waiting for completion
+
+[Core Cycle: 687]
+NPU Core is ticked at cycle 687
+ExecuteStage: waiting for completion
+
+[Core Cycle: 688]
+NPU Core is ticked at cycle 688
+ExecuteStage: waiting for completion
+
+[Core Cycle: 689]
+NPU Core is ticked at cycle 689
+ExecuteStage: waiting for completion
+
+[Core Cycle: 690]
+NPU Core is ticked at cycle 690
+ExecuteStage: waiting for completion
+
+[Core Cycle: 691]
+NPU Core is ticked at cycle 691
+ExecuteStage: waiting for completion
+
+[Core Cycle: 692]
+NPU Core is ticked at cycle 692
+ExecuteStage: waiting for completion
+
+[Core Cycle: 693]
+NPU Core is ticked at cycle 693
+ExecuteStage: waiting for completion
+
+[Core Cycle: 694]
+NPU Core is ticked at cycle 694
+ExecuteStage: waiting for completion
+
+[Core Cycle: 695]
+NPU Core is ticked at cycle 695
+ExecuteStage: waiting for completion
+
+[Core Cycle: 696]
+NPU Core is ticked at cycle 696
+ExecuteStage: waiting for completion
+
+[Core Cycle: 697]
+NPU Core is ticked at cycle 697
+ExecuteStage: waiting for completion
+
+[Core Cycle: 698]
+NPU Core is ticked at cycle 698
+ExecuteStage: waiting for completion
+
+[Core Cycle: 699]
+NPU Core is ticked at cycle 699
+ExecuteStage: waiting for completion
+
+[Core Cycle: 700]
+NPU Core is ticked at cycle 700
+ExecuteStage: waiting for completion
+
+[Core Cycle: 701]
+NPU Core is ticked at cycle 701
+ExecuteStage: waiting for completion
+
+[Core Cycle: 702]
+NPU Core is ticked at cycle 702
+ExecuteStage: waiting for completion
+
+[Core Cycle: 703]
+NPU Core is ticked at cycle 703
+ExecuteStage: waiting for completion
+
+[Core Cycle: 704]
+NPU Core is ticked at cycle 704
+ExecuteStage: waiting for completion
+
+[Core Cycle: 705]
+NPU Core is ticked at cycle 705
+ExecuteStage: waiting for completion
+
+[Core Cycle: 706]
+NPU Core is ticked at cycle 706
+ExecuteStage: waiting for completion
+
+[Core Cycle: 707]
+NPU Core is ticked at cycle 707
+ExecuteStage: waiting for completion
+
+[Core Cycle: 708]
+NPU Core is ticked at cycle 708
+ExecuteStage: waiting for completion
+
+[Core Cycle: 709]
+NPU Core is ticked at cycle 709
+ExecuteStage: waiting for completion
+
+[Core Cycle: 710]
+NPU Core is ticked at cycle 710
+ExecuteStage: waiting for completion
+
+[Core Cycle: 711]
+NPU Core is ticked at cycle 711
+ExecuteStage: waiting for completion
+
+[Core Cycle: 712]
+NPU Core is ticked at cycle 712
+ExecuteStage: waiting for completion
+
+[Core Cycle: 713]
+NPU Core is ticked at cycle 713
+ExecuteStage: waiting for completion
+
+[Core Cycle: 714]
+NPU Core is ticked at cycle 714
+ExecuteStage: waiting for completion
+
+[Core Cycle: 715]
+NPU Core is ticked at cycle 715
+ExecuteStage: waiting for completion
+
+[Core Cycle: 716]
+NPU Core is ticked at cycle 716
+ExecuteStage: waiting for completion
+
+[Core Cycle: 717]
+NPU Core is ticked at cycle 717
+ExecuteStage: waiting for completion
+
+[Core Cycle: 718]
+NPU Core is ticked at cycle 718
+ExecuteStage: waiting for completion
+
+[Core Cycle: 719]
+NPU Core is ticked at cycle 719
+ExecuteStage: waiting for completion
+
+[Core Cycle: 720]
+NPU Core is ticked at cycle 720
+ExecuteStage: waiting for completion
+
+[Core Cycle: 721]
+NPU Core is ticked at cycle 721
+ExecuteStage: waiting for completion
+
+[Core Cycle: 722]
+NPU Core is ticked at cycle 722
+ExecuteStage: waiting for completion
+
+[Core Cycle: 723]
+NPU Core is ticked at cycle 723
+ExecuteStage: waiting for completion
+
+[Core Cycle: 724]
+NPU Core is ticked at cycle 724
+ExecuteStage: waiting for completion
+
+[Core Cycle: 725]
+NPU Core is ticked at cycle 725
+ExecuteStage: waiting for completion
+
+[Core Cycle: 726]
+NPU Core is ticked at cycle 726
+ExecuteStage: waiting for completion
+
+[Core Cycle: 727]
+NPU Core is ticked at cycle 727
+ExecuteStage: waiting for completion
+
+[Core Cycle: 728]
+NPU Core is ticked at cycle 728
+ExecuteStage: waiting for completion
+
+[Core Cycle: 729]
+NPU Core is ticked at cycle 729
+ExecuteStage: waiting for completion
+
+[Core Cycle: 730]
+NPU Core is ticked at cycle 730
+ExecuteStage: waiting for completion
+
+[Core Cycle: 731]
+NPU Core is ticked at cycle 731
+ExecuteStage: waiting for completion
+
+[Core Cycle: 732]
+NPU Core is ticked at cycle 732
+ExecuteStage: waiting for completion
+
+[Core Cycle: 733]
+NPU Core is ticked at cycle 733
+ExecuteStage: waiting for completion
+
+[Core Cycle: 734]
+NPU Core is ticked at cycle 734
+ExecuteStage: waiting for completion
+
+[Core Cycle: 735]
+NPU Core is ticked at cycle 735
+ExecuteStage: waiting for completion
+
+[Core Cycle: 736]
+NPU Core is ticked at cycle 736
+ExecuteStage: waiting for completion
+
+[Core Cycle: 737]
+NPU Core is ticked at cycle 737
+ExecuteStage: waiting for completion
+
+[Core Cycle: 738]
+NPU Core is ticked at cycle 738
+ExecuteStage: waiting for completion
+
+[Core Cycle: 739]
+NPU Core is ticked at cycle 739
+ExecuteStage: waiting for completion
+
+[Core Cycle: 740]
+NPU Core is ticked at cycle 740
+ExecuteStage: waiting for completion
+
+[Core Cycle: 741]
+NPU Core is ticked at cycle 741
+ExecuteStage: waiting for completion
+
+[Core Cycle: 742]
+NPU Core is ticked at cycle 742
+ExecuteStage: waiting for completion
+
+[Core Cycle: 743]
+NPU Core is ticked at cycle 743
+ExecuteStage: waiting for completion
+
+[Core Cycle: 744]
+NPU Core is ticked at cycle 744
+ExecuteStage: waiting for completion
+
+[Core Cycle: 745]
+NPU Core is ticked at cycle 745
+ExecuteStage: waiting for completion
+
+[Core Cycle: 746]
+NPU Core is ticked at cycle 746
+ExecuteStage: waiting for completion
+
+[Core Cycle: 747]
+NPU Core is ticked at cycle 747
+ExecuteStage: waiting for completion
+
+[Core Cycle: 748]
+NPU Core is ticked at cycle 748
+ExecuteStage: waiting for completion
+
+[Core Cycle: 749]
+NPU Core is ticked at cycle 749
+ExecuteStage: waiting for completion
+
+[Core Cycle: 750]
+NPU Core is ticked at cycle 750
+ExecuteStage: waiting for completion
+
+[Core Cycle: 751]
+NPU Core is ticked at cycle 751
+ExecuteStage: waiting for completion
+
+[Core Cycle: 752]
+NPU Core is ticked at cycle 752
+ExecuteStage: waiting for completion
+
+[Core Cycle: 753]
+NPU Core is ticked at cycle 753
+ExecuteStage: waiting for completion
+
+[Core Cycle: 754]
+NPU Core is ticked at cycle 754
+ExecuteStage: waiting for completion
+
+[Core Cycle: 755]
+NPU Core is ticked at cycle 755
+ExecuteStage: waiting for completion
+
+[Core Cycle: 756]
+NPU Core is ticked at cycle 756
+ExecuteStage: waiting for completion
+
+[Core Cycle: 757]
+NPU Core is ticked at cycle 757
+ExecuteStage: waiting for completion
+
+[Core Cycle: 758]
+NPU Core is ticked at cycle 758
+ExecuteStage: waiting for completion
+
+[Core Cycle: 759]
+NPU Core is ticked at cycle 759
+ExecuteStage: waiting for completion
+
+[Core Cycle: 760]
+NPU Core is ticked at cycle 760
+ExecuteStage: waiting for completion
+
+[Core Cycle: 761]
+NPU Core is ticked at cycle 761
+ExecuteStage: waiting for completion
+
+[Core Cycle: 762]
+NPU Core is ticked at cycle 762
+ExecuteStage: waiting for completion
+
+[Core Cycle: 763]
+NPU Core is ticked at cycle 763
+ExecuteStage: waiting for completion
+
+[Core Cycle: 764]
+NPU Core is ticked at cycle 764
+ExecuteStage: waiting for completion
+
+[Core Cycle: 765]
+NPU Core is ticked at cycle 765
+ExecuteStage: waiting for completion
+
+[Core Cycle: 766]
+NPU Core is ticked at cycle 766
+ExecuteStage: waiting for completion
+[SFU] ISR Reg[5] Updated
+  [PipelineController] SFU module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [5] at cycle 766
+  Write IPR Reg addr: 0xd8, Data: 0x20
+Simulator Detectes an irq signal at cycle 767
+  IPR Reg matches expected opcode 32
+
+[Core Cycle: 767]
+NPU Core is ticked at cycle 767
+UpdataRegStage: IAR received for bits [5]
+IRQ signal successfully cleared at cycle 768
+
+[Core Cycle: 768]
+NPU Core is ticked at cycle 768
+WriteRegStage: Write Reg addr: 0x10, Data: 0x3000
+
+[Core Cycle: 769]
+NPU Core is ticked at cycle 769
+WriteRegStage: Write Reg addr: 0x18, Data: 0xef00002000
+
+[Core Cycle: 770]
+NPU Core is ticked at cycle 770
+WriteRegStage: Write Reg addr: 0x30, Data: 0xf000f000000004
+
+[Core Cycle: 771]
+NPU Core is ticked at cycle 771
+WriteRegStage: Write Reg addr: 0x38, Data: 0x100000000
+
+[Core Cycle: 772]
+NPU Core is ticked at cycle 772
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x2
+
+[Core Cycle: 773]
+NPU Core is ticked at cycle 773
+
+[Core Cycle: 774]
+NPU Core is ticked at cycle 774
 ExecuteStage: 1
 ExecuteStage: start task execution
 [PipelineController] Configing MVOUT instruction
@@ -2749,95 +3280,140 @@ ExecuteStage: start task execution
 [Core] push req to outbox, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x2000
 [DMA] Send request to DDR, DMA set to busy
 
-[Core Cycle: 643]
-NPU Core is ticked at cycle 643
+[Core Cycle: 775]
+NPU Core is ticked at cycle 775
 [DDR] received request from core
 [Core] send req to DDR, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x2000, row_num = 0, col_num = 239, dram_stride = 240, sram_stride = 240, data_size = 1
 ExecuteStage: waiting for completion
 [DDR] start processing new request with 18 estimated remaining DDR cycles
 [DDR] processing request, remaining 17 cycles...
 [DDR] processing request, remaining 16 cycles...
-
-[Core Cycle: 644]
-NPU Core is ticked at cycle 644
-ExecuteStage: waiting for completion
 [DDR] processing request, remaining 15 cycles...
+
+[Core Cycle: 776]
+NPU Core is ticked at cycle 776
+ExecuteStage: waiting for completion
 [DDR] processing request, remaining 14 cycles...
 [DDR] processing request, remaining 13 cycles...
-
-[Core Cycle: 645]
-NPU Core is ticked at cycle 645
-ExecuteStage: waiting for completion
 [DDR] processing request, remaining 12 cycles...
+
+[Core Cycle: 777]
+NPU Core is ticked at cycle 777
+ExecuteStage: waiting for completion
 [DDR] processing request, remaining 11 cycles...
 [DDR] processing request, remaining 10 cycles...
-
-[Core Cycle: 646]
-NPU Core is ticked at cycle 646
-ExecuteStage: waiting for completion
 [DDR] processing request, remaining 9 cycles...
+
+[Core Cycle: 778]
+NPU Core is ticked at cycle 778
+ExecuteStage: waiting for completion
 [DDR] processing request, remaining 8 cycles...
 [DDR] processing request, remaining 7 cycles...
 [DDR] processing request, remaining 6 cycles...
 
-[Core Cycle: 647]
-NPU Core is ticked at cycle 647
+[Core Cycle: 779]
+NPU Core is ticked at cycle 779
 ExecuteStage: waiting for completion
 [DDR] processing request, remaining 5 cycles...
 [DDR] processing request, remaining 4 cycles...
 [DDR] processing request, remaining 3 cycles...
-
-[Core Cycle: 648]
-NPU Core is ticked at cycle 648
-ExecuteStage: waiting for completion
 [DDR] processing request, remaining 2 cycles...
+
+[Core Cycle: 780]
+NPU Core is ticked at cycle 780
+ExecuteStage: waiting for completion
 [DDR] processing request, remaining 1 cycles...
 [DDR] processing request, remaining 0 cycles...
 [DDR] finish processing current request
 [Core] push resp into inbox, type = ST_RESP, src_addr = 0x3000, dst_addr = 0x2000
 
-[Core Cycle: 649]
-NPU Core is ticked at cycle 649
+[Core Cycle: 781]
+NPU Core is ticked at cycle 781
 ExecuteStage: waiting for completion
-[DMA] get expected resp type = ST_RESP, DMA complete
+[DMA] get expected resp type = ST_RESP
+
+[Core Cycle: 782]
+NPU Core is ticked at cycle 782
+ExecuteStage: waiting for completion
+
+[Core Cycle: 783]
+NPU Core is ticked at cycle 783
+ExecuteStage: waiting for completion
+
+[Core Cycle: 784]
+NPU Core is ticked at cycle 784
+ExecuteStage: waiting for completion
+
+[Core Cycle: 785]
+NPU Core is ticked at cycle 785
+ExecuteStage: waiting for completion
+
+[Core Cycle: 786]
+NPU Core is ticked at cycle 786
+ExecuteStage: waiting for completion
+
+[Core Cycle: 787]
+NPU Core is ticked at cycle 787
+ExecuteStage: waiting for completion
+
+[Core Cycle: 788]
+NPU Core is ticked at cycle 788
+ExecuteStage: waiting for completion
+
+[Core Cycle: 789]
+NPU Core is ticked at cycle 789
+ExecuteStage: waiting for completion
+
+[Core Cycle: 790]
+NPU Core is ticked at cycle 790
+ExecuteStage: waiting for completion
+
+[Core Cycle: 791]
+NPU Core is ticked at cycle 791
+ExecuteStage: waiting for completion
+
+[Core Cycle: 792]
+NPU Core is ticked at cycle 792
+ExecuteStage: waiting for completion
+[DMA] DDR response and SPM transfer both completed, DMA complete
 [DMA] ISR Reg[1] Updated
   [PipelineController] DMA module finished
   [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 649
+UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 792
   Write IPR Reg addr: 0xd8, Data: 0x2
-Simulator Detectes an irq signal at cycle 650
+Simulator Detectes an irq signal at cycle 793
   IPR Reg matches expected opcode 2
 
-[Core Cycle: 650]
-NPU Core is ticked at cycle 650
+[Core Cycle: 793]
+NPU Core is ticked at cycle 793
 UpdataRegStage: IAR received for bits [1]
-IRQ signal successfully cleared at cycle 651
+IRQ signal successfully cleared at cycle 794
 
-[Core Cycle: 651]
-NPU Core is ticked at cycle 651
+[Core Cycle: 794]
+NPU Core is ticked at cycle 794
 WriteRegStage: Write Reg addr: 0x10, Data: 0xf00003000
 
-[Core Cycle: 652]
-NPU Core is ticked at cycle 652
+[Core Cycle: 795]
+NPU Core is ticked at cycle 795
 WriteRegStage: Write Reg addr: 0x18, Data: 0xf00001000
 
-[Core Cycle: 653]
-NPU Core is ticked at cycle 653
+[Core Cycle: 796]
+NPU Core is ticked at cycle 796
 WriteRegStage: Write Reg addr: 0x30, Data: 0x20002000000004
 
-[Core Cycle: 654]
-NPU Core is ticked at cycle 654
+[Core Cycle: 797]
+NPU Core is ticked at cycle 797
 WriteRegStage: Write Reg addr: 0x38, Data: 0x100000000
 
-[Core Cycle: 655]
-NPU Core is ticked at cycle 655
+[Core Cycle: 798]
+NPU Core is ticked at cycle 798
 WriteRegStage: Write Reg addr: 0xb0, Data: 0x2
 
-[Core Cycle: 656]
-NPU Core is ticked at cycle 656
+[Core Cycle: 799]
+NPU Core is ticked at cycle 799
 
-[Core Cycle: 657]
-NPU Core is ticked at cycle 657
+[Core Cycle: 800]
+NPU Core is ticked at cycle 800
 ExecuteStage: 1
 ExecuteStage: start task execution
 [PipelineController] Configing MVOUT instruction
@@ -2845,104 +3421,104 @@ ExecuteStage: start task execution
 [Core] push req to outbox, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x1000
 [DMA] Send request to DDR, DMA set to busy
 
-[Core Cycle: 658]
-NPU Core is ticked at cycle 658
+[Core Cycle: 801]
+NPU Core is ticked at cycle 801
 [DDR] received request from core
 [Core] send req to DDR, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x1000, row_num = 15, col_num = 15, dram_stride = 32, sram_stride = 32, data_size = 1
 ExecuteStage: waiting for completion
 [DDR] start processing new request with 44 estimated remaining DDR cycles
 [DDR] processing request, remaining 43 cycles...
 [DDR] processing request, remaining 42 cycles...
-
-[Core Cycle: 659]
-NPU Core is ticked at cycle 659
-ExecuteStage: waiting for completion
 [DDR] processing request, remaining 41 cycles...
+
+[Core Cycle: 802]
+NPU Core is ticked at cycle 802
+ExecuteStage: waiting for completion
 [DDR] processing request, remaining 40 cycles...
 [DDR] processing request, remaining 39 cycles...
 [DDR] processing request, remaining 38 cycles...
 
-[Core Cycle: 660]
-NPU Core is ticked at cycle 660
+[Core Cycle: 803]
+NPU Core is ticked at cycle 803
 ExecuteStage: waiting for completion
 [DDR] processing request, remaining 37 cycles...
 [DDR] processing request, remaining 36 cycles...
 [DDR] processing request, remaining 35 cycles...
 
-[Core Cycle: 661]
-NPU Core is ticked at cycle 661
+[Core Cycle: 804]
+NPU Core is ticked at cycle 804
 ExecuteStage: waiting for completion
 [DDR] processing request, remaining 34 cycles...
 [DDR] processing request, remaining 33 cycles...
 [DDR] processing request, remaining 32 cycles...
 
-[Core Cycle: 662]
-NPU Core is ticked at cycle 662
+[Core Cycle: 805]
+NPU Core is ticked at cycle 805
 ExecuteStage: waiting for completion
 [DDR] processing request, remaining 31 cycles...
 [DDR] processing request, remaining 30 cycles...
 [DDR] processing request, remaining 29 cycles...
 
-[Core Cycle: 663]
-NPU Core is ticked at cycle 663
+[Core Cycle: 806]
+NPU Core is ticked at cycle 806
 ExecuteStage: waiting for completion
 [DDR] processing request, remaining 28 cycles...
 [DDR] processing request, remaining 27 cycles...
 [DDR] processing request, remaining 26 cycles...
-
-[Core Cycle: 664]
-NPU Core is ticked at cycle 664
-ExecuteStage: waiting for completion
 [DDR] processing request, remaining 25 cycles...
+
+[Core Cycle: 807]
+NPU Core is ticked at cycle 807
+ExecuteStage: waiting for completion
 [DDR] processing request, remaining 24 cycles...
 [DDR] processing request, remaining 23 cycles...
 [DDR] processing request, remaining 22 cycles...
 
-[Core Cycle: 665]
-NPU Core is ticked at cycle 665
+[Core Cycle: 808]
+NPU Core is ticked at cycle 808
 ExecuteStage: waiting for completion
 [DDR] processing request, remaining 21 cycles...
 [DDR] processing request, remaining 20 cycles...
 [DDR] processing request, remaining 19 cycles...
 
-[Core Cycle: 666]
-NPU Core is ticked at cycle 666
+[Core Cycle: 809]
+NPU Core is ticked at cycle 809
 ExecuteStage: waiting for completion
 [DDR] processing request, remaining 18 cycles...
 [DDR] processing request, remaining 17 cycles...
 [DDR] processing request, remaining 16 cycles...
 
-[Core Cycle: 667]
-NPU Core is ticked at cycle 667
+[Core Cycle: 810]
+NPU Core is ticked at cycle 810
 ExecuteStage: waiting for completion
 [DDR] processing request, remaining 15 cycles...
 [DDR] processing request, remaining 14 cycles...
 [DDR] processing request, remaining 13 cycles...
-
-[Core Cycle: 668]
-NPU Core is ticked at cycle 668
-ExecuteStage: waiting for completion
 [DDR] processing request, remaining 12 cycles...
+
+[Core Cycle: 811]
+NPU Core is ticked at cycle 811
+ExecuteStage: waiting for completion
 [DDR] processing request, remaining 11 cycles...
 [DDR] processing request, remaining 10 cycles...
 [DDR] processing request, remaining 9 cycles...
 
-[Core Cycle: 669]
-NPU Core is ticked at cycle 669
+[Core Cycle: 812]
+NPU Core is ticked at cycle 812
 ExecuteStage: waiting for completion
 [DDR] processing request, remaining 8 cycles...
 [DDR] processing request, remaining 7 cycles...
 [DDR] processing request, remaining 6 cycles...
 
-[Core Cycle: 670]
-NPU Core is ticked at cycle 670
+[Core Cycle: 813]
+NPU Core is ticked at cycle 813
 ExecuteStage: waiting for completion
 [DDR] processing request, remaining 5 cycles...
 [DDR] processing request, remaining 4 cycles...
 [DDR] processing request, remaining 3 cycles...
 
-[Core Cycle: 671]
-NPU Core is ticked at cycle 671
+[Core Cycle: 814]
+NPU Core is ticked at cycle 814
 ExecuteStage: waiting for completion
 [DDR] processing request, remaining 2 cycles...
 [DDR] processing request, remaining 1 cycles...
@@ -2950,44 +3526,161 @@ ExecuteStage: waiting for completion
 [DDR] finish processing current request
 [Core] push resp into inbox, type = ST_RESP, src_addr = 0x3000, dst_addr = 0x1000
 
-[Core Cycle: 672]
-NPU Core is ticked at cycle 672
+[Core Cycle: 815]
+NPU Core is ticked at cycle 815
 ExecuteStage: waiting for completion
-[DMA] get expected resp type = ST_RESP, DMA complete
+[DMA] get expected resp type = ST_RESP
+
+[Core Cycle: 816]
+NPU Core is ticked at cycle 816
+ExecuteStage: waiting for completion
+
+[Core Cycle: 817]
+NPU Core is ticked at cycle 817
+ExecuteStage: waiting for completion
+
+[Core Cycle: 818]
+NPU Core is ticked at cycle 818
+ExecuteStage: waiting for completion
+
+[Core Cycle: 819]
+NPU Core is ticked at cycle 819
+ExecuteStage: waiting for completion
+
+[Core Cycle: 820]
+NPU Core is ticked at cycle 820
+ExecuteStage: waiting for completion
+
+[Core Cycle: 821]
+NPU Core is ticked at cycle 821
+ExecuteStage: waiting for completion
+
+[Core Cycle: 822]
+NPU Core is ticked at cycle 822
+ExecuteStage: waiting for completion
+
+[Core Cycle: 823]
+NPU Core is ticked at cycle 823
+ExecuteStage: waiting for completion
+
+[Core Cycle: 824]
+NPU Core is ticked at cycle 824
+ExecuteStage: waiting for completion
+
+[Core Cycle: 825]
+NPU Core is ticked at cycle 825
+ExecuteStage: waiting for completion
+
+[Core Cycle: 826]
+NPU Core is ticked at cycle 826
+ExecuteStage: waiting for completion
+
+[Core Cycle: 827]
+NPU Core is ticked at cycle 827
+ExecuteStage: waiting for completion
+
+[Core Cycle: 828]
+NPU Core is ticked at cycle 828
+ExecuteStage: waiting for completion
+
+[Core Cycle: 829]
+NPU Core is ticked at cycle 829
+ExecuteStage: waiting for completion
+
+[Core Cycle: 830]
+NPU Core is ticked at cycle 830
+ExecuteStage: waiting for completion
+
+[Core Cycle: 831]
+NPU Core is ticked at cycle 831
+ExecuteStage: waiting for completion
+
+[Core Cycle: 832]
+NPU Core is ticked at cycle 832
+ExecuteStage: waiting for completion
+
+[Core Cycle: 833]
+NPU Core is ticked at cycle 833
+ExecuteStage: waiting for completion
+
+[Core Cycle: 834]
+NPU Core is ticked at cycle 834
+ExecuteStage: waiting for completion
+
+[Core Cycle: 835]
+NPU Core is ticked at cycle 835
+ExecuteStage: waiting for completion
+
+[Core Cycle: 836]
+NPU Core is ticked at cycle 836
+ExecuteStage: waiting for completion
+
+[Core Cycle: 837]
+NPU Core is ticked at cycle 837
+ExecuteStage: waiting for completion
+
+[Core Cycle: 838]
+NPU Core is ticked at cycle 838
+ExecuteStage: waiting for completion
+
+[Core Cycle: 839]
+NPU Core is ticked at cycle 839
+ExecuteStage: waiting for completion
+
+[Core Cycle: 840]
+NPU Core is ticked at cycle 840
+ExecuteStage: waiting for completion
+
+[Core Cycle: 841]
+NPU Core is ticked at cycle 841
+ExecuteStage: waiting for completion
+
+[Core Cycle: 842]
+NPU Core is ticked at cycle 842
+ExecuteStage: waiting for completion
+
+[Core Cycle: 843]
+NPU Core is ticked at cycle 843
+ExecuteStage: waiting for completion
+
+[Core Cycle: 844]
+NPU Core is ticked at cycle 844
+ExecuteStage: waiting for completion
+[DMA] DDR response and SPM transfer both completed, DMA complete
 [DMA] ISR Reg[1] Updated
   [PipelineController] DMA module finished
   [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 672
+UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 844
   Write IPR Reg addr: 0xd8, Data: 0x2
-Simulator Detectes an irq signal at cycle 673
+Simulator Detectes an irq signal at cycle 845
   IPR Reg matches expected opcode 2
 
-[Core Cycle: 673]
-NPU Core is ticked at cycle 673
+[Core Cycle: 845]
+NPU Core is ticked at cycle 845
 UpdataRegStage: IAR received for bits [1]
-IRQ signal successfully cleared at cycle 674
-NPU Core: Simulation completed at cycle 673
-Core finished execution at cycle 673
-Simulation finished early at cycle 673
+IRQ signal successfully cleared at cycle 846
+NPU Core: Simulation completed at cycle 845
+Core finished execution at cycle 845
+Simulation finished early at cycle 845
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.005196 s
-  Maximum cycle limit: 1000
+  Simulation time: 0.006071 s
+  Maximum cycle limit: 10000
   Early termination: Yes
   Final state: DONE
-  Total cycles: 673
+  Total cycles: 845
   Total simulated instructions: 38
-  Simulated instructions per second: 7313.317937
+  Simulated instructions per second: 6259.265360
 +------------------+--------------+--------------+------------+
 |                    HW Utilization Report                    |
 +------------------+--------------+--------------+------------+
 | Module           |  Busy Cycles | Total Cycles |    Util(%) |
 +------------------+--------------+--------------+------------+
-| DMA              |           50 |          616 |       8.12 |
-| SPM              |            0 |          616 |       0.00 |
-| SystolicArray    |           68 |          616 |      11.04 |
-| Accumulator      |           32 |          616 |       5.19 |
-| SFU              |          481 |          616 |      78.08 |
-| GEMV             |            0 |          616 |       0.00 |
+| DMA              |          218 |          788 |      27.66 |
+| SPM              |          240 |          788 |      30.46 |
+| SystolicArray    |           67 |          788 |       8.50 |
+| Accumulator      |           31 |          788 |       3.93 |
+| SFU              |          480 |          788 |      60.91 |
+| GEMV             |            0 |          788 |       0.00 |
 +------------------+--------------+--------------+------------+

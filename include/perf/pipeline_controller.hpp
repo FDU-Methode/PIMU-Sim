@@ -4,6 +4,7 @@
 #include <memory>
 #include <queue>
 #include "hw_utilization.hpp"
+#include "scratchpad.hpp"
 #include "perf_func_unit.hpp"
 
 class PerfSim;
@@ -21,7 +22,6 @@ private:
 
     // Function Units
     std::unique_ptr<DMA> dma;
-    std::unique_ptr<SPM> spm;
     std::unique_ptr<SystolicArray> sa;
     std::unique_ptr<Accumulator> acc;
     std::unique_ptr<SFU> sfu;
@@ -39,6 +39,9 @@ protected:
     // Util Tracker
     HardWareUtilizationTracker* util_tracker;
 
+    // Scratchpad
+    Scratchpad* spm;
+
     enum State{
         IDLE,
         BUSY,
@@ -48,7 +51,7 @@ protected:
     void completeInstruction();
 
 public:
-    PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg, HardWareUtilizationTracker* util_tracker);
+    PipelineController(PerfSim* sim, Logger& logger, RegFile& regfile, const Config& cfg, HardWareUtilizationTracker* util_tracker, Scratchpad* spm);
     virtual ~PipelineController() = default;
 
     bool isIdle() const { return state == IDLE; };
@@ -61,6 +64,7 @@ public:
     virtual void tick();
 
     PerfFunctionalUnit* getUnit(UnitType name);
+    Scratchpad* getSpm();
 };
 
 #endif
