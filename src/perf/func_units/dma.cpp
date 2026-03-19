@@ -79,6 +79,18 @@ void DMA::tick(){
 
         // Port conflict/backpressure: stall this beat and retry next cycle.
         if(access_ok) {
+            // Compute Bandwidth
+            HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+            if(util_tracker) {
+                if(mvin_start) {
+                    util_tracker->addDdrReadBytes(axi_beat_bytes);
+                    util_tracker->addSpmWriteBytes(axi_beat_bytes);
+                } else if(mvout_start) {
+                    util_tracker->addSpmReadBytes(axi_beat_bytes);
+                    util_tracker->addDdrWriteBytes(axi_beat_bytes);
+                }
+            }
+
             --current_burst_beats_remaining;
             ++current_row_beat_idx;
 

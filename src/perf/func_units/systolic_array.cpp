@@ -8,27 +8,56 @@ SystolicArray::SystolicArray(PerfSim* sim, PipelineController* controller, Logge
 }
 
 void SystolicArray::tick(){
-    if(isBusy()){
-        remaining_cycles--;
+    if(!isBusy()) return;
 
-        if(remaining_start_acc_cycles == 0) {
-            if(!acc_started) {
-                PerfFunctionalUnit* acc = controller->getUnit(UnitType::Accumulator);
-                assert(acc && acc->isIdle());
-                logger.log("  [SystolicArray] start Accumulator");
-                acc->execute();
-                acc_started = true;
-                remaining_start_acc_cycles = -1;
-            }
-        } else if(remaining_start_acc_cycles > 0) {
-            remaining_start_acc_cycles--;
-        } else {
+    Scratchpad* spm = controller->getSpm();
+    assert(spm && "SystolicArray requires a valid Scratchpad");
+
+    // Port 0: weight stream
+    if(spm_rd1_remaining > 0) {
+        bool read_status_1 = spm->accessPort(1, spm_rd1_addr);
+        assert(read_status_1 && "[SystolicArray] SPM port 1 read failed");
+        spm_rd1_addr += spm_rd1_stride_bytes;
+        --spm_rd1_remaining;
+
+        HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+        if(util_tracker) {
+            util_tracker->addSpmReadBytes(cfg.systolic_array_size * cfg.sram_data_width / 8);
+        }
+    }
+
+    // Port 1: activation / im2col stream
+    if(spm_rd2_remaining > 0) {
+        bool read_status_2 = spm->accessPort(0, spm_rd2_addr);
+        assert(read_status_2 && "[SystolicArray] SPM port 0 read failed");
+        spm_rd2_addr += spm_rd2_stride_bytes;
+        --spm_rd2_remaining;
+
+        HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+        if(util_tracker) {
+            util_tracker->addSpmReadBytes(cfg.systolic_array_size * cfg.sram_data_width / 8);
+        }
+    }
+
+    remaining_cycles--;
+
+    if(remaining_start_acc_cycles == 0) {
+        if(!acc_started) {
+            PerfFunctionalUnit* acc = controller->getUnit(UnitType::Accumulator);
+            assert(acc && acc->isIdle());
+            logger.log("  [SystolicArray] start Accumulator");
+            acc->execute();
+            acc_started = true;
             remaining_start_acc_cycles = -1;
         }
+    } else if(remaining_start_acc_cycles > 0) {
+        remaining_start_acc_cycles--;
+    } else {
+        remaining_start_acc_cycles = -1;
+    }
 
-        if(remaining_cycles == 0){
-            completeInstruction();
-        }
+    if(remaining_cycles == 0){
+        completeInstruction();
     }
 }
 
@@ -38,7 +67,16 @@ void SystolicArray::execute(){
 
     state = State::BUSY;
 
+    acc_started = false;
+    spm_rd1_remaining = 0;
+    spm_rd2_remaining = 0;
+
     uint8_t optype = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 25) & 0x3);
+    spm_rd2_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs1_reg_addr) & 0xFFFFFFFF);  // Activation/IFM Address
+    spm_rd1_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs2_reg_addr) & 0xFFFFFFFF);  // Weight Address
+
+    spm_rd2_stride_bytes = cfg.systolic_array_size * cfg.sram_data_width / 8;
+    spm_rd1_stride_bytes = cfg.systolic_array_size * cfg.sram_data_width / 8;
 
     if(optype == 0) {  // GEMM
 
@@ -54,6 +92,11 @@ void SystolicArray::execute(){
 
         remaining_cycles = row_num_a + col_num_a + col_num_b + 2;
         remaining_start_acc_cycles = col_num_a + col_num_b + 1;
+
+        // Compute Read SPM Cycles
+        spm_rd1_remaining = remaining_start_acc_cycles;
+        spm_rd2_remaining = remaining_cycles;
+
         logger.log("[SystolicArray] GEMM Start, A:%d*%d, B:%d*%d, remaining = %d, remaining start acc = %d", 
             row_num_a, col_num_a, row_num_b, col_num_b, remaining_cycles, remaining_start_acc_cycles);
 
@@ -95,6 +138,9 @@ void SystolicArray::execute(){
         remaining_cycles = im2col_delay + input_a_row_num + input_b_col_num + input_a_col_num + 2;
         remaining_start_acc_cycles = im2col_delay + input_a_col_num + input_b_col_num + 1;
 
+        spm_rd1_remaining = input_a_col_num;
+        spm_rd2_remaining = remaining_start_acc_cycles;
+
         logger.log("[SystolicArray] CONV Start, pad_t/b/l/r/mode=%d/%d/%d/%d/%d, weight_shape/stride/dilation=%d/%d/%d, "
             "ifm_w=%d, ifm_h=%d, cin=%d, cout=%d, remaining = %d, remaining start acc = %d", 
             pad_top, pad_bottom, pad_left, pad_right, pad_mode, weight_shape, weight_stride, weight_dilation, 
@@ -103,6 +149,8 @@ void SystolicArray::execute(){
     } else {  // GEMV
         remaining_cycles = 10;
         remaining_start_acc_cycles = -1;
+        spm_rd1_remaining = 0;
+        spm_rd2_remaining = 0;
         logger.log("[SystolicArray] GEMV Start, remaining = %d", remaining_cycles);
     }
 }
@@ -111,4 +159,6 @@ void SystolicArray::completeInstruction(){
     PerfFunctionalUnit::completeInstruction();
     acc_started = false;
     remaining_start_acc_cycles = -1;
+    spm_rd1_remaining = 0;
+    spm_rd2_remaining = 0;
 }

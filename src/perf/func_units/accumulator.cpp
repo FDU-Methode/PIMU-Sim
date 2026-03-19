@@ -19,6 +19,13 @@ void Accumulator::tick(){
             int write_base_addr = matadd_start ? matadd_output_base_addr : sa_output_base_addr;
             bool write_status = spm->WriteMemory(write_base_addr + static_cast<uint32_t>(write_beat) * cfg.systolic_array_size * cfg.sram_data_width / 8);
             assert(write_status && "[Accumulator] SPM Write Request Failed");
+            // Compute Bandwidth
+            if(write_status) {
+                HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+                if(util_tracker) {
+                    util_tracker->addSpmWriteBytes(cfg.systolic_array_size * cfg.sram_data_width / 8);
+                }
+            }
         }
     }
 
@@ -39,8 +46,8 @@ void Accumulator::execute(){
 
     uint8_t optype = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 25) & 0x3);
     acc_dest = (regfile.read(regfile.config_compute_rs1_reg_addr) >> 27) & 0x1;
-    sa_output_base_addr = (regfile.read(regfile.config_accumulate_rs2_reg_addr)) & 0xFFFF;
-    matadd_output_base_addr = (regfile.read(regfile.compute_matadd_rs2_reg_addr)) & 0xFFFF;
+    sa_output_base_addr = (regfile.read(regfile.config_accumulate_rs2_reg_addr)) & 0xFFFFFFFF;
+    matadd_output_base_addr = (regfile.read(regfile.compute_matadd_rs2_reg_addr)) & 0xFFFFFFFF;
 
     const int tail_cycles = acc_dest ? 3 : 4;
 

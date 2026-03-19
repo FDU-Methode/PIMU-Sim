@@ -92,6 +92,14 @@ public:
 protected:
     bool acc_started = false;
     int remaining_start_acc_cycles = -1;
+
+    uint32_t spm_rd1_addr = 0;   // weight port
+    uint32_t spm_rd2_addr = 0;   // activation / ifm port
+    int spm_rd1_stride_bytes = 0;
+    int spm_rd2_stride_bytes = 0;
+    int spm_rd1_remaining = 0;
+    int spm_rd2_remaining = 0;
+
     void completeInstruction() override;
 };
 

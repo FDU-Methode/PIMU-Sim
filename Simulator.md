@@ -81,3 +81,8 @@
 ### 2026-03-19
 
 - 添加`SPM`建模，添加`SystolicArray`、`Accumulator`、`DMA`、`SFU`对SPM访问(`ReadMemory`、`WriteMemory`)
+
+- 硬件利用率模块添加`DRAM`和`SPM`带宽统计
+> 目前`DRAM`带宽建模不准确，需要在ddr_freq下进行建模
+
+- `Accumulator`添加SRAM建模(尚未完成，需要先修改SPM建模使得能够支持同时读)

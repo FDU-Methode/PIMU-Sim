@@ -139,12 +139,26 @@ void SFU::tick(){
     if(issue_read) {
         bool read_status = spm->ReadMemory(read_addr);
         assert(read_status && "[SFU] SPM Read Request Failed");
+        // Compute Bandwidth
+        if(read_status) {
+            HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+            if(util_tracker) {
+                util_tracker->addSpmReadBytes(cfg.systolic_array_size * cfg.sram_data_width / 8);
+            }
+        }
         ++spm_issued_reads;
     }
 
     if(issue_write) {
         bool write_status = spm->WriteMemory(write_addr);
         assert(write_status && "[SFU] SPM Write Request Failed");
+        // Compute Bandwidth
+        if(write_status) {
+            HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+            if(util_tracker) {
+                util_tracker->addSpmWriteBytes(cfg.systolic_array_size * cfg.sram_data_width / 8);
+            }
+        }
         ++spm_issued_writes;
     }
 

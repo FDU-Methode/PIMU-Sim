@@ -12,7 +12,7 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     state = State::IDLE;
 
     // Initialize MicroArchitecture Components
-    util_tracker = std::make_unique<HardWareUtilizationTracker>(logger);
+    util_tracker = std::make_unique<HardWareUtilizationTracker>(logger, cfg);
     util_tracker->reset();
     logger.log("  HardWare Utilization Tracker created!");
 
@@ -213,8 +213,7 @@ void PerfNpuCore::tick(){
     }
 
     // Set SPM Idle
-    spm->setReadIdle();
-    spm->setWriteIdle();
+    spm->clearPorts();
 
     // 执行指令
     ExecuteStage();

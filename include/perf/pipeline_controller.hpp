@@ -64,7 +64,8 @@ public:
     virtual void tick();
 
     PerfFunctionalUnit* getUnit(UnitType name);
-    Scratchpad* getSpm();
+    HardWareUtilizationTracker* getUtilTracker() { return util_tracker; }
+    Scratchpad* getSpm() { return spm; }
 };
 
 #endif

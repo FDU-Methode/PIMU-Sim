@@ -17,18 +17,20 @@ protected:
         IDLE,
         BUSY
     };
-    State read_state  = IDLE;
-    State write_state = IDLE;
+
+    std::array<State, 2> port_state{{IDLE, IDLE}};
 
 public:
     Scratchpad(Logger& logger, const Config& cfg);
     virtual ~Scratchpad() = default;
 
-    bool isReadBusy() const { return read_state == BUSY; };
-    bool isWriteBusy() const { return write_state == BUSY; };
-    void setReadIdle() { read_state = IDLE; };
-    void setWriteIdle() { write_state = IDLE; };
+    bool isBusy()  { return (port_state[0] == BUSY) || (port_state[1] == BUSY); }
+    bool isReadBusy() { return isBusy(); }
+    bool isWriteBusy() { return isBusy(); }
 
+    void clearPorts() { port_state[0] = IDLE; port_state[1] = IDLE; }
+
+    bool accessPort(int port, uint32_t addr);
     bool ReadMemory(uint32_t addr);
     bool WriteMemory(uint32_t addr);
 };

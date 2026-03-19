@@ -27,7 +27,7 @@ void PipelineController::tick(){
 
     util_tracker->sample({
         dma->isBusy(),
-        spm ? (spm->isReadBusy() || spm->isWriteBusy()) : false,
+        spm ? spm->isBusy() : false,
         sa->isBusy(),
         acc->isBusy(),
         sfu->isBusy(),
@@ -103,8 +103,4 @@ PerfFunctionalUnit* PipelineController::getUnit(UnitType name) {
         case UnitType::GEMV          : return gemv.get();
         default                      : return nullptr;
     }
-}
-
-Scratchpad* PipelineController::getSpm() {
-    return spm;
 }
