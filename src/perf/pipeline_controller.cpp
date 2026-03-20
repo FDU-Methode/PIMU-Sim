@@ -30,6 +30,7 @@ void PipelineController::tick(){
         spm ? spm->isBusy() : false,
         sa->isBusy(),
         acc->isBusy(),
+        acc->getScratchpad() ? acc->getScratchpad()->isBusy() : false,
         sfu->isBusy(),
         gemv->isBusy()
     });

@@ -66,6 +66,7 @@ public:
     PerfFunctionalUnit* getUnit(UnitType name);
     HardWareUtilizationTracker* getUtilTracker() { return util_tracker; }
     Scratchpad* getSpm() { return spm; }
+    Scratchpad* getAccSram() { return acc->getScratchpad(); }
 };
 
 #endif

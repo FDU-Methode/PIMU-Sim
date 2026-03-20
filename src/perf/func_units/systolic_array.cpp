@@ -75,8 +75,8 @@ void SystolicArray::execute(){
     spm_rd2_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs1_reg_addr) & 0xFFFFFFFF);  // Activation/IFM Address
     spm_rd1_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs2_reg_addr) & 0xFFFFFFFF);  // Weight Address
 
-    spm_rd2_stride_bytes = cfg.systolic_array_size * cfg.sram_data_width / 8;
-    spm_rd1_stride_bytes = cfg.systolic_array_size * cfg.sram_data_width / 8;
+    spm_rd2_stride_bytes = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 48) & 0xFFFF);
+    spm_rd1_stride_bytes = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 48) & 0xFFFF);
 
     if(optype == 0) {  // GEMM
 
@@ -94,7 +94,7 @@ void SystolicArray::execute(){
         remaining_start_acc_cycles = col_num_a + col_num_b + 1;
 
         // Compute Read SPM Cycles
-        spm_rd1_remaining = remaining_start_acc_cycles;
+        spm_rd1_remaining = remaining_start_acc_cycles + 1;
         spm_rd2_remaining = remaining_cycles;
 
         logger.log("[SystolicArray] GEMM Start, A:%d*%d, B:%d*%d, remaining = %d, remaining start acc = %d", 

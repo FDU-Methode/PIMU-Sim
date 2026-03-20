@@ -212,8 +212,10 @@ void PerfNpuCore::tick(){
         outbox_.pop();
     }
 
-    // Set SPM Idle
+    // Set SPM && ACC SRAM Idle
     spm->clearPorts();
+    Scratchpad* acc_sram = pipeline_controller->getAccSram();
+    acc_sram->clearPorts();
 
     // 执行指令
     ExecuteStage();

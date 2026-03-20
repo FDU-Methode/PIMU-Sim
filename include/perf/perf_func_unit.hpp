@@ -1,9 +1,11 @@
 #ifndef _FUNC_UNIT_HPP__
 #define _FUNC_UNIT_HPP__
 
+#include <memory>
 #include "../util.hpp"
 #include "../logger.hpp"
 #include "../regfile.hpp"
+#include "scratchpad.hpp"
 
 class PerfSim;
 class PipelineController;
@@ -60,6 +62,9 @@ protected:
     bool mvout_start = false;
     MsgType expectedMsgType;
 
+    bool source = false;  // 0/1 for SPM/ACC
+    bool is_bias = false;
+
     bool resp_done = false;
 
     uint32_t spm_base_addr = 0;
@@ -115,13 +120,29 @@ public:
     void execute() override;
     void tick() override;
 
+    Scratchpad* getScratchpad() { return acc_sram.get(); }
+
 protected:
+    // ACC SRAM
+    std::unique_ptr<Scratchpad> acc_sram;
+
     bool matadd_start = false;
     bool sa_start = false;
+    uint8_t optype = 0;
+    bool is_bias = false;
     bool acc_dest = false;
+    int tail_cycles = 0;
     int total_cycles = 0;
+
+    uint32_t biaspsum_base_addr = 0;
     uint32_t sa_output_base_addr = 0;
+    uint32_t matadd_a_base_addr = 0;
+    uint32_t matadd_b_base_addr = 0;
     uint32_t matadd_output_base_addr = 0;
+    int sa_input_b_col_num = 0;
+    int biaspsum_stride = 0;
+    int sa_output_stride = 0;
+
     void completeInstruction() override;
 };
 

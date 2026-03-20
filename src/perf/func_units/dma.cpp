@@ -64,6 +64,8 @@ void DMA::tick(){
 
     Scratchpad* spm = controller->getSpm();
     assert(spm && "DMA requires a valid Scratchpad");
+    Scratchpad* acc_sram = controller->getAccSram();
+    assert(acc_sram && "DMA requires a valid ACC SRAM");
 
     if(current_burst_idx < burst_beat_plan.size()) {
         uint32_t spm_addr = spm_base_addr
@@ -72,9 +74,19 @@ void DMA::tick(){
 
         bool access_ok = false;
         if(mvin_start) {
-            access_ok = spm->WriteMemory(spm_addr);
+            if(source && !is_bias) {
+                access_ok = acc_sram->WriteMemory(spm_addr);
+            }
+            if(!source) {
+                access_ok = spm->WriteMemory(spm_addr);
+            }
         } else if(mvout_start) {
-            access_ok = spm->ReadMemory(spm_addr);
+            if(source) {
+                access_ok = acc_sram->ReadMemory(spm_addr);
+            }
+            if(!source) {
+                access_ok = spm->ReadMemory(spm_addr);
+            }
         }
 
         // Port conflict/backpressure: stall this beat and retry next cycle.
@@ -84,9 +96,17 @@ void DMA::tick(){
             if(util_tracker) {
                 if(mvin_start) {
                     util_tracker->addDdrReadBytes(axi_beat_bytes);
-                    util_tracker->addSpmWriteBytes(axi_beat_bytes);
+                    if(source && !is_bias) {
+                        util_tracker->addAccWriteBytes(axi_beat_bytes * cfg.acc_data_width / cfg.sram_data_width);
+                    } else if(!source) {
+                        util_tracker->addSpmWriteBytes(axi_beat_bytes);
+                    }
                 } else if(mvout_start) {
-                    util_tracker->addSpmReadBytes(axi_beat_bytes);
+                    if(source) {
+                        util_tracker->addAccReadBytes(axi_beat_bytes * cfg.acc_data_width / cfg.sram_data_width);
+                    } else {
+                        util_tracker->addSpmReadBytes(axi_beat_bytes);
+                    }
                     util_tracker->addDdrWriteBytes(axi_beat_bytes);
                 }
             }
@@ -151,6 +171,9 @@ void DMA::execute(){
 
     if(mvin_start && !mvout_start){
         req.type = MsgType::LD_REQ;
+        source = (regfile.read(regfile.config_mvin_rs1_reg_addr) >> 5) & 0x1;
+        is_bias = (regfile.read(regfile.config_mvin_rs1_reg_addr) >> 6) & 0x1;
+
         req.row_num = (int)((regfile.read(regfile.mvin_rs1_reg_addr) >> 32) & 0xFFFF);
         req.col_num = (int)((regfile.read(regfile.mvin_rs2_reg_addr) >> 32) & 0xFFFF);
         req.dram_stride = (int)((regfile.read(regfile.config_mvin_rs1_reg_addr) >> 48) & 0xFFFF);
@@ -177,6 +200,8 @@ void DMA::execute(){
 
     } else if(!mvin_start && mvout_start){
         req.type = MsgType::ST_REQ;
+        source = (regfile.read(regfile.config_mvout_rs1_reg_addr) >> 5) & 0x1;
+
         req.row_num = (int)((regfile.read(regfile.mvout_rs1_reg_addr) >> 32) & 0xFFFF);
         req.col_num = (int)((regfile.read(regfile.mvout_rs2_reg_addr) >> 32) & 0xFFFF);
         req.dram_stride = (int)((regfile.read(regfile.config_mvout_rs1_reg_addr) >> 48) & 0xFFFF);

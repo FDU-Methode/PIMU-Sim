@@ -18,7 +18,7 @@ enum class MsgType {
 };
 
 enum class UnitType {
-    DMA, SPM, SystolicArray, Accumulator, SFU, GEMV
+    DMA, SPM, SystolicArray, Accumulator, AccSram, SFU, GEMV
 };
 
 struct Message {
@@ -126,8 +126,9 @@ inline int UnitTypeToIndex(UnitType unit){
         case UnitType::SPM:           return 1;
         case UnitType::SystolicArray: return 2;
         case UnitType::Accumulator:   return 3;
-        case UnitType::SFU:           return 4;
-        case UnitType::GEMV:          return 5;
+        case UnitType::AccSram:       return 4;
+        case UnitType::SFU:           return 5;
+        case UnitType::GEMV:          return 6;
         default:                      throw std::invalid_argument("Unknown UnitType");
     }
 }
@@ -138,6 +139,7 @@ inline std::string UnitTypeToStr(UnitType unit){
         case UnitType::SPM:           return "SPM";
         case UnitType::SystolicArray: return "SystolicArray";
         case UnitType::Accumulator:   return "Accumulator";
+        case UnitType::AccSram:       return "AccSram";
         case UnitType::SFU:           return "SFU";
         case UnitType::GEMV:          return "GEMV";
         default:                      return "UNKNOWN";

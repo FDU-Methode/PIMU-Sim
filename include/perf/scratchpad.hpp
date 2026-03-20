@@ -12,6 +12,8 @@ protected:
 
     int sram_bytes = 0;
     int sram_ports = 0;
+    int sram_data_width = 0;
+    int sram_data_num = 0;
 
     enum State{
         IDLE,
@@ -22,6 +24,7 @@ protected:
 
 public:
     Scratchpad(Logger& logger, const Config& cfg);
+    Scratchpad(Logger& logger, const Config& cfg, int sram_bytes, int sram_ports, int sram_data_width, int sram_data_num);
     virtual ~Scratchpad() = default;
 
     bool isBusy()  { return (port_state[0] == BUSY) || (port_state[1] == BUSY); }
