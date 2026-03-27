@@ -67,15 +67,27 @@ protected:
 
     bool resp_done = false;
 
+    int axi_beat_bytes = 0;
+    int local_minus_dram_log2 = 0;
+
+    // DRAM side row geometry (byte domain)
+    uint32_t dram_base_addr = 0;
+    int dram_row_stride_bytes = 0;
+    int dram_row_payload_bytes = 0;
+
+    // Local memory side geometry (SPM/ACC byte domain)
     uint32_t spm_base_addr = 0;
     int spm_row_stride_bytes = 0;
-    int axi_beat_bytes = 0;
 
-    std::vector<int> row_beat_plan;
-    std::vector<int> burst_beat_plan;
+    // Transfer plans
+    std::vector<int> row_beat_plan;    // beats per row
+    std::vector<int> burst_beat_plan;  // AXI burst beats (split by 4KB and <=256 beats)
 
+    // Runtime cursors
     size_t current_row_idx = 0;
     int current_row_beat_idx = 0;
+    int current_row_dram_offset_bytes = 0;
+
     size_t current_burst_idx = 0;
     int current_burst_beats_remaining = 0;
 
