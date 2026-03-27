@@ -3,8 +3,8 @@ Creating Analytical DDR...
 ----------------------------------------------------
 Initializing Analytical DDR Model
   DDR Frequency: 3.200000 GHz
-  Base Latency: 45 in ddr cycles
-  Burst Size: 64 bytes
+  Base Latency: 45 (DDR cycles)
+  AXI Beat Bytes: 32
   DDR request queue depth: 8
 ----------------------------------------------------
 Creating NPU Core...
@@ -57,294 +57,413 @@ NPU Core is ticked at cycle 7
 ExecuteStage: 1
 ExecuteStage: start task execution
 [PipelineController] Configing MVIN instruction
-[DMA] MVIN: send LD_REQ, src_addr = 0x0, dst_addr = 0x0, row_num = 0, col_num = 4095, dram_stride = 4096, sram_stride = 4096, data_size = 1
+[DMA] MVIN: send LD_REQ, src=0x0 dst=0x0 rows=1 cols=4096 dram_stride=4096 sram_stride=4096 dram_bytes=1 local_bytes=1 dest=SPM quant=0
 [Core] push req to outbox, type = LD_REQ, src_addr = 0x0, dst_addr = 0x0
-[DMA] Send request to DDR, DMA set to busy
+[DMA] Send request to DDR, DMA set to busy (rows=1, bursts=2)
 
 [Core Cycle: 8]
 NPU Core is ticked at cycle 8
-[DDR] received request from core
+[DDR] received request from core, type=LD_REQ
 [Core] send req to DDR, type = LD_REQ, src_addr = 0x0, dst_addr = 0x0, row_num = 0, col_num = 4095, dram_stride = 4096, sram_stride = 4096, data_size = 1
 ExecuteStage: waiting for completion
-[DDR] start processing new request with 55 estimated remaining DDR cycles
-[DDR] processing request, remaining 54 cycles...
-[DDR] processing request, remaining 53 cycles...
-[DDR] processing request, remaining 52 cycles...
+[DDR] start request type=LD_REQ rows=1 cols=4096 beats=128 bursts=1 estimated_latency=174
+[DDR] start processing new request with 174 estimated remaining DDR cycles
+[DDR] processing request, remaining 173 cycles... (setup=0, base=45, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 172 cycles... (setup=0, base=44, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 171 cycles... (setup=0, base=43, gap=0, data=128, bresp=0)
 
 [Core Cycle: 9]
 NPU Core is ticked at cycle 9
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 51 cycles...
-[DDR] processing request, remaining 50 cycles...
-[DDR] processing request, remaining 49 cycles...
+[DDR] processing request, remaining 170 cycles... (setup=0, base=42, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 169 cycles... (setup=0, base=41, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 168 cycles... (setup=0, base=40, gap=0, data=128, bresp=0)
 
 [Core Cycle: 10]
 NPU Core is ticked at cycle 10
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 48 cycles...
-[DDR] processing request, remaining 47 cycles...
-[DDR] processing request, remaining 46 cycles...
+[DDR] processing request, remaining 167 cycles... (setup=0, base=39, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 166 cycles... (setup=0, base=38, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 165 cycles... (setup=0, base=37, gap=0, data=128, bresp=0)
 
 [Core Cycle: 11]
 NPU Core is ticked at cycle 11
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 45 cycles...
-[DDR] processing request, remaining 44 cycles...
-[DDR] processing request, remaining 43 cycles...
+[DDR] processing request, remaining 164 cycles... (setup=0, base=36, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 163 cycles... (setup=0, base=35, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 162 cycles... (setup=0, base=34, gap=0, data=128, bresp=0)
 
 [Core Cycle: 12]
 NPU Core is ticked at cycle 12
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 42 cycles...
-[DDR] processing request, remaining 41 cycles...
-[DDR] processing request, remaining 40 cycles...
+[DDR] processing request, remaining 161 cycles... (setup=0, base=33, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 160 cycles... (setup=0, base=32, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 159 cycles... (setup=0, base=31, gap=0, data=128, bresp=0)
 
 [Core Cycle: 13]
 NPU Core is ticked at cycle 13
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 39 cycles...
-[DDR] processing request, remaining 38 cycles...
-[DDR] processing request, remaining 37 cycles...
-[DDR] processing request, remaining 36 cycles...
+[DDR] processing request, remaining 158 cycles... (setup=0, base=30, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 157 cycles... (setup=0, base=29, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 156 cycles... (setup=0, base=28, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 155 cycles... (setup=0, base=27, gap=0, data=128, bresp=0)
 
 [Core Cycle: 14]
 NPU Core is ticked at cycle 14
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 35 cycles...
-[DDR] processing request, remaining 34 cycles...
-[DDR] processing request, remaining 33 cycles...
+[DDR] processing request, remaining 154 cycles... (setup=0, base=26, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 153 cycles... (setup=0, base=25, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 152 cycles... (setup=0, base=24, gap=0, data=128, bresp=0)
 
 [Core Cycle: 15]
 NPU Core is ticked at cycle 15
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 32 cycles...
-[DDR] processing request, remaining 31 cycles...
-[DDR] processing request, remaining 30 cycles...
+[DDR] processing request, remaining 151 cycles... (setup=0, base=23, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 150 cycles... (setup=0, base=22, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 149 cycles... (setup=0, base=21, gap=0, data=128, bresp=0)
 
 [Core Cycle: 16]
 NPU Core is ticked at cycle 16
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 29 cycles...
-[DDR] processing request, remaining 28 cycles...
-[DDR] processing request, remaining 27 cycles...
+[DDR] processing request, remaining 148 cycles... (setup=0, base=20, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 147 cycles... (setup=0, base=19, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 146 cycles... (setup=0, base=18, gap=0, data=128, bresp=0)
 
 [Core Cycle: 17]
 NPU Core is ticked at cycle 17
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 26 cycles...
-[DDR] processing request, remaining 25 cycles...
-[DDR] processing request, remaining 24 cycles...
-[DDR] processing request, remaining 23 cycles...
+[DDR] processing request, remaining 145 cycles... (setup=0, base=17, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 144 cycles... (setup=0, base=16, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 143 cycles... (setup=0, base=15, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 142 cycles... (setup=0, base=14, gap=0, data=128, bresp=0)
 
 [Core Cycle: 18]
 NPU Core is ticked at cycle 18
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 22 cycles...
-[DDR] processing request, remaining 21 cycles...
-[DDR] processing request, remaining 20 cycles...
+[DDR] processing request, remaining 141 cycles... (setup=0, base=13, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 140 cycles... (setup=0, base=12, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 139 cycles... (setup=0, base=11, gap=0, data=128, bresp=0)
 
 [Core Cycle: 19]
 NPU Core is ticked at cycle 19
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 19 cycles...
-[DDR] processing request, remaining 18 cycles...
-[DDR] processing request, remaining 17 cycles...
+[DDR] processing request, remaining 138 cycles... (setup=0, base=10, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 137 cycles... (setup=0, base=9, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 136 cycles... (setup=0, base=8, gap=0, data=128, bresp=0)
 
 [Core Cycle: 20]
 NPU Core is ticked at cycle 20
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 16 cycles...
-[DDR] processing request, remaining 15 cycles...
-[DDR] processing request, remaining 14 cycles...
+[DDR] processing request, remaining 135 cycles... (setup=0, base=7, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 134 cycles... (setup=0, base=6, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 133 cycles... (setup=0, base=5, gap=0, data=128, bresp=0)
 
 [Core Cycle: 21]
 NPU Core is ticked at cycle 21
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 13 cycles...
-[DDR] processing request, remaining 12 cycles...
-[DDR] processing request, remaining 11 cycles...
+[DDR] processing request, remaining 132 cycles... (setup=0, base=4, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 131 cycles... (setup=0, base=3, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 130 cycles... (setup=0, base=2, gap=0, data=128, bresp=0)
 
 [Core Cycle: 22]
 NPU Core is ticked at cycle 22
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 10 cycles...
-[DDR] processing request, remaining 9 cycles...
-[DDR] processing request, remaining 8 cycles...
-[DDR] processing request, remaining 7 cycles...
+[DDR] processing request, remaining 129 cycles... (setup=0, base=1, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 128 cycles... (setup=0, base=0, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 127 cycles... (setup=0, base=0, gap=0, data=127, bresp=0)
+[DDR] processing request, remaining 126 cycles... (setup=0, base=0, gap=0, data=126, bresp=0)
 
 [Core Cycle: 23]
 NPU Core is ticked at cycle 23
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 6 cycles...
-[DDR] processing request, remaining 5 cycles...
-[DDR] processing request, remaining 4 cycles...
+[DDR] processing request, remaining 125 cycles... (setup=0, base=0, gap=0, data=125, bresp=0)
+[DDR] processing request, remaining 124 cycles... (setup=0, base=0, gap=0, data=124, bresp=0)
+[DDR] processing request, remaining 123 cycles... (setup=0, base=0, gap=0, data=123, bresp=0)
 
 [Core Cycle: 24]
 NPU Core is ticked at cycle 24
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 3 cycles...
-[DDR] processing request, remaining 2 cycles...
-[DDR] processing request, remaining 1 cycles...
+[DDR] processing request, remaining 122 cycles... (setup=0, base=0, gap=0, data=122, bresp=0)
+[DDR] processing request, remaining 121 cycles... (setup=0, base=0, gap=0, data=121, bresp=0)
+[DDR] processing request, remaining 120 cycles... (setup=0, base=0, gap=0, data=120, bresp=0)
 
 [Core Cycle: 25]
 NPU Core is ticked at cycle 25
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 0 cycles...
-[DDR] finish processing current request
-[Core] push resp into inbox, type = LD_RESP, src_addr = 0x0, dst_addr = 0x0
+[DDR] processing request, remaining 119 cycles... (setup=0, base=0, gap=0, data=119, bresp=0)
+[DDR] processing request, remaining 118 cycles... (setup=0, base=0, gap=0, data=118, bresp=0)
+[DDR] processing request, remaining 117 cycles... (setup=0, base=0, gap=0, data=117, bresp=0)
 
 [Core Cycle: 26]
 NPU Core is ticked at cycle 26
 ExecuteStage: waiting for completion
-[DMA] get expected resp type = LD_RESP
+[DDR] processing request, remaining 116 cycles... (setup=0, base=0, gap=0, data=116, bresp=0)
+[DDR] processing request, remaining 115 cycles... (setup=0, base=0, gap=0, data=115, bresp=0)
+[DDR] processing request, remaining 114 cycles... (setup=0, base=0, gap=0, data=114, bresp=0)
+[DDR] processing request, remaining 113 cycles... (setup=0, base=0, gap=0, data=113, bresp=0)
 
 [Core Cycle: 27]
 NPU Core is ticked at cycle 27
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 112 cycles... (setup=0, base=0, gap=0, data=112, bresp=0)
+[DDR] processing request, remaining 111 cycles... (setup=0, base=0, gap=0, data=111, bresp=0)
+[DDR] processing request, remaining 110 cycles... (setup=0, base=0, gap=0, data=110, bresp=0)
 
 [Core Cycle: 28]
 NPU Core is ticked at cycle 28
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 109 cycles... (setup=0, base=0, gap=0, data=109, bresp=0)
+[DDR] processing request, remaining 108 cycles... (setup=0, base=0, gap=0, data=108, bresp=0)
+[DDR] processing request, remaining 107 cycles... (setup=0, base=0, gap=0, data=107, bresp=0)
 
 [Core Cycle: 29]
 NPU Core is ticked at cycle 29
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 106 cycles... (setup=0, base=0, gap=0, data=106, bresp=0)
+[DDR] processing request, remaining 105 cycles... (setup=0, base=0, gap=0, data=105, bresp=0)
+[DDR] processing request, remaining 104 cycles... (setup=0, base=0, gap=0, data=104, bresp=0)
 
 [Core Cycle: 30]
 NPU Core is ticked at cycle 30
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 103 cycles... (setup=0, base=0, gap=0, data=103, bresp=0)
+[DDR] processing request, remaining 102 cycles... (setup=0, base=0, gap=0, data=102, bresp=0)
+[DDR] processing request, remaining 101 cycles... (setup=0, base=0, gap=0, data=101, bresp=0)
 
 [Core Cycle: 31]
 NPU Core is ticked at cycle 31
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 100 cycles... (setup=0, base=0, gap=0, data=100, bresp=0)
+[DDR] processing request, remaining 99 cycles... (setup=0, base=0, gap=0, data=99, bresp=0)
+[DDR] processing request, remaining 98 cycles... (setup=0, base=0, gap=0, data=98, bresp=0)
+[DDR] processing request, remaining 97 cycles... (setup=0, base=0, gap=0, data=97, bresp=0)
 
 [Core Cycle: 32]
 NPU Core is ticked at cycle 32
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 96 cycles... (setup=0, base=0, gap=0, data=96, bresp=0)
+[DDR] processing request, remaining 95 cycles... (setup=0, base=0, gap=0, data=95, bresp=0)
+[DDR] processing request, remaining 94 cycles... (setup=0, base=0, gap=0, data=94, bresp=0)
 
 [Core Cycle: 33]
 NPU Core is ticked at cycle 33
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 93 cycles... (setup=0, base=0, gap=0, data=93, bresp=0)
+[DDR] processing request, remaining 92 cycles... (setup=0, base=0, gap=0, data=92, bresp=0)
+[DDR] processing request, remaining 91 cycles... (setup=0, base=0, gap=0, data=91, bresp=0)
 
 [Core Cycle: 34]
 NPU Core is ticked at cycle 34
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 90 cycles... (setup=0, base=0, gap=0, data=90, bresp=0)
+[DDR] processing request, remaining 89 cycles... (setup=0, base=0, gap=0, data=89, bresp=0)
+[DDR] processing request, remaining 88 cycles... (setup=0, base=0, gap=0, data=88, bresp=0)
 
 [Core Cycle: 35]
 NPU Core is ticked at cycle 35
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 87 cycles... (setup=0, base=0, gap=0, data=87, bresp=0)
+[DDR] processing request, remaining 86 cycles... (setup=0, base=0, gap=0, data=86, bresp=0)
+[DDR] processing request, remaining 85 cycles... (setup=0, base=0, gap=0, data=85, bresp=0)
+[DDR] processing request, remaining 84 cycles... (setup=0, base=0, gap=0, data=84, bresp=0)
 
 [Core Cycle: 36]
 NPU Core is ticked at cycle 36
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 83 cycles... (setup=0, base=0, gap=0, data=83, bresp=0)
+[DDR] processing request, remaining 82 cycles... (setup=0, base=0, gap=0, data=82, bresp=0)
+[DDR] processing request, remaining 81 cycles... (setup=0, base=0, gap=0, data=81, bresp=0)
 
 [Core Cycle: 37]
 NPU Core is ticked at cycle 37
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 80 cycles... (setup=0, base=0, gap=0, data=80, bresp=0)
+[DDR] processing request, remaining 79 cycles... (setup=0, base=0, gap=0, data=79, bresp=0)
+[DDR] processing request, remaining 78 cycles... (setup=0, base=0, gap=0, data=78, bresp=0)
 
 [Core Cycle: 38]
 NPU Core is ticked at cycle 38
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 77 cycles... (setup=0, base=0, gap=0, data=77, bresp=0)
+[DDR] processing request, remaining 76 cycles... (setup=0, base=0, gap=0, data=76, bresp=0)
+[DDR] processing request, remaining 75 cycles... (setup=0, base=0, gap=0, data=75, bresp=0)
 
 [Core Cycle: 39]
 NPU Core is ticked at cycle 39
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 74 cycles... (setup=0, base=0, gap=0, data=74, bresp=0)
+[DDR] processing request, remaining 73 cycles... (setup=0, base=0, gap=0, data=73, bresp=0)
+[DDR] processing request, remaining 72 cycles... (setup=0, base=0, gap=0, data=72, bresp=0)
+[DDR] processing request, remaining 71 cycles... (setup=0, base=0, gap=0, data=71, bresp=0)
 
 [Core Cycle: 40]
 NPU Core is ticked at cycle 40
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 70 cycles... (setup=0, base=0, gap=0, data=70, bresp=0)
+[DDR] processing request, remaining 69 cycles... (setup=0, base=0, gap=0, data=69, bresp=0)
+[DDR] processing request, remaining 68 cycles... (setup=0, base=0, gap=0, data=68, bresp=0)
 
 [Core Cycle: 41]
 NPU Core is ticked at cycle 41
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 67 cycles... (setup=0, base=0, gap=0, data=67, bresp=0)
+[DDR] processing request, remaining 66 cycles... (setup=0, base=0, gap=0, data=66, bresp=0)
+[DDR] processing request, remaining 65 cycles... (setup=0, base=0, gap=0, data=65, bresp=0)
 
 [Core Cycle: 42]
 NPU Core is ticked at cycle 42
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 64 cycles... (setup=0, base=0, gap=0, data=64, bresp=0)
+[DDR] processing request, remaining 63 cycles... (setup=0, base=0, gap=0, data=63, bresp=0)
+[DDR] processing request, remaining 62 cycles... (setup=0, base=0, gap=0, data=62, bresp=0)
 
 [Core Cycle: 43]
 NPU Core is ticked at cycle 43
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 61 cycles... (setup=0, base=0, gap=0, data=61, bresp=0)
+[DDR] processing request, remaining 60 cycles... (setup=0, base=0, gap=0, data=60, bresp=0)
+[DDR] processing request, remaining 59 cycles... (setup=0, base=0, gap=0, data=59, bresp=0)
 
 [Core Cycle: 44]
 NPU Core is ticked at cycle 44
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 58 cycles... (setup=0, base=0, gap=0, data=58, bresp=0)
+[DDR] processing request, remaining 57 cycles... (setup=0, base=0, gap=0, data=57, bresp=0)
+[DDR] processing request, remaining 56 cycles... (setup=0, base=0, gap=0, data=56, bresp=0)
+[DDR] processing request, remaining 55 cycles... (setup=0, base=0, gap=0, data=55, bresp=0)
 
 [Core Cycle: 45]
 NPU Core is ticked at cycle 45
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 54 cycles... (setup=0, base=0, gap=0, data=54, bresp=0)
+[DDR] processing request, remaining 53 cycles... (setup=0, base=0, gap=0, data=53, bresp=0)
+[DDR] processing request, remaining 52 cycles... (setup=0, base=0, gap=0, data=52, bresp=0)
 
 [Core Cycle: 46]
 NPU Core is ticked at cycle 46
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 51 cycles... (setup=0, base=0, gap=0, data=51, bresp=0)
+[DDR] processing request, remaining 50 cycles... (setup=0, base=0, gap=0, data=50, bresp=0)
+[DDR] processing request, remaining 49 cycles... (setup=0, base=0, gap=0, data=49, bresp=0)
 
 [Core Cycle: 47]
 NPU Core is ticked at cycle 47
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 48 cycles... (setup=0, base=0, gap=0, data=48, bresp=0)
+[DDR] processing request, remaining 47 cycles... (setup=0, base=0, gap=0, data=47, bresp=0)
+[DDR] processing request, remaining 46 cycles... (setup=0, base=0, gap=0, data=46, bresp=0)
 
 [Core Cycle: 48]
 NPU Core is ticked at cycle 48
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 45 cycles... (setup=0, base=0, gap=0, data=45, bresp=0)
+[DDR] processing request, remaining 44 cycles... (setup=0, base=0, gap=0, data=44, bresp=0)
+[DDR] processing request, remaining 43 cycles... (setup=0, base=0, gap=0, data=43, bresp=0)
+[DDR] processing request, remaining 42 cycles... (setup=0, base=0, gap=0, data=42, bresp=0)
 
 [Core Cycle: 49]
 NPU Core is ticked at cycle 49
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 41 cycles... (setup=0, base=0, gap=0, data=41, bresp=0)
+[DDR] processing request, remaining 40 cycles... (setup=0, base=0, gap=0, data=40, bresp=0)
+[DDR] processing request, remaining 39 cycles... (setup=0, base=0, gap=0, data=39, bresp=0)
 
 [Core Cycle: 50]
 NPU Core is ticked at cycle 50
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 38 cycles... (setup=0, base=0, gap=0, data=38, bresp=0)
+[DDR] processing request, remaining 37 cycles... (setup=0, base=0, gap=0, data=37, bresp=0)
+[DDR] processing request, remaining 36 cycles... (setup=0, base=0, gap=0, data=36, bresp=0)
 
 [Core Cycle: 51]
 NPU Core is ticked at cycle 51
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 35 cycles... (setup=0, base=0, gap=0, data=35, bresp=0)
+[DDR] processing request, remaining 34 cycles... (setup=0, base=0, gap=0, data=34, bresp=0)
+[DDR] processing request, remaining 33 cycles... (setup=0, base=0, gap=0, data=33, bresp=0)
 
 [Core Cycle: 52]
 NPU Core is ticked at cycle 52
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 32 cycles... (setup=0, base=0, gap=0, data=32, bresp=0)
+[DDR] processing request, remaining 31 cycles... (setup=0, base=0, gap=0, data=31, bresp=0)
+[DDR] processing request, remaining 30 cycles... (setup=0, base=0, gap=0, data=30, bresp=0)
 
 [Core Cycle: 53]
 NPU Core is ticked at cycle 53
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 29 cycles... (setup=0, base=0, gap=0, data=29, bresp=0)
+[DDR] processing request, remaining 28 cycles... (setup=0, base=0, gap=0, data=28, bresp=0)
+[DDR] processing request, remaining 27 cycles... (setup=0, base=0, gap=0, data=27, bresp=0)
+[DDR] processing request, remaining 26 cycles... (setup=0, base=0, gap=0, data=26, bresp=0)
 
 [Core Cycle: 54]
 NPU Core is ticked at cycle 54
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 25 cycles... (setup=0, base=0, gap=0, data=25, bresp=0)
+[DDR] processing request, remaining 24 cycles... (setup=0, base=0, gap=0, data=24, bresp=0)
+[DDR] processing request, remaining 23 cycles... (setup=0, base=0, gap=0, data=23, bresp=0)
 
 [Core Cycle: 55]
 NPU Core is ticked at cycle 55
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 22 cycles... (setup=0, base=0, gap=0, data=22, bresp=0)
+[DDR] processing request, remaining 21 cycles... (setup=0, base=0, gap=0, data=21, bresp=0)
+[DDR] processing request, remaining 20 cycles... (setup=0, base=0, gap=0, data=20, bresp=0)
 
 [Core Cycle: 56]
 NPU Core is ticked at cycle 56
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 19 cycles... (setup=0, base=0, gap=0, data=19, bresp=0)
+[DDR] processing request, remaining 18 cycles... (setup=0, base=0, gap=0, data=18, bresp=0)
+[DDR] processing request, remaining 17 cycles... (setup=0, base=0, gap=0, data=17, bresp=0)
 
 [Core Cycle: 57]
 NPU Core is ticked at cycle 57
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 16 cycles... (setup=0, base=0, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 15 cycles... (setup=0, base=0, gap=0, data=15, bresp=0)
+[DDR] processing request, remaining 14 cycles... (setup=0, base=0, gap=0, data=14, bresp=0)
+[DDR] processing request, remaining 13 cycles... (setup=0, base=0, gap=0, data=13, bresp=0)
 
 [Core Cycle: 58]
 NPU Core is ticked at cycle 58
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 12 cycles... (setup=0, base=0, gap=0, data=12, bresp=0)
+[DDR] processing request, remaining 11 cycles... (setup=0, base=0, gap=0, data=11, bresp=0)
+[DDR] processing request, remaining 10 cycles... (setup=0, base=0, gap=0, data=10, bresp=0)
 
 [Core Cycle: 59]
 NPU Core is ticked at cycle 59
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 9 cycles... (setup=0, base=0, gap=0, data=9, bresp=0)
+[DDR] processing request, remaining 8 cycles... (setup=0, base=0, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 7 cycles... (setup=0, base=0, gap=0, data=7, bresp=0)
 
 [Core Cycle: 60]
 NPU Core is ticked at cycle 60
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 6 cycles... (setup=0, base=0, gap=0, data=6, bresp=0)
+[DDR] processing request, remaining 5 cycles... (setup=0, base=0, gap=0, data=5, bresp=0)
+[DDR] processing request, remaining 4 cycles... (setup=0, base=0, gap=0, data=4, bresp=0)
 
 [Core Cycle: 61]
 NPU Core is ticked at cycle 61
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 3 cycles... (setup=0, base=0, gap=0, data=3, bresp=0)
+[DDR] processing request, remaining 2 cycles... (setup=0, base=0, gap=0, data=2, bresp=0)
+[DDR] processing request, remaining 1 cycles... (setup=0, base=0, gap=0, data=1, bresp=0)
 
 [Core Cycle: 62]
 NPU Core is ticked at cycle 62
 ExecuteStage: waiting for completion
+[DDR] finish request, send LD_RESP
+[Core] push resp into inbox, type = LD_RESP, src_addr = 0x0, dst_addr = 0x0
 
 [Core Cycle: 63]
 NPU Core is ticked at cycle 63
 ExecuteStage: waiting for completion
+[DMA] get expected resp type = LD_RESP
 
 [Core Cycle: 64]
 NPU Core is ticked at cycle 64
@@ -633,321 +752,459 @@ ExecuteStage: waiting for completion
 [Core Cycle: 135]
 NPU Core is ticked at cycle 135
 ExecuteStage: waiting for completion
-[DMA] DDR response and SPM transfer both completed, DMA complete
-[DMA] ISR Reg[0] Updated
-  [PipelineController] DMA module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 135
-  Write IPR Reg addr: 0xd8, Data: 0x1
-Simulator Detectes an irq signal at cycle 136
-  IPR Reg matches expected opcode 1
 
 [Core Cycle: 136]
 NPU Core is ticked at cycle 136
-UpdataRegStage: IAR received for bits [0]
-IRQ signal successfully cleared at cycle 137
+ExecuteStage: waiting for completion
+[DMA] DDR response and local transfer both completed, DMA complete
+[DMA] ISR Reg[0] Updated
+  [PipelineController] DMA module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 136
+  Write IPR Reg addr: 0xd8, Data: 0x1
+Simulator Detectes an irq signal at cycle 137
+  IPR Reg matches expected opcode 1
 
 [Core Cycle: 137]
 NPU Core is ticked at cycle 137
-WriteRegStage: Write Reg addr: 0x0, Data: 0x1000
+UpdataRegStage: IAR received for bits [0]
+IRQ signal successfully cleared at cycle 138
 
 [Core Cycle: 138]
 NPU Core is ticked at cycle 138
-WriteRegStage: Write Reg addr: 0x8, Data: 0x3ff00000000
+WriteRegStage: Write Reg addr: 0x0, Data: 0x1000
 
 [Core Cycle: 139]
 NPU Core is ticked at cycle 139
-WriteRegStage: Write Reg addr: 0x20, Data: 0x400040000000026
+WriteRegStage: Write Reg addr: 0x8, Data: 0x3ff00000000
 
 [Core Cycle: 140]
 NPU Core is ticked at cycle 140
-WriteRegStage: Write Reg addr: 0x28, Data: 0x100000000
+WriteRegStage: Write Reg addr: 0x20, Data: 0x400040000000026
 
 [Core Cycle: 141]
 NPU Core is ticked at cycle 141
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x1
+WriteRegStage: Write Reg addr: 0x28, Data: 0x100000000
 
 [Core Cycle: 142]
 NPU Core is ticked at cycle 142
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x1
 
 [Core Cycle: 143]
 NPU Core is ticked at cycle 143
-ExecuteStage: 1
-ExecuteStage: start task execution
-[PipelineController] Configing MVIN instruction
-[DMA] MVIN: send LD_REQ, src_addr = 0x1000, dst_addr = 0x0, row_num = 0, col_num = 1023, dram_stride = 1024, sram_stride = 1024, data_size = 1
-[Core] push req to outbox, type = LD_REQ, src_addr = 0x1000, dst_addr = 0x0
-[DMA] Send request to DDR, DMA set to busy
 
 [Core Cycle: 144]
 NPU Core is ticked at cycle 144
-[DDR] received request from core
-[Core] send req to DDR, type = LD_REQ, src_addr = 0x1000, dst_addr = 0x0, row_num = 0, col_num = 1023, dram_stride = 1024, sram_stride = 1024, data_size = 1
-ExecuteStage: waiting for completion
-[DDR] start processing new request with 25 estimated remaining DDR cycles
-[DDR] processing request, remaining 24 cycles...
-[DDR] processing request, remaining 23 cycles...
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing MVIN instruction
+[DMA] MVIN: send LD_REQ, src=0x1000 dst=0x0 rows=1 cols=1024 dram_stride=1024 sram_stride=1024 dram_bytes=4 local_bytes=4 dest=ACC quant=0
+[Core] push req to outbox, type = LD_REQ, src_addr = 0x1000, dst_addr = 0x0
+[DMA] Send request to DDR, DMA set to busy (rows=1, bursts=2)
 
 [Core Cycle: 145]
 NPU Core is ticked at cycle 145
+[DDR] received request from core, type=LD_REQ
+[Core] send req to DDR, type = LD_REQ, src_addr = 0x1000, dst_addr = 0x0, row_num = 0, col_num = 1023, dram_stride = 1024, sram_stride = 1024, data_size = 4
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 22 cycles...
-[DDR] processing request, remaining 21 cycles...
-[DDR] processing request, remaining 20 cycles...
+[DDR] start request type=LD_REQ rows=1 cols=1024 beats=128 bursts=1 estimated_latency=174
+[DDR] start processing new request with 174 estimated remaining DDR cycles
+[DDR] processing request, remaining 173 cycles... (setup=0, base=45, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 172 cycles... (setup=0, base=44, gap=0, data=128, bresp=0)
 
 [Core Cycle: 146]
 NPU Core is ticked at cycle 146
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 19 cycles...
-[DDR] processing request, remaining 18 cycles...
-[DDR] processing request, remaining 17 cycles...
-[DDR] processing request, remaining 16 cycles...
+[DDR] processing request, remaining 171 cycles... (setup=0, base=43, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 170 cycles... (setup=0, base=42, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 169 cycles... (setup=0, base=41, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 168 cycles... (setup=0, base=40, gap=0, data=128, bresp=0)
 
 [Core Cycle: 147]
 NPU Core is ticked at cycle 147
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 15 cycles...
-[DDR] processing request, remaining 14 cycles...
-[DDR] processing request, remaining 13 cycles...
+[DDR] processing request, remaining 167 cycles... (setup=0, base=39, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 166 cycles... (setup=0, base=38, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 165 cycles... (setup=0, base=37, gap=0, data=128, bresp=0)
 
 [Core Cycle: 148]
 NPU Core is ticked at cycle 148
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 12 cycles...
-[DDR] processing request, remaining 11 cycles...
-[DDR] processing request, remaining 10 cycles...
+[DDR] processing request, remaining 164 cycles... (setup=0, base=36, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 163 cycles... (setup=0, base=35, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 162 cycles... (setup=0, base=34, gap=0, data=128, bresp=0)
 
 [Core Cycle: 149]
 NPU Core is ticked at cycle 149
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 9 cycles...
-[DDR] processing request, remaining 8 cycles...
-[DDR] processing request, remaining 7 cycles...
+[DDR] processing request, remaining 161 cycles... (setup=0, base=33, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 160 cycles... (setup=0, base=32, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 159 cycles... (setup=0, base=31, gap=0, data=128, bresp=0)
 
 [Core Cycle: 150]
 NPU Core is ticked at cycle 150
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 6 cycles...
-[DDR] processing request, remaining 5 cycles...
-[DDR] processing request, remaining 4 cycles...
-[DDR] processing request, remaining 3 cycles...
+[DDR] processing request, remaining 158 cycles... (setup=0, base=30, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 157 cycles... (setup=0, base=29, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 156 cycles... (setup=0, base=28, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 155 cycles... (setup=0, base=27, gap=0, data=128, bresp=0)
 
 [Core Cycle: 151]
 NPU Core is ticked at cycle 151
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 2 cycles...
-[DDR] processing request, remaining 1 cycles...
-[DDR] processing request, remaining 0 cycles...
-[DDR] finish processing current request
-[Core] push resp into inbox, type = LD_RESP, src_addr = 0x1000, dst_addr = 0x0
+[DDR] processing request, remaining 154 cycles... (setup=0, base=26, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 153 cycles... (setup=0, base=25, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 152 cycles... (setup=0, base=24, gap=0, data=128, bresp=0)
 
 [Core Cycle: 152]
 NPU Core is ticked at cycle 152
 ExecuteStage: waiting for completion
-[DMA] get expected resp type = LD_RESP
+[DDR] processing request, remaining 151 cycles... (setup=0, base=23, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 150 cycles... (setup=0, base=22, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 149 cycles... (setup=0, base=21, gap=0, data=128, bresp=0)
 
 [Core Cycle: 153]
 NPU Core is ticked at cycle 153
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 148 cycles... (setup=0, base=20, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 147 cycles... (setup=0, base=19, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 146 cycles... (setup=0, base=18, gap=0, data=128, bresp=0)
 
 [Core Cycle: 154]
 NPU Core is ticked at cycle 154
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 145 cycles... (setup=0, base=17, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 144 cycles... (setup=0, base=16, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 143 cycles... (setup=0, base=15, gap=0, data=128, bresp=0)
 
 [Core Cycle: 155]
 NPU Core is ticked at cycle 155
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 142 cycles... (setup=0, base=14, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 141 cycles... (setup=0, base=13, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 140 cycles... (setup=0, base=12, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 139 cycles... (setup=0, base=11, gap=0, data=128, bresp=0)
 
 [Core Cycle: 156]
 NPU Core is ticked at cycle 156
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 138 cycles... (setup=0, base=10, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 137 cycles... (setup=0, base=9, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 136 cycles... (setup=0, base=8, gap=0, data=128, bresp=0)
 
 [Core Cycle: 157]
 NPU Core is ticked at cycle 157
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 135 cycles... (setup=0, base=7, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 134 cycles... (setup=0, base=6, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 133 cycles... (setup=0, base=5, gap=0, data=128, bresp=0)
 
 [Core Cycle: 158]
 NPU Core is ticked at cycle 158
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 132 cycles... (setup=0, base=4, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 131 cycles... (setup=0, base=3, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 130 cycles... (setup=0, base=2, gap=0, data=128, bresp=0)
 
 [Core Cycle: 159]
 NPU Core is ticked at cycle 159
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 129 cycles... (setup=0, base=1, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 128 cycles... (setup=0, base=0, gap=0, data=128, bresp=0)
+[DDR] processing request, remaining 127 cycles... (setup=0, base=0, gap=0, data=127, bresp=0)
+[DDR] processing request, remaining 126 cycles... (setup=0, base=0, gap=0, data=126, bresp=0)
 
 [Core Cycle: 160]
 NPU Core is ticked at cycle 160
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 125 cycles... (setup=0, base=0, gap=0, data=125, bresp=0)
+[DDR] processing request, remaining 124 cycles... (setup=0, base=0, gap=0, data=124, bresp=0)
+[DDR] processing request, remaining 123 cycles... (setup=0, base=0, gap=0, data=123, bresp=0)
 
 [Core Cycle: 161]
 NPU Core is ticked at cycle 161
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 122 cycles... (setup=0, base=0, gap=0, data=122, bresp=0)
+[DDR] processing request, remaining 121 cycles... (setup=0, base=0, gap=0, data=121, bresp=0)
+[DDR] processing request, remaining 120 cycles... (setup=0, base=0, gap=0, data=120, bresp=0)
 
 [Core Cycle: 162]
 NPU Core is ticked at cycle 162
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 119 cycles... (setup=0, base=0, gap=0, data=119, bresp=0)
+[DDR] processing request, remaining 118 cycles... (setup=0, base=0, gap=0, data=118, bresp=0)
+[DDR] processing request, remaining 117 cycles... (setup=0, base=0, gap=0, data=117, bresp=0)
 
 [Core Cycle: 163]
 NPU Core is ticked at cycle 163
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 116 cycles... (setup=0, base=0, gap=0, data=116, bresp=0)
+[DDR] processing request, remaining 115 cycles... (setup=0, base=0, gap=0, data=115, bresp=0)
+[DDR] processing request, remaining 114 cycles... (setup=0, base=0, gap=0, data=114, bresp=0)
+[DDR] processing request, remaining 113 cycles... (setup=0, base=0, gap=0, data=113, bresp=0)
 
 [Core Cycle: 164]
 NPU Core is ticked at cycle 164
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 112 cycles... (setup=0, base=0, gap=0, data=112, bresp=0)
+[DDR] processing request, remaining 111 cycles... (setup=0, base=0, gap=0, data=111, bresp=0)
+[DDR] processing request, remaining 110 cycles... (setup=0, base=0, gap=0, data=110, bresp=0)
 
 [Core Cycle: 165]
 NPU Core is ticked at cycle 165
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 109 cycles... (setup=0, base=0, gap=0, data=109, bresp=0)
+[DDR] processing request, remaining 108 cycles... (setup=0, base=0, gap=0, data=108, bresp=0)
+[DDR] processing request, remaining 107 cycles... (setup=0, base=0, gap=0, data=107, bresp=0)
 
 [Core Cycle: 166]
 NPU Core is ticked at cycle 166
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 106 cycles... (setup=0, base=0, gap=0, data=106, bresp=0)
+[DDR] processing request, remaining 105 cycles... (setup=0, base=0, gap=0, data=105, bresp=0)
+[DDR] processing request, remaining 104 cycles... (setup=0, base=0, gap=0, data=104, bresp=0)
 
 [Core Cycle: 167]
 NPU Core is ticked at cycle 167
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 103 cycles... (setup=0, base=0, gap=0, data=103, bresp=0)
+[DDR] processing request, remaining 102 cycles... (setup=0, base=0, gap=0, data=102, bresp=0)
+[DDR] processing request, remaining 101 cycles... (setup=0, base=0, gap=0, data=101, bresp=0)
 
 [Core Cycle: 168]
 NPU Core is ticked at cycle 168
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 100 cycles... (setup=0, base=0, gap=0, data=100, bresp=0)
+[DDR] processing request, remaining 99 cycles... (setup=0, base=0, gap=0, data=99, bresp=0)
+[DDR] processing request, remaining 98 cycles... (setup=0, base=0, gap=0, data=98, bresp=0)
+[DDR] processing request, remaining 97 cycles... (setup=0, base=0, gap=0, data=97, bresp=0)
 
 [Core Cycle: 169]
 NPU Core is ticked at cycle 169
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 96 cycles... (setup=0, base=0, gap=0, data=96, bresp=0)
+[DDR] processing request, remaining 95 cycles... (setup=0, base=0, gap=0, data=95, bresp=0)
+[DDR] processing request, remaining 94 cycles... (setup=0, base=0, gap=0, data=94, bresp=0)
 
 [Core Cycle: 170]
 NPU Core is ticked at cycle 170
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 93 cycles... (setup=0, base=0, gap=0, data=93, bresp=0)
+[DDR] processing request, remaining 92 cycles... (setup=0, base=0, gap=0, data=92, bresp=0)
+[DDR] processing request, remaining 91 cycles... (setup=0, base=0, gap=0, data=91, bresp=0)
 
 [Core Cycle: 171]
 NPU Core is ticked at cycle 171
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 90 cycles... (setup=0, base=0, gap=0, data=90, bresp=0)
+[DDR] processing request, remaining 89 cycles... (setup=0, base=0, gap=0, data=89, bresp=0)
+[DDR] processing request, remaining 88 cycles... (setup=0, base=0, gap=0, data=88, bresp=0)
 
 [Core Cycle: 172]
 NPU Core is ticked at cycle 172
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 87 cycles... (setup=0, base=0, gap=0, data=87, bresp=0)
+[DDR] processing request, remaining 86 cycles... (setup=0, base=0, gap=0, data=86, bresp=0)
+[DDR] processing request, remaining 85 cycles... (setup=0, base=0, gap=0, data=85, bresp=0)
+[DDR] processing request, remaining 84 cycles... (setup=0, base=0, gap=0, data=84, bresp=0)
 
 [Core Cycle: 173]
 NPU Core is ticked at cycle 173
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 83 cycles... (setup=0, base=0, gap=0, data=83, bresp=0)
+[DDR] processing request, remaining 82 cycles... (setup=0, base=0, gap=0, data=82, bresp=0)
+[DDR] processing request, remaining 81 cycles... (setup=0, base=0, gap=0, data=81, bresp=0)
 
 [Core Cycle: 174]
 NPU Core is ticked at cycle 174
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 80 cycles... (setup=0, base=0, gap=0, data=80, bresp=0)
+[DDR] processing request, remaining 79 cycles... (setup=0, base=0, gap=0, data=79, bresp=0)
+[DDR] processing request, remaining 78 cycles... (setup=0, base=0, gap=0, data=78, bresp=0)
 
 [Core Cycle: 175]
 NPU Core is ticked at cycle 175
 ExecuteStage: waiting for completion
-[DMA] DDR response and SPM transfer both completed, DMA complete
-[DMA] ISR Reg[0] Updated
-  [PipelineController] DMA module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 175
-  Write IPR Reg addr: 0xd8, Data: 0x1
-Simulator Detectes an irq signal at cycle 176
-  IPR Reg matches expected opcode 1
+[DDR] processing request, remaining 77 cycles... (setup=0, base=0, gap=0, data=77, bresp=0)
+[DDR] processing request, remaining 76 cycles... (setup=0, base=0, gap=0, data=76, bresp=0)
+[DDR] processing request, remaining 75 cycles... (setup=0, base=0, gap=0, data=75, bresp=0)
 
 [Core Cycle: 176]
 NPU Core is ticked at cycle 176
-UpdataRegStage: IAR received for bits [0]
-IRQ signal successfully cleared at cycle 177
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 74 cycles... (setup=0, base=0, gap=0, data=74, bresp=0)
+[DDR] processing request, remaining 73 cycles... (setup=0, base=0, gap=0, data=73, bresp=0)
+[DDR] processing request, remaining 72 cycles... (setup=0, base=0, gap=0, data=72, bresp=0)
 
 [Core Cycle: 177]
 NPU Core is ticked at cycle 177
-WriteRegStage: Write Reg addr: 0x40, Data: 0x1
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 71 cycles... (setup=0, base=0, gap=0, data=71, bresp=0)
+[DDR] processing request, remaining 70 cycles... (setup=0, base=0, gap=0, data=70, bresp=0)
+[DDR] processing request, remaining 69 cycles... (setup=0, base=0, gap=0, data=69, bresp=0)
+[DDR] processing request, remaining 68 cycles... (setup=0, base=0, gap=0, data=68, bresp=0)
 
 [Core Cycle: 178]
 NPU Core is ticked at cycle 178
-WriteRegStage: Write Reg addr: 0x48, Data: 0x100000000
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 67 cycles... (setup=0, base=0, gap=0, data=67, bresp=0)
+[DDR] processing request, remaining 66 cycles... (setup=0, base=0, gap=0, data=66, bresp=0)
+[DDR] processing request, remaining 65 cycles... (setup=0, base=0, gap=0, data=65, bresp=0)
 
 [Core Cycle: 179]
 NPU Core is ticked at cycle 179
-WriteRegStage: Write Reg addr: 0x60, Data: 0x0
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 64 cycles... (setup=0, base=0, gap=0, data=64, bresp=0)
+[DDR] processing request, remaining 63 cycles... (setup=0, base=0, gap=0, data=63, bresp=0)
+[DDR] processing request, remaining 62 cycles... (setup=0, base=0, gap=0, data=62, bresp=0)
 
 [Core Cycle: 180]
 NPU Core is ticked at cycle 180
-WriteRegStage: Write Reg addr: 0x68, Data: 0xf00001000
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 61 cycles... (setup=0, base=0, gap=0, data=61, bresp=0)
+[DDR] processing request, remaining 60 cycles... (setup=0, base=0, gap=0, data=60, bresp=0)
+[DDR] processing request, remaining 59 cycles... (setup=0, base=0, gap=0, data=59, bresp=0)
 
 [Core Cycle: 181]
 NPU Core is ticked at cycle 181
-WriteRegStage: Write Reg addr: 0x70, Data: 0x60701700000000
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 58 cycles... (setup=0, base=0, gap=0, data=58, bresp=0)
+[DDR] processing request, remaining 57 cycles... (setup=0, base=0, gap=0, data=57, bresp=0)
+[DDR] processing request, remaining 56 cycles... (setup=0, base=0, gap=0, data=56, bresp=0)
+[DDR] processing request, remaining 55 cycles... (setup=0, base=0, gap=0, data=55, bresp=0)
 
 [Core Cycle: 182]
 NPU Core is ticked at cycle 182
-WriteRegStage: Write Reg addr: 0x78, Data: 0x2002fa00004000
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 54 cycles... (setup=0, base=0, gap=0, data=54, bresp=0)
+[DDR] processing request, remaining 53 cycles... (setup=0, base=0, gap=0, data=53, bresp=0)
+[DDR] processing request, remaining 52 cycles... (setup=0, base=0, gap=0, data=52, bresp=0)
 
 [Core Cycle: 183]
 NPU Core is ticked at cycle 183
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x4
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 51 cycles... (setup=0, base=0, gap=0, data=51, bresp=0)
+[DDR] processing request, remaining 50 cycles... (setup=0, base=0, gap=0, data=50, bresp=0)
+[DDR] processing request, remaining 49 cycles... (setup=0, base=0, gap=0, data=49, bresp=0)
 
 [Core Cycle: 184]
 NPU Core is ticked at cycle 184
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 48 cycles... (setup=0, base=0, gap=0, data=48, bresp=0)
+[DDR] processing request, remaining 47 cycles... (setup=0, base=0, gap=0, data=47, bresp=0)
+[DDR] processing request, remaining 46 cycles... (setup=0, base=0, gap=0, data=46, bresp=0)
 
 [Core Cycle: 185]
 NPU Core is ticked at cycle 185
-ExecuteStage: 1
-ExecuteStage: start task execution
-[PipelineController] Configing COM_SA instruction
-[SystolicArray] GEMM Start, A:15*24, B:24*27, remaining = 68, remaining start acc = 52
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 45 cycles... (setup=0, base=0, gap=0, data=45, bresp=0)
+[DDR] processing request, remaining 44 cycles... (setup=0, base=0, gap=0, data=44, bresp=0)
+[DDR] processing request, remaining 43 cycles... (setup=0, base=0, gap=0, data=43, bresp=0)
 
 [Core Cycle: 186]
 NPU Core is ticked at cycle 186
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 42 cycles... (setup=0, base=0, gap=0, data=42, bresp=0)
+[DDR] processing request, remaining 41 cycles... (setup=0, base=0, gap=0, data=41, bresp=0)
+[DDR] processing request, remaining 40 cycles... (setup=0, base=0, gap=0, data=40, bresp=0)
+[DDR] processing request, remaining 39 cycles... (setup=0, base=0, gap=0, data=39, bresp=0)
 
 [Core Cycle: 187]
 NPU Core is ticked at cycle 187
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 38 cycles... (setup=0, base=0, gap=0, data=38, bresp=0)
+[DDR] processing request, remaining 37 cycles... (setup=0, base=0, gap=0, data=37, bresp=0)
+[DDR] processing request, remaining 36 cycles... (setup=0, base=0, gap=0, data=36, bresp=0)
 
 [Core Cycle: 188]
 NPU Core is ticked at cycle 188
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 35 cycles... (setup=0, base=0, gap=0, data=35, bresp=0)
+[DDR] processing request, remaining 34 cycles... (setup=0, base=0, gap=0, data=34, bresp=0)
+[DDR] processing request, remaining 33 cycles... (setup=0, base=0, gap=0, data=33, bresp=0)
 
 [Core Cycle: 189]
 NPU Core is ticked at cycle 189
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 32 cycles... (setup=0, base=0, gap=0, data=32, bresp=0)
+[DDR] processing request, remaining 31 cycles... (setup=0, base=0, gap=0, data=31, bresp=0)
+[DDR] processing request, remaining 30 cycles... (setup=0, base=0, gap=0, data=30, bresp=0)
 
 [Core Cycle: 190]
 NPU Core is ticked at cycle 190
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 29 cycles... (setup=0, base=0, gap=0, data=29, bresp=0)
+[DDR] processing request, remaining 28 cycles... (setup=0, base=0, gap=0, data=28, bresp=0)
+[DDR] processing request, remaining 27 cycles... (setup=0, base=0, gap=0, data=27, bresp=0)
+[DDR] processing request, remaining 26 cycles... (setup=0, base=0, gap=0, data=26, bresp=0)
 
 [Core Cycle: 191]
 NPU Core is ticked at cycle 191
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 25 cycles... (setup=0, base=0, gap=0, data=25, bresp=0)
+[DDR] processing request, remaining 24 cycles... (setup=0, base=0, gap=0, data=24, bresp=0)
+[DDR] processing request, remaining 23 cycles... (setup=0, base=0, gap=0, data=23, bresp=0)
 
 [Core Cycle: 192]
 NPU Core is ticked at cycle 192
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 22 cycles... (setup=0, base=0, gap=0, data=22, bresp=0)
+[DDR] processing request, remaining 21 cycles... (setup=0, base=0, gap=0, data=21, bresp=0)
+[DDR] processing request, remaining 20 cycles... (setup=0, base=0, gap=0, data=20, bresp=0)
 
 [Core Cycle: 193]
 NPU Core is ticked at cycle 193
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 19 cycles... (setup=0, base=0, gap=0, data=19, bresp=0)
+[DDR] processing request, remaining 18 cycles... (setup=0, base=0, gap=0, data=18, bresp=0)
+[DDR] processing request, remaining 17 cycles... (setup=0, base=0, gap=0, data=17, bresp=0)
 
 [Core Cycle: 194]
 NPU Core is ticked at cycle 194
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 16 cycles... (setup=0, base=0, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 15 cycles... (setup=0, base=0, gap=0, data=15, bresp=0)
+[DDR] processing request, remaining 14 cycles... (setup=0, base=0, gap=0, data=14, bresp=0)
+[DDR] processing request, remaining 13 cycles... (setup=0, base=0, gap=0, data=13, bresp=0)
 
 [Core Cycle: 195]
 NPU Core is ticked at cycle 195
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 12 cycles... (setup=0, base=0, gap=0, data=12, bresp=0)
+[DDR] processing request, remaining 11 cycles... (setup=0, base=0, gap=0, data=11, bresp=0)
+[DDR] processing request, remaining 10 cycles... (setup=0, base=0, gap=0, data=10, bresp=0)
 
 [Core Cycle: 196]
 NPU Core is ticked at cycle 196
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 9 cycles... (setup=0, base=0, gap=0, data=9, bresp=0)
+[DDR] processing request, remaining 8 cycles... (setup=0, base=0, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 7 cycles... (setup=0, base=0, gap=0, data=7, bresp=0)
 
 [Core Cycle: 197]
 NPU Core is ticked at cycle 197
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 6 cycles... (setup=0, base=0, gap=0, data=6, bresp=0)
+[DDR] processing request, remaining 5 cycles... (setup=0, base=0, gap=0, data=5, bresp=0)
+[DDR] processing request, remaining 4 cycles... (setup=0, base=0, gap=0, data=4, bresp=0)
 
 [Core Cycle: 198]
 NPU Core is ticked at cycle 198
 ExecuteStage: waiting for completion
+[DDR] processing request, remaining 3 cycles... (setup=0, base=0, gap=0, data=3, bresp=0)
+[DDR] processing request, remaining 2 cycles... (setup=0, base=0, gap=0, data=2, bresp=0)
+[DDR] processing request, remaining 1 cycles... (setup=0, base=0, gap=0, data=1, bresp=0)
 
 [Core Cycle: 199]
 NPU Core is ticked at cycle 199
 ExecuteStage: waiting for completion
+[DDR] finish request, send LD_RESP
+[Core] push resp into inbox, type = LD_RESP, src_addr = 0x1000, dst_addr = 0x0
 
 [Core Cycle: 200]
 NPU Core is ticked at cycle 200
 ExecuteStage: waiting for completion
+[DMA] get expected resp type = LD_RESP
 
 [Core Cycle: 201]
 NPU Core is ticked at cycle 201
@@ -1100,8 +1357,6 @@ ExecuteStage: waiting for completion
 [Core Cycle: 238]
 NPU Core is ticked at cycle 238
 ExecuteStage: waiting for completion
-  [SystolicArray] start Accumulator
-[Accumulator] GEMM Start, M=15, K=24, N=27, remaining = 19
 
 [Core Cycle: 239]
 NPU Core is ticked at cycle 239
@@ -1162,7 +1417,6 @@ ExecuteStage: waiting for completion
 [Core Cycle: 253]
 NPU Core is ticked at cycle 253
 ExecuteStage: waiting for completion
-  [PipelineController] SystolicArray module finished
 
 [Core Cycle: 254]
 NPU Core is ticked at cycle 254
@@ -1179,44 +1433,34 @@ ExecuteStage: waiting for completion
 [Core Cycle: 257]
 NPU Core is ticked at cycle 257
 ExecuteStage: waiting for completion
-[Accumulator] ISR Reg[2] Updated
-  [PipelineController] Accumulator module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [2] at cycle 257
-  Write IPR Reg addr: 0xd8, Data: 0x4
-Simulator Detectes an irq signal at cycle 258
-  IPR Reg matches expected opcode 4
 
 [Core Cycle: 258]
 NPU Core is ticked at cycle 258
-UpdataRegStage: IAR received for bits [2]
-IRQ signal successfully cleared at cycle 259
+ExecuteStage: waiting for completion
 
 [Core Cycle: 259]
 NPU Core is ticked at cycle 259
-WriteRegStage: Write Reg addr: 0x80, Data: 0x100000000000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 260]
 NPU Core is ticked at cycle 260
-WriteRegStage: Write Reg addr: 0x88, Data: 0x100f00001000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 261]
 NPU Core is ticked at cycle 261
-WriteRegStage: Write Reg addr: 0x48, Data: 0xfff8000100000000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 262]
 NPU Core is ticked at cycle 262
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x8
+ExecuteStage: waiting for completion
 
 [Core Cycle: 263]
 NPU Core is ticked at cycle 263
+ExecuteStage: waiting for completion
 
 [Core Cycle: 264]
 NPU Core is ticked at cycle 264
-ExecuteStage: 1
-ExecuteStage: start task execution
-[PipelineController] Configing COM_MATADD instruction
-[Accumulator] Matadd Start, row_num=17, col_num=16, remaining = 14
+ExecuteStage: waiting for completion
 
 [Core Cycle: 265]
 NPU Core is ticked at cycle 265
@@ -1253,68 +1497,69 @@ ExecuteStage: waiting for completion
 [Core Cycle: 273]
 NPU Core is ticked at cycle 273
 ExecuteStage: waiting for completion
+[DMA] DDR response and local transfer both completed, DMA complete
+[DMA] ISR Reg[0] Updated
+  [PipelineController] DMA module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [0] at cycle 273
+  Write IPR Reg addr: 0xd8, Data: 0x1
+Simulator Detectes an irq signal at cycle 274
+  IPR Reg matches expected opcode 1
 
 [Core Cycle: 274]
 NPU Core is ticked at cycle 274
-ExecuteStage: waiting for completion
+UpdataRegStage: IAR received for bits [0]
+IRQ signal successfully cleared at cycle 275
 
 [Core Cycle: 275]
 NPU Core is ticked at cycle 275
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x40, Data: 0x1
 
 [Core Cycle: 276]
 NPU Core is ticked at cycle 276
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x48, Data: 0x100000000
 
 [Core Cycle: 277]
 NPU Core is ticked at cycle 277
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x60, Data: 0x0
 
 [Core Cycle: 278]
 NPU Core is ticked at cycle 278
-ExecuteStage: waiting for completion
-[Accumulator] ISR Reg[3] Updated
-  [PipelineController] Accumulator module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [3] at cycle 278
-  Write IPR Reg addr: 0xd8, Data: 0x8
-Simulator Detectes an irq signal at cycle 279
-  IPR Reg matches expected opcode 8
+WriteRegStage: Write Reg addr: 0x68, Data: 0xf00001000
 
 [Core Cycle: 279]
 NPU Core is ticked at cycle 279
-UpdataRegStage: IAR received for bits [3]
-IRQ signal successfully cleared at cycle 280
+WriteRegStage: Write Reg addr: 0x70, Data: 0x60701700000000
 
 [Core Cycle: 280]
 NPU Core is ticked at cycle 280
-WriteRegStage: Write Reg addr: 0xa0, Data: 0xf000e00001000
+WriteRegStage: Write Reg addr: 0x78, Data: 0x2002fa00004000
 
 [Core Cycle: 281]
 NPU Core is ticked at cycle 281
-WriteRegStage: Write Reg addr: 0xa8, Data: 0x2000
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x4
 
 [Core Cycle: 282]
 NPU Core is ticked at cycle 282
-WriteRegStage: Write Reg addr: 0x50, Data: 0x2
 
 [Core Cycle: 283]
 NPU Core is ticked at cycle 283
-WriteRegStage: Write Reg addr: 0x58, Data: 0x1fffc0001
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing COM_SA instruction
+[SystolicArray] GEMM Start, A:15*24, B:24*27, remaining = 68, remaining start acc = 52
 
 [Core Cycle: 284]
 NPU Core is ticked at cycle 284
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x20
+ExecuteStage: waiting for completion
 
 [Core Cycle: 285]
 NPU Core is ticked at cycle 285
+ExecuteStage: waiting for completion
 
 [Core Cycle: 286]
 NPU Core is ticked at cycle 286
-ExecuteStage: 1
-ExecuteStage: start task execution
-[PipelineController] Configing COM_SFU instruction
-[SFU] Layernorm Start, col_num=15, row_num=16, remaining = 481
+ExecuteStage: waiting for completion
 
 [Core Cycle: 287]
 NPU Core is ticked at cycle 287
@@ -1515,6 +1760,8 @@ ExecuteStage: waiting for completion
 [Core Cycle: 336]
 NPU Core is ticked at cycle 336
 ExecuteStage: waiting for completion
+  [SystolicArray] start Accumulator
+[Accumulator] GEMM Start, M=15, K=24, N=27, remaining = 19
 
 [Core Cycle: 337]
 NPU Core is ticked at cycle 337
@@ -1575,6 +1822,7 @@ ExecuteStage: waiting for completion
 [Core Cycle: 351]
 NPU Core is ticked at cycle 351
 ExecuteStage: waiting for completion
+  [PipelineController] SystolicArray module finished
 
 [Core Cycle: 352]
 NPU Core is ticked at cycle 352
@@ -1591,34 +1839,44 @@ ExecuteStage: waiting for completion
 [Core Cycle: 355]
 NPU Core is ticked at cycle 355
 ExecuteStage: waiting for completion
+[Accumulator] ISR Reg[2] Updated
+  [PipelineController] Accumulator module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [2] at cycle 355
+  Write IPR Reg addr: 0xd8, Data: 0x4
+Simulator Detectes an irq signal at cycle 356
+  IPR Reg matches expected opcode 4
 
 [Core Cycle: 356]
 NPU Core is ticked at cycle 356
-ExecuteStage: waiting for completion
+UpdataRegStage: IAR received for bits [2]
+IRQ signal successfully cleared at cycle 357
 
 [Core Cycle: 357]
 NPU Core is ticked at cycle 357
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x80, Data: 0x100000000000
 
 [Core Cycle: 358]
 NPU Core is ticked at cycle 358
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x88, Data: 0x100f00001000
 
 [Core Cycle: 359]
 NPU Core is ticked at cycle 359
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x48, Data: 0xfff8000100000000
 
 [Core Cycle: 360]
 NPU Core is ticked at cycle 360
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x8
 
 [Core Cycle: 361]
 NPU Core is ticked at cycle 361
-ExecuteStage: waiting for completion
 
 [Core Cycle: 362]
 NPU Core is ticked at cycle 362
-ExecuteStage: waiting for completion
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing COM_MATADD instruction
+[Accumulator] Matadd Start, row_num=17, col_num=16, remaining = 14
 
 [Core Cycle: 363]
 NPU Core is ticked at cycle 363
@@ -1675,38 +1933,48 @@ ExecuteStage: waiting for completion
 [Core Cycle: 376]
 NPU Core is ticked at cycle 376
 ExecuteStage: waiting for completion
+[Accumulator] ISR Reg[3] Updated
+  [PipelineController] Accumulator module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [3] at cycle 376
+  Write IPR Reg addr: 0xd8, Data: 0x8
+Simulator Detectes an irq signal at cycle 377
+  IPR Reg matches expected opcode 8
 
 [Core Cycle: 377]
 NPU Core is ticked at cycle 377
-ExecuteStage: waiting for completion
+UpdataRegStage: IAR received for bits [3]
+IRQ signal successfully cleared at cycle 378
 
 [Core Cycle: 378]
 NPU Core is ticked at cycle 378
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0xa0, Data: 0xf000e00001000
 
 [Core Cycle: 379]
 NPU Core is ticked at cycle 379
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0xa8, Data: 0x2000
 
 [Core Cycle: 380]
 NPU Core is ticked at cycle 380
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x50, Data: 0x2
 
 [Core Cycle: 381]
 NPU Core is ticked at cycle 381
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0x58, Data: 0x1fffc0001
 
 [Core Cycle: 382]
 NPU Core is ticked at cycle 382
-ExecuteStage: waiting for completion
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x20
 
 [Core Cycle: 383]
 NPU Core is ticked at cycle 383
-ExecuteStage: waiting for completion
 
 [Core Cycle: 384]
 NPU Core is ticked at cycle 384
-ExecuteStage: waiting for completion
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing COM_SFU instruction
+[SFU] Layernorm Start, col_num=15, row_num=16, remaining = 481
 
 [Core Cycle: 385]
 NPU Core is ticked at cycle 385
@@ -3239,102 +3507,66 @@ ExecuteStage: waiting for completion
 [Core Cycle: 767]
 NPU Core is ticked at cycle 767
 ExecuteStage: waiting for completion
-[SFU] ISR Reg[5] Updated
-  [PipelineController] SFU module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [5] at cycle 767
-  Write IPR Reg addr: 0xd8, Data: 0x20
-Simulator Detectes an irq signal at cycle 768
-  IPR Reg matches expected opcode 32
 
 [Core Cycle: 768]
 NPU Core is ticked at cycle 768
-UpdataRegStage: IAR received for bits [5]
-IRQ signal successfully cleared at cycle 769
+ExecuteStage: waiting for completion
 
 [Core Cycle: 769]
 NPU Core is ticked at cycle 769
-WriteRegStage: Write Reg addr: 0x10, Data: 0x3000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 770]
 NPU Core is ticked at cycle 770
-WriteRegStage: Write Reg addr: 0x18, Data: 0xef00002000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 771]
 NPU Core is ticked at cycle 771
-WriteRegStage: Write Reg addr: 0x30, Data: 0xf000f000000004
+ExecuteStage: waiting for completion
 
 [Core Cycle: 772]
 NPU Core is ticked at cycle 772
-WriteRegStage: Write Reg addr: 0x38, Data: 0x100000000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 773]
 NPU Core is ticked at cycle 773
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x2
+ExecuteStage: waiting for completion
 
 [Core Cycle: 774]
 NPU Core is ticked at cycle 774
+ExecuteStage: waiting for completion
 
 [Core Cycle: 775]
 NPU Core is ticked at cycle 775
-ExecuteStage: 1
-ExecuteStage: start task execution
-[PipelineController] Configing MVOUT instruction
-[DMA] MVOUT: send ST_REQ, src_addr = 0x3000, dst_addr = 0x2000, row_num = 0, col_num = 239, dram_stride = 240, sram_stride = 240, data_size = 1
-[Core] push req to outbox, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x2000
-[DMA] Send request to DDR, DMA set to busy
+ExecuteStage: waiting for completion
 
 [Core Cycle: 776]
 NPU Core is ticked at cycle 776
-[DDR] received request from core
-[Core] send req to DDR, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x2000, row_num = 0, col_num = 239, dram_stride = 240, sram_stride = 240, data_size = 1
 ExecuteStage: waiting for completion
-[DDR] start processing new request with 18 estimated remaining DDR cycles
-[DDR] processing request, remaining 17 cycles...
-[DDR] processing request, remaining 16 cycles...
 
 [Core Cycle: 777]
 NPU Core is ticked at cycle 777
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 15 cycles...
-[DDR] processing request, remaining 14 cycles...
-[DDR] processing request, remaining 13 cycles...
 
 [Core Cycle: 778]
 NPU Core is ticked at cycle 778
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 12 cycles...
-[DDR] processing request, remaining 11 cycles...
-[DDR] processing request, remaining 10 cycles...
 
 [Core Cycle: 779]
 NPU Core is ticked at cycle 779
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 9 cycles...
-[DDR] processing request, remaining 8 cycles...
-[DDR] processing request, remaining 7 cycles...
-[DDR] processing request, remaining 6 cycles...
 
 [Core Cycle: 780]
 NPU Core is ticked at cycle 780
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 5 cycles...
-[DDR] processing request, remaining 4 cycles...
-[DDR] processing request, remaining 3 cycles...
 
 [Core Cycle: 781]
 NPU Core is ticked at cycle 781
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 2 cycles...
-[DDR] processing request, remaining 1 cycles...
-[DDR] processing request, remaining 0 cycles...
-[DDR] finish processing current request
-[Core] push resp into inbox, type = ST_RESP, src_addr = 0x3000, dst_addr = 0x2000
 
 [Core Cycle: 782]
 NPU Core is ticked at cycle 782
 ExecuteStage: waiting for completion
-[DMA] get expected resp type = ST_RESP
 
 [Core Cycle: 783]
 NPU Core is ticked at cycle 783
@@ -3379,161 +3611,98 @@ ExecuteStage: waiting for completion
 [Core Cycle: 793]
 NPU Core is ticked at cycle 793
 ExecuteStage: waiting for completion
-[DMA] DDR response and SPM transfer both completed, DMA complete
-[DMA] ISR Reg[1] Updated
-  [PipelineController] DMA module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 793
-  Write IPR Reg addr: 0xd8, Data: 0x2
-Simulator Detectes an irq signal at cycle 794
-  IPR Reg matches expected opcode 2
 
 [Core Cycle: 794]
 NPU Core is ticked at cycle 794
-UpdataRegStage: IAR received for bits [1]
-IRQ signal successfully cleared at cycle 795
+ExecuteStage: waiting for completion
 
 [Core Cycle: 795]
 NPU Core is ticked at cycle 795
-WriteRegStage: Write Reg addr: 0x10, Data: 0xf00003000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 796]
 NPU Core is ticked at cycle 796
-WriteRegStage: Write Reg addr: 0x18, Data: 0xf00001000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 797]
 NPU Core is ticked at cycle 797
-WriteRegStage: Write Reg addr: 0x30, Data: 0x20002000000004
+ExecuteStage: waiting for completion
 
 [Core Cycle: 798]
 NPU Core is ticked at cycle 798
-WriteRegStage: Write Reg addr: 0x38, Data: 0x100000000
+ExecuteStage: waiting for completion
 
 [Core Cycle: 799]
 NPU Core is ticked at cycle 799
-WriteRegStage: Write Reg addr: 0xb0, Data: 0x2
+ExecuteStage: waiting for completion
 
 [Core Cycle: 800]
 NPU Core is ticked at cycle 800
+ExecuteStage: waiting for completion
 
 [Core Cycle: 801]
 NPU Core is ticked at cycle 801
-ExecuteStage: 1
-ExecuteStage: start task execution
-[PipelineController] Configing MVOUT instruction
-[DMA] MVOUT: send ST_REQ, src_addr = 0x3000, dst_addr = 0x1000, row_num = 15, col_num = 15, dram_stride = 32, sram_stride = 32, data_size = 1
-[Core] push req to outbox, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x1000
-[DMA] Send request to DDR, DMA set to busy
+ExecuteStage: waiting for completion
 
 [Core Cycle: 802]
 NPU Core is ticked at cycle 802
-[DDR] received request from core
-[Core] send req to DDR, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x1000, row_num = 15, col_num = 15, dram_stride = 32, sram_stride = 32, data_size = 1
 ExecuteStage: waiting for completion
-[DDR] start processing new request with 44 estimated remaining DDR cycles
-[DDR] processing request, remaining 43 cycles...
-[DDR] processing request, remaining 42 cycles...
 
 [Core Cycle: 803]
 NPU Core is ticked at cycle 803
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 41 cycles...
-[DDR] processing request, remaining 40 cycles...
-[DDR] processing request, remaining 39 cycles...
 
 [Core Cycle: 804]
 NPU Core is ticked at cycle 804
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 38 cycles...
-[DDR] processing request, remaining 37 cycles...
-[DDR] processing request, remaining 36 cycles...
 
 [Core Cycle: 805]
 NPU Core is ticked at cycle 805
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 35 cycles...
-[DDR] processing request, remaining 34 cycles...
-[DDR] processing request, remaining 33 cycles...
 
 [Core Cycle: 806]
 NPU Core is ticked at cycle 806
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 32 cycles...
-[DDR] processing request, remaining 31 cycles...
-[DDR] processing request, remaining 30 cycles...
-[DDR] processing request, remaining 29 cycles...
 
 [Core Cycle: 807]
 NPU Core is ticked at cycle 807
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 28 cycles...
-[DDR] processing request, remaining 27 cycles...
-[DDR] processing request, remaining 26 cycles...
 
 [Core Cycle: 808]
 NPU Core is ticked at cycle 808
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 25 cycles...
-[DDR] processing request, remaining 24 cycles...
-[DDR] processing request, remaining 23 cycles...
 
 [Core Cycle: 809]
 NPU Core is ticked at cycle 809
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 22 cycles...
-[DDR] processing request, remaining 21 cycles...
-[DDR] processing request, remaining 20 cycles...
 
 [Core Cycle: 810]
 NPU Core is ticked at cycle 810
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 19 cycles...
-[DDR] processing request, remaining 18 cycles...
-[DDR] processing request, remaining 17 cycles...
-[DDR] processing request, remaining 16 cycles...
 
 [Core Cycle: 811]
 NPU Core is ticked at cycle 811
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 15 cycles...
-[DDR] processing request, remaining 14 cycles...
-[DDR] processing request, remaining 13 cycles...
 
 [Core Cycle: 812]
 NPU Core is ticked at cycle 812
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 12 cycles...
-[DDR] processing request, remaining 11 cycles...
-[DDR] processing request, remaining 10 cycles...
 
 [Core Cycle: 813]
 NPU Core is ticked at cycle 813
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 9 cycles...
-[DDR] processing request, remaining 8 cycles...
-[DDR] processing request, remaining 7 cycles...
 
 [Core Cycle: 814]
 NPU Core is ticked at cycle 814
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 6 cycles...
-[DDR] processing request, remaining 5 cycles...
-[DDR] processing request, remaining 4 cycles...
-[DDR] processing request, remaining 3 cycles...
 
 [Core Cycle: 815]
 NPU Core is ticked at cycle 815
 ExecuteStage: waiting for completion
-[DDR] processing request, remaining 2 cycles...
-[DDR] processing request, remaining 1 cycles...
-[DDR] processing request, remaining 0 cycles...
-[DDR] finish processing current request
-[Core] push resp into inbox, type = ST_RESP, src_addr = 0x3000, dst_addr = 0x1000
 
 [Core Cycle: 816]
 NPU Core is ticked at cycle 816
 ExecuteStage: waiting for completion
-[DMA] get expected resp type = ST_RESP
 
 [Core Cycle: 817]
 NPU Core is ticked at cycle 817
@@ -3650,51 +3819,646 @@ ExecuteStage: waiting for completion
 [Core Cycle: 845]
 NPU Core is ticked at cycle 845
 ExecuteStage: waiting for completion
-[DMA] DDR response and SPM transfer both completed, DMA complete
-[DMA] ISR Reg[1] Updated
-  [PipelineController] DMA module finished
-  [PipelineController] All tasks finished
-UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 845
-  Write IPR Reg addr: 0xd8, Data: 0x2
-Simulator Detectes an irq signal at cycle 846
-  IPR Reg matches expected opcode 2
 
 [Core Cycle: 846]
 NPU Core is ticked at cycle 846
+ExecuteStage: waiting for completion
+
+[Core Cycle: 847]
+NPU Core is ticked at cycle 847
+ExecuteStage: waiting for completion
+
+[Core Cycle: 848]
+NPU Core is ticked at cycle 848
+ExecuteStage: waiting for completion
+
+[Core Cycle: 849]
+NPU Core is ticked at cycle 849
+ExecuteStage: waiting for completion
+
+[Core Cycle: 850]
+NPU Core is ticked at cycle 850
+ExecuteStage: waiting for completion
+
+[Core Cycle: 851]
+NPU Core is ticked at cycle 851
+ExecuteStage: waiting for completion
+
+[Core Cycle: 852]
+NPU Core is ticked at cycle 852
+ExecuteStage: waiting for completion
+
+[Core Cycle: 853]
+NPU Core is ticked at cycle 853
+ExecuteStage: waiting for completion
+
+[Core Cycle: 854]
+NPU Core is ticked at cycle 854
+ExecuteStage: waiting for completion
+
+[Core Cycle: 855]
+NPU Core is ticked at cycle 855
+ExecuteStage: waiting for completion
+
+[Core Cycle: 856]
+NPU Core is ticked at cycle 856
+ExecuteStage: waiting for completion
+
+[Core Cycle: 857]
+NPU Core is ticked at cycle 857
+ExecuteStage: waiting for completion
+
+[Core Cycle: 858]
+NPU Core is ticked at cycle 858
+ExecuteStage: waiting for completion
+
+[Core Cycle: 859]
+NPU Core is ticked at cycle 859
+ExecuteStage: waiting for completion
+
+[Core Cycle: 860]
+NPU Core is ticked at cycle 860
+ExecuteStage: waiting for completion
+
+[Core Cycle: 861]
+NPU Core is ticked at cycle 861
+ExecuteStage: waiting for completion
+
+[Core Cycle: 862]
+NPU Core is ticked at cycle 862
+ExecuteStage: waiting for completion
+
+[Core Cycle: 863]
+NPU Core is ticked at cycle 863
+ExecuteStage: waiting for completion
+
+[Core Cycle: 864]
+NPU Core is ticked at cycle 864
+ExecuteStage: waiting for completion
+
+[Core Cycle: 865]
+NPU Core is ticked at cycle 865
+ExecuteStage: waiting for completion
+[SFU] ISR Reg[5] Updated
+  [PipelineController] SFU module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [5] at cycle 865
+  Write IPR Reg addr: 0xd8, Data: 0x20
+Simulator Detectes an irq signal at cycle 866
+  IPR Reg matches expected opcode 32
+
+[Core Cycle: 866]
+NPU Core is ticked at cycle 866
+UpdataRegStage: IAR received for bits [5]
+IRQ signal successfully cleared at cycle 867
+
+[Core Cycle: 867]
+NPU Core is ticked at cycle 867
+WriteRegStage: Write Reg addr: 0x10, Data: 0x3000
+
+[Core Cycle: 868]
+NPU Core is ticked at cycle 868
+WriteRegStage: Write Reg addr: 0x18, Data: 0xef00002000
+
+[Core Cycle: 869]
+NPU Core is ticked at cycle 869
+WriteRegStage: Write Reg addr: 0x30, Data: 0xf000f000000004
+
+[Core Cycle: 870]
+NPU Core is ticked at cycle 870
+WriteRegStage: Write Reg addr: 0x38, Data: 0x100000000
+
+[Core Cycle: 871]
+NPU Core is ticked at cycle 871
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x2
+
+[Core Cycle: 872]
+NPU Core is ticked at cycle 872
+
+[Core Cycle: 873]
+NPU Core is ticked at cycle 873
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing MVOUT instruction
+[DMA] MVOUT: send ST_REQ, src=0x3000 dst=0x2000 rows=1 cols=240 dram_stride=240 sram_stride=240 dram_bytes=1 local_bytes=1 source=SPM quant=0
+[Core] push req to outbox, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x2000
+[DMA] Send request to DDR, DMA set to busy (rows=1, bursts=1)
+
+[Core Cycle: 874]
+NPU Core is ticked at cycle 874
+[DDR] received request from core, type=ST_REQ
+[Core] send req to DDR, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x2000, row_num = 0, col_num = 239, dram_stride = 240, sram_stride = 240, data_size = 1
+ExecuteStage: waiting for completion
+[DDR] start request type=ST_REQ rows=1 cols=240 beats=8 bursts=1 estimated_latency=56
+[DDR] start processing new request with 56 estimated remaining DDR cycles
+[DDR] processing request, remaining 54 cycles... (setup=1, base=45, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 53 cycles... (setup=0, base=45, gap=0, data=8, bresp=0)
+
+[Core Cycle: 875]
+NPU Core is ticked at cycle 875
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 52 cycles... (setup=0, base=44, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 51 cycles... (setup=0, base=43, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 50 cycles... (setup=0, base=42, gap=0, data=8, bresp=0)
+
+[Core Cycle: 876]
+NPU Core is ticked at cycle 876
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 49 cycles... (setup=0, base=41, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 48 cycles... (setup=0, base=40, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 47 cycles... (setup=0, base=39, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 46 cycles... (setup=0, base=38, gap=0, data=8, bresp=0)
+
+[Core Cycle: 877]
+NPU Core is ticked at cycle 877
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 45 cycles... (setup=0, base=37, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 44 cycles... (setup=0, base=36, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 43 cycles... (setup=0, base=35, gap=0, data=8, bresp=0)
+
+[Core Cycle: 878]
+NPU Core is ticked at cycle 878
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 42 cycles... (setup=0, base=34, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 41 cycles... (setup=0, base=33, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 40 cycles... (setup=0, base=32, gap=0, data=8, bresp=0)
+
+[Core Cycle: 879]
+NPU Core is ticked at cycle 879
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 39 cycles... (setup=0, base=31, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 38 cycles... (setup=0, base=30, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 37 cycles... (setup=0, base=29, gap=0, data=8, bresp=0)
+
+[Core Cycle: 880]
+NPU Core is ticked at cycle 880
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 36 cycles... (setup=0, base=28, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 35 cycles... (setup=0, base=27, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 34 cycles... (setup=0, base=26, gap=0, data=8, bresp=0)
+
+[Core Cycle: 881]
+NPU Core is ticked at cycle 881
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 33 cycles... (setup=0, base=25, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 32 cycles... (setup=0, base=24, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 31 cycles... (setup=0, base=23, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 30 cycles... (setup=0, base=22, gap=0, data=8, bresp=0)
+
+[Core Cycle: 882]
+NPU Core is ticked at cycle 882
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 29 cycles... (setup=0, base=21, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 28 cycles... (setup=0, base=20, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 27 cycles... (setup=0, base=19, gap=0, data=8, bresp=0)
+
+[Core Cycle: 883]
+NPU Core is ticked at cycle 883
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 26 cycles... (setup=0, base=18, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 25 cycles... (setup=0, base=17, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 24 cycles... (setup=0, base=16, gap=0, data=8, bresp=0)
+
+[Core Cycle: 884]
+NPU Core is ticked at cycle 884
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 23 cycles... (setup=0, base=15, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 22 cycles... (setup=0, base=14, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 21 cycles... (setup=0, base=13, gap=0, data=8, bresp=0)
+
+[Core Cycle: 885]
+NPU Core is ticked at cycle 885
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 20 cycles... (setup=0, base=12, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 19 cycles... (setup=0, base=11, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 18 cycles... (setup=0, base=10, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 17 cycles... (setup=0, base=9, gap=0, data=8, bresp=0)
+
+[Core Cycle: 886]
+NPU Core is ticked at cycle 886
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 16 cycles... (setup=0, base=8, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 15 cycles... (setup=0, base=7, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 14 cycles... (setup=0, base=6, gap=0, data=8, bresp=0)
+
+[Core Cycle: 887]
+NPU Core is ticked at cycle 887
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 13 cycles... (setup=0, base=5, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 12 cycles... (setup=0, base=4, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 11 cycles... (setup=0, base=3, gap=0, data=8, bresp=0)
+
+[Core Cycle: 888]
+NPU Core is ticked at cycle 888
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 10 cycles... (setup=0, base=2, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 9 cycles... (setup=0, base=1, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 8 cycles... (setup=0, base=0, gap=0, data=8, bresp=0)
+
+[Core Cycle: 889]
+NPU Core is ticked at cycle 889
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 7 cycles... (setup=0, base=0, gap=0, data=7, bresp=0)
+[DDR] processing request, remaining 6 cycles... (setup=0, base=0, gap=0, data=6, bresp=0)
+[DDR] processing request, remaining 5 cycles... (setup=0, base=0, gap=0, data=5, bresp=0)
+
+[Core Cycle: 890]
+NPU Core is ticked at cycle 890
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 4 cycles... (setup=0, base=0, gap=0, data=4, bresp=0)
+[DDR] processing request, remaining 3 cycles... (setup=0, base=0, gap=0, data=3, bresp=0)
+[DDR] processing request, remaining 2 cycles... (setup=0, base=0, gap=0, data=2, bresp=0)
+[DDR] processing request, remaining 1 cycles... (setup=0, base=0, gap=0, data=1, bresp=0)
+
+[Core Cycle: 891]
+NPU Core is ticked at cycle 891
+ExecuteStage: waiting for completion
+[DDR] finish request, send ST_RESP
+[Core] push resp into inbox, type = ST_RESP, src_addr = 0x3000, dst_addr = 0x2000
+
+[Core Cycle: 892]
+NPU Core is ticked at cycle 892
+ExecuteStage: waiting for completion
+[DMA] get expected resp type = ST_RESP
+[DMA] DDR response and local transfer both completed, DMA complete
+[DMA] ISR Reg[1] Updated
+  [PipelineController] DMA module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 892
+  Write IPR Reg addr: 0xd8, Data: 0x2
+Simulator Detectes an irq signal at cycle 893
+  IPR Reg matches expected opcode 2
+
+[Core Cycle: 893]
+NPU Core is ticked at cycle 893
 UpdataRegStage: IAR received for bits [1]
-IRQ signal successfully cleared at cycle 847
-NPU Core: Simulation completed at cycle 846
-Core finished execution at cycle 846
-Simulation finished early at cycle 846
+IRQ signal successfully cleared at cycle 894
+
+[Core Cycle: 894]
+NPU Core is ticked at cycle 894
+WriteRegStage: Write Reg addr: 0x10, Data: 0xf00003000
+
+[Core Cycle: 895]
+NPU Core is ticked at cycle 895
+WriteRegStage: Write Reg addr: 0x18, Data: 0xf00001000
+
+[Core Cycle: 896]
+NPU Core is ticked at cycle 896
+WriteRegStage: Write Reg addr: 0x30, Data: 0x20002000000004
+
+[Core Cycle: 897]
+NPU Core is ticked at cycle 897
+WriteRegStage: Write Reg addr: 0x38, Data: 0x100000000
+
+[Core Cycle: 898]
+NPU Core is ticked at cycle 898
+WriteRegStage: Write Reg addr: 0xb0, Data: 0x2
+
+[Core Cycle: 899]
+NPU Core is ticked at cycle 899
+
+[Core Cycle: 900]
+NPU Core is ticked at cycle 900
+ExecuteStage: 1
+ExecuteStage: start task execution
+[PipelineController] Configing MVOUT instruction
+[DMA] MVOUT: send ST_REQ, src=0x3000 dst=0x1000 rows=16 cols=16 dram_stride=32 sram_stride=32 dram_bytes=1 local_bytes=1 source=SPM quant=0
+[Core] push req to outbox, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x1000
+[DMA] Send request to DDR, DMA set to busy (rows=16, bursts=16)
+
+[Core Cycle: 901]
+NPU Core is ticked at cycle 901
+[DDR] received request from core, type=ST_REQ
+[Core] send req to DDR, type = ST_REQ, src_addr = 0x3000, dst_addr = 0x1000, row_num = 15, col_num = 15, dram_stride = 32, sram_stride = 32, data_size = 1
+ExecuteStage: waiting for completion
+[DDR] start request type=ST_REQ rows=16 cols=16 beats=16 bursts=16 estimated_latency=139
+[DDR] start processing new request with 139 estimated remaining DDR cycles
+[DDR] processing request, remaining 62 cycles... (setup=1, base=45, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 61 cycles... (setup=0, base=45, gap=0, data=16, bresp=0)
+
+[Core Cycle: 902]
+NPU Core is ticked at cycle 902
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 60 cycles... (setup=0, base=44, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 59 cycles... (setup=0, base=43, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 58 cycles... (setup=0, base=42, gap=0, data=16, bresp=0)
+
+[Core Cycle: 903]
+NPU Core is ticked at cycle 903
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 57 cycles... (setup=0, base=41, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 56 cycles... (setup=0, base=40, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 55 cycles... (setup=0, base=39, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 54 cycles... (setup=0, base=38, gap=0, data=16, bresp=0)
+
+[Core Cycle: 904]
+NPU Core is ticked at cycle 904
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 53 cycles... (setup=0, base=37, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 52 cycles... (setup=0, base=36, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 51 cycles... (setup=0, base=35, gap=0, data=16, bresp=0)
+
+[Core Cycle: 905]
+NPU Core is ticked at cycle 905
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 50 cycles... (setup=0, base=34, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 49 cycles... (setup=0, base=33, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 48 cycles... (setup=0, base=32, gap=0, data=16, bresp=0)
+
+[Core Cycle: 906]
+NPU Core is ticked at cycle 906
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 47 cycles... (setup=0, base=31, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 46 cycles... (setup=0, base=30, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 45 cycles... (setup=0, base=29, gap=0, data=16, bresp=0)
+
+[Core Cycle: 907]
+NPU Core is ticked at cycle 907
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 44 cycles... (setup=0, base=28, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 43 cycles... (setup=0, base=27, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 42 cycles... (setup=0, base=26, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 41 cycles... (setup=0, base=25, gap=0, data=16, bresp=0)
+
+[Core Cycle: 908]
+NPU Core is ticked at cycle 908
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 40 cycles... (setup=0, base=24, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 39 cycles... (setup=0, base=23, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 38 cycles... (setup=0, base=22, gap=0, data=16, bresp=0)
+
+[Core Cycle: 909]
+NPU Core is ticked at cycle 909
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 37 cycles... (setup=0, base=21, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 36 cycles... (setup=0, base=20, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 35 cycles... (setup=0, base=19, gap=0, data=16, bresp=0)
+
+[Core Cycle: 910]
+NPU Core is ticked at cycle 910
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 34 cycles... (setup=0, base=18, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 33 cycles... (setup=0, base=17, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 32 cycles... (setup=0, base=16, gap=0, data=16, bresp=0)
+
+[Core Cycle: 911]
+NPU Core is ticked at cycle 911
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 31 cycles... (setup=0, base=15, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 30 cycles... (setup=0, base=14, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 29 cycles... (setup=0, base=13, gap=0, data=16, bresp=0)
+
+[Core Cycle: 912]
+NPU Core is ticked at cycle 912
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 28 cycles... (setup=0, base=12, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 27 cycles... (setup=0, base=11, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 26 cycles... (setup=0, base=10, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 25 cycles... (setup=0, base=9, gap=0, data=16, bresp=0)
+
+[Core Cycle: 913]
+NPU Core is ticked at cycle 913
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 24 cycles... (setup=0, base=8, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 23 cycles... (setup=0, base=7, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 22 cycles... (setup=0, base=6, gap=0, data=16, bresp=0)
+
+[Core Cycle: 914]
+NPU Core is ticked at cycle 914
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 21 cycles... (setup=0, base=5, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 20 cycles... (setup=0, base=4, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 19 cycles... (setup=0, base=3, gap=0, data=16, bresp=0)
+
+[Core Cycle: 915]
+NPU Core is ticked at cycle 915
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 18 cycles... (setup=0, base=2, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 17 cycles... (setup=0, base=1, gap=0, data=16, bresp=0)
+[DDR] processing request, remaining 16 cycles... (setup=0, base=0, gap=0, data=16, bresp=0)
+
+[Core Cycle: 916]
+NPU Core is ticked at cycle 916
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 19 cycles... (setup=0, base=0, gap=4, data=15, bresp=0)
+[DDR] processing request, remaining 18 cycles... (setup=0, base=0, gap=3, data=15, bresp=0)
+[DDR] processing request, remaining 17 cycles... (setup=0, base=0, gap=2, data=15, bresp=0)
+[DDR] processing request, remaining 16 cycles... (setup=0, base=0, gap=1, data=15, bresp=0)
+
+[Core Cycle: 917]
+NPU Core is ticked at cycle 917
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 15 cycles... (setup=0, base=0, gap=0, data=15, bresp=0)
+[DDR] processing request, remaining 18 cycles... (setup=0, base=0, gap=4, data=14, bresp=0)
+[DDR] processing request, remaining 17 cycles... (setup=0, base=0, gap=3, data=14, bresp=0)
+
+[Core Cycle: 918]
+NPU Core is ticked at cycle 918
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 16 cycles... (setup=0, base=0, gap=2, data=14, bresp=0)
+[DDR] processing request, remaining 15 cycles... (setup=0, base=0, gap=1, data=14, bresp=0)
+[DDR] processing request, remaining 14 cycles... (setup=0, base=0, gap=0, data=14, bresp=0)
+
+[Core Cycle: 919]
+NPU Core is ticked at cycle 919
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 17 cycles... (setup=0, base=0, gap=4, data=13, bresp=0)
+[DDR] processing request, remaining 16 cycles... (setup=0, base=0, gap=3, data=13, bresp=0)
+[DDR] processing request, remaining 15 cycles... (setup=0, base=0, gap=2, data=13, bresp=0)
+
+[Core Cycle: 920]
+NPU Core is ticked at cycle 920
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 14 cycles... (setup=0, base=0, gap=1, data=13, bresp=0)
+[DDR] processing request, remaining 13 cycles... (setup=0, base=0, gap=0, data=13, bresp=0)
+[DDR] processing request, remaining 16 cycles... (setup=0, base=0, gap=4, data=12, bresp=0)
+
+[Core Cycle: 921]
+NPU Core is ticked at cycle 921
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 15 cycles... (setup=0, base=0, gap=3, data=12, bresp=0)
+[DDR] processing request, remaining 14 cycles... (setup=0, base=0, gap=2, data=12, bresp=0)
+[DDR] processing request, remaining 13 cycles... (setup=0, base=0, gap=1, data=12, bresp=0)
+[DDR] processing request, remaining 12 cycles... (setup=0, base=0, gap=0, data=12, bresp=0)
+
+[Core Cycle: 922]
+NPU Core is ticked at cycle 922
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 15 cycles... (setup=0, base=0, gap=4, data=11, bresp=0)
+[DDR] processing request, remaining 14 cycles... (setup=0, base=0, gap=3, data=11, bresp=0)
+[DDR] processing request, remaining 13 cycles... (setup=0, base=0, gap=2, data=11, bresp=0)
+
+[Core Cycle: 923]
+NPU Core is ticked at cycle 923
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 12 cycles... (setup=0, base=0, gap=1, data=11, bresp=0)
+[DDR] processing request, remaining 11 cycles... (setup=0, base=0, gap=0, data=11, bresp=0)
+[DDR] processing request, remaining 14 cycles... (setup=0, base=0, gap=4, data=10, bresp=0)
+
+[Core Cycle: 924]
+NPU Core is ticked at cycle 924
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 13 cycles... (setup=0, base=0, gap=3, data=10, bresp=0)
+[DDR] processing request, remaining 12 cycles... (setup=0, base=0, gap=2, data=10, bresp=0)
+[DDR] processing request, remaining 11 cycles... (setup=0, base=0, gap=1, data=10, bresp=0)
+
+[Core Cycle: 925]
+NPU Core is ticked at cycle 925
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 10 cycles... (setup=0, base=0, gap=0, data=10, bresp=0)
+[DDR] processing request, remaining 13 cycles... (setup=0, base=0, gap=4, data=9, bresp=0)
+[DDR] processing request, remaining 12 cycles... (setup=0, base=0, gap=3, data=9, bresp=0)
+[DDR] processing request, remaining 11 cycles... (setup=0, base=0, gap=2, data=9, bresp=0)
+
+[Core Cycle: 926]
+NPU Core is ticked at cycle 926
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 10 cycles... (setup=0, base=0, gap=1, data=9, bresp=0)
+[DDR] processing request, remaining 9 cycles... (setup=0, base=0, gap=0, data=9, bresp=0)
+[DDR] processing request, remaining 12 cycles... (setup=0, base=0, gap=4, data=8, bresp=0)
+
+[Core Cycle: 927]
+NPU Core is ticked at cycle 927
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 11 cycles... (setup=0, base=0, gap=3, data=8, bresp=0)
+[DDR] processing request, remaining 10 cycles... (setup=0, base=0, gap=2, data=8, bresp=0)
+[DDR] processing request, remaining 9 cycles... (setup=0, base=0, gap=1, data=8, bresp=0)
+
+[Core Cycle: 928]
+NPU Core is ticked at cycle 928
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 8 cycles... (setup=0, base=0, gap=0, data=8, bresp=0)
+[DDR] processing request, remaining 11 cycles... (setup=0, base=0, gap=4, data=7, bresp=0)
+[DDR] processing request, remaining 10 cycles... (setup=0, base=0, gap=3, data=7, bresp=0)
+
+[Core Cycle: 929]
+NPU Core is ticked at cycle 929
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 9 cycles... (setup=0, base=0, gap=2, data=7, bresp=0)
+[DDR] processing request, remaining 8 cycles... (setup=0, base=0, gap=1, data=7, bresp=0)
+[DDR] processing request, remaining 7 cycles... (setup=0, base=0, gap=0, data=7, bresp=0)
+
+[Core Cycle: 930]
+NPU Core is ticked at cycle 930
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 10 cycles... (setup=0, base=0, gap=4, data=6, bresp=0)
+[DDR] processing request, remaining 9 cycles... (setup=0, base=0, gap=3, data=6, bresp=0)
+[DDR] processing request, remaining 8 cycles... (setup=0, base=0, gap=2, data=6, bresp=0)
+[DDR] processing request, remaining 7 cycles... (setup=0, base=0, gap=1, data=6, bresp=0)
+
+[Core Cycle: 931]
+NPU Core is ticked at cycle 931
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 6 cycles... (setup=0, base=0, gap=0, data=6, bresp=0)
+[DDR] processing request, remaining 9 cycles... (setup=0, base=0, gap=4, data=5, bresp=0)
+[DDR] processing request, remaining 8 cycles... (setup=0, base=0, gap=3, data=5, bresp=0)
+
+[Core Cycle: 932]
+NPU Core is ticked at cycle 932
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 7 cycles... (setup=0, base=0, gap=2, data=5, bresp=0)
+[DDR] processing request, remaining 6 cycles... (setup=0, base=0, gap=1, data=5, bresp=0)
+[DDR] processing request, remaining 5 cycles... (setup=0, base=0, gap=0, data=5, bresp=0)
+
+[Core Cycle: 933]
+NPU Core is ticked at cycle 933
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 8 cycles... (setup=0, base=0, gap=4, data=4, bresp=0)
+[DDR] processing request, remaining 7 cycles... (setup=0, base=0, gap=3, data=4, bresp=0)
+[DDR] processing request, remaining 6 cycles... (setup=0, base=0, gap=2, data=4, bresp=0)
+
+[Core Cycle: 934]
+NPU Core is ticked at cycle 934
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 5 cycles... (setup=0, base=0, gap=1, data=4, bresp=0)
+[DDR] processing request, remaining 4 cycles... (setup=0, base=0, gap=0, data=4, bresp=0)
+[DDR] processing request, remaining 7 cycles... (setup=0, base=0, gap=4, data=3, bresp=0)
+[DDR] processing request, remaining 6 cycles... (setup=0, base=0, gap=3, data=3, bresp=0)
+
+[Core Cycle: 935]
+NPU Core is ticked at cycle 935
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 5 cycles... (setup=0, base=0, gap=2, data=3, bresp=0)
+[DDR] processing request, remaining 4 cycles... (setup=0, base=0, gap=1, data=3, bresp=0)
+[DDR] processing request, remaining 3 cycles... (setup=0, base=0, gap=0, data=3, bresp=0)
+
+[Core Cycle: 936]
+NPU Core is ticked at cycle 936
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 6 cycles... (setup=0, base=0, gap=4, data=2, bresp=0)
+[DDR] processing request, remaining 5 cycles... (setup=0, base=0, gap=3, data=2, bresp=0)
+[DDR] processing request, remaining 4 cycles... (setup=0, base=0, gap=2, data=2, bresp=0)
+
+[Core Cycle: 937]
+NPU Core is ticked at cycle 937
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 3 cycles... (setup=0, base=0, gap=1, data=2, bresp=0)
+[DDR] processing request, remaining 2 cycles... (setup=0, base=0, gap=0, data=2, bresp=0)
+[DDR] processing request, remaining 5 cycles... (setup=0, base=0, gap=4, data=1, bresp=0)
+
+[Core Cycle: 938]
+NPU Core is ticked at cycle 938
+ExecuteStage: waiting for completion
+[DDR] processing request, remaining 4 cycles... (setup=0, base=0, gap=3, data=1, bresp=0)
+[DDR] processing request, remaining 3 cycles... (setup=0, base=0, gap=2, data=1, bresp=0)
+[DDR] processing request, remaining 2 cycles... (setup=0, base=0, gap=1, data=1, bresp=0)
+[DDR] processing request, remaining 1 cycles... (setup=0, base=0, gap=0, data=1, bresp=0)
+
+[Core Cycle: 939]
+NPU Core is ticked at cycle 939
+ExecuteStage: waiting for completion
+[DDR] finish request, send ST_RESP
+[Core] push resp into inbox, type = ST_RESP, src_addr = 0x3000, dst_addr = 0x1000
+
+[Core Cycle: 940]
+NPU Core is ticked at cycle 940
+ExecuteStage: waiting for completion
+[DMA] get expected resp type = ST_RESP
+[DMA] DDR response and local transfer both completed, DMA complete
+[DMA] ISR Reg[1] Updated
+  [PipelineController] DMA module finished
+  [PipelineController] All tasks finished
+UpdataRegStage: Detected ISR Interrupt bit [1] at cycle 940
+  Write IPR Reg addr: 0xd8, Data: 0x2
+Simulator Detectes an irq signal at cycle 941
+  IPR Reg matches expected opcode 2
+
+[Core Cycle: 941]
+NPU Core is ticked at cycle 941
+UpdataRegStage: IAR received for bits [1]
+IRQ signal successfully cleared at cycle 942
+NPU Core: Simulation completed at cycle 941
+Core finished execution at cycle 941
+Simulation finished early at cycle 941
 ================================================
 Simulation Finished!
 Simulation Statistics:
-  Simulation time: 0.012140 s
+  Simulation time: 0.015376 s
   Maximum cycle limit: 10000
   Early termination: Yes
   Final state: DONE
-  Total cycles: 846
+  Total cycles: 941
   Total simulated instructions: 38
-  Simulated instructions per second: 3130.148270
+  Simulated instructions per second: 2471.383975
 +------------------+--------------+--------------+------------+
 |                    HW Utilization Report                    |
 +------------------+--------------+--------------+------------+
 | Module           |  Busy Cycles | Total Cycles |    Util(%) |
 +------------------+--------------+--------------+------------+
-| DMA              |          218 |          789 |      27.63 |
-| SPM              |          266 |          789 |      33.71 |
-| SystolicArray    |           67 |          789 |       8.49 |
-| Accumulator      |           32 |          789 |       4.06 |
-| AccSram          |           59 |          789 |       7.48 |
-| SFU              |          480 |          789 |      60.84 |
-| GEMV             |            0 |          789 |       0.00 |
+| DMA              |          313 |          884 |      35.41 |
+| SPM              |          267 |          884 |      30.20 |
+| SystolicArray    |           67 |          884 |       7.58 |
+| Accumulator      |           32 |          884 |       3.62 |
+| AccSram          |          156 |          884 |      17.65 |
+| SFU              |          480 |          884 |      54.30 |
+| GEMV             |            0 |          884 |       0.00 |
 +------------------+--------------+--------------+------------+
 +------------+----------------+----------------+--------------+--------------+--------------+
 |                                     Bandwidth Report                                      |
 +------------+----------------+----------------+--------------+--------------+--------------+
 | Path       |     Read Bytes |    Write Bytes |  Avg B/Cycle |     Avg GB/s | Peak B/Cycle |
 +------------+----------------+----------------+--------------+--------------+--------------+
-| DDR        |           5120 |            768 |         7.46 |         7.46 |           32 |
-| SPM        |           5152 |           5408 |        13.38 |        13.38 |           64 |
-| ACC SRAM   |           4864 |           4096 |        11.36 |        11.36 |          256 |
+| DDR        |           8256 |            768 |        10.21 |        10.21 |           32 |
+| SPM        |           4880 |           5440 |        11.67 |        11.67 |           64 |
+| ACC SRAM   |           4864 |           4128 |        10.17 |        10.17 |          256 |
 +------------+----------------+----------------+--------------+--------------+--------------+

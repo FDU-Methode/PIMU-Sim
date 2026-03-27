@@ -208,7 +208,7 @@ void PerfNpuCore::tick(){
             break;
         }
         logger.log("[Core] send req to DDR, type = %s, src_addr = 0x%x, dst_addr = 0x%x, row_num = %d, col_num = %d, dram_stride = %d, sram_stride = %d, data_size = %d", 
-            MsgTypeToStr(req.type).c_str(), req.src_addr, req.dst_addr, req.row_num, req.col_num, req.dram_stride, req.sram_stride, req.data_size, req.data_size);
+            MsgTypeToStr(req.type).c_str(), req.src_addr, req.dst_addr, req.row_num + 1, req.col_num + 1, req.dram_stride, req.sram_stride, req.data_size);
         outbox_.pop();
     }
 

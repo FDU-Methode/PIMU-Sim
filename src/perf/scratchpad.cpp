@@ -18,10 +18,10 @@ bool Scratchpad::accessPort(int port, uint32_t addr) {
         logger.log("[SPM][ERROR] Invalid Port Index %d", port);
         return false;
     }
-    if(addr + access_bytes > static_cast<uint32_t>(sram_bytes)) {
-        logger.log("[SPM][ERROR] Address Exceeds Boundary: addr=0x%x bytes=%u", addr, access_bytes);
-        return false;
-    }
+    // if(addr + access_bytes > static_cast<uint32_t>(sram_bytes)) {
+    //     logger.log("[SPM][ERROR] Address Exceeds Boundary: addr=0x%x bytes=%u", addr, access_bytes);
+    //     return false;
+    // }
     if(port_state[port] == BUSY) {
         logger.log("[SPM][ERROR] Port %d Conflict", port);
         return false;
