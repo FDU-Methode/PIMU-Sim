@@ -13,10 +13,10 @@ void SystolicArray::tick(){
     Scratchpad* spm = controller->getSpm();
     assert(spm && "SystolicArray requires a valid Scratchpad");
 
-    // Port 0: weight stream
+    // Port 0: activation / im2col stream
     if(spm_rd1_remaining > 0) {
-        bool read_status_1 = spm->accessPort(1, spm_rd1_addr);
-        assert(read_status_1 && "[SystolicArray] SPM port 1 read failed");
+        bool read_status_1 = spm->accessPort(0, spm_rd1_addr);
+        assert(read_status_1 && "[SystolicArray] SPM port 0 (Activation) read failed");
         spm_rd1_addr += spm_rd1_stride_bytes;
         --spm_rd1_remaining;
 
@@ -26,10 +26,10 @@ void SystolicArray::tick(){
         }
     }
 
-    // Port 1: activation / im2col stream
+    // Port 1: weight stream
     if(spm_rd2_remaining > 0) {
-        bool read_status_2 = spm->accessPort(0, spm_rd2_addr);
-        assert(read_status_2 && "[SystolicArray] SPM port 0 read failed");
+        bool read_status_2 = spm->accessPort(1, spm_rd2_addr);
+        assert(read_status_2 && "[SystolicArray] SPM port 1 (Weight) read failed");
         spm_rd2_addr += spm_rd2_stride_bytes;
         --spm_rd2_remaining;
 
@@ -72,11 +72,11 @@ void SystolicArray::execute(){
     spm_rd2_remaining = 0;
 
     uint8_t optype = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 25) & 0x3);
-    spm_rd2_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs1_reg_addr) & 0xFFFFFFFF);  // Activation/IFM Address
-    spm_rd1_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs2_reg_addr) & 0xFFFFFFFF);  // Weight Address
+    spm_rd1_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs1_reg_addr) & 0xFFFFFFFF);  // Activation/IFM Address
+    spm_rd2_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs2_reg_addr) & 0xFFFFFFFF);  // Weight Address
 
-    spm_rd2_stride_bytes = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 48) & 0xFFFF);
     spm_rd1_stride_bytes = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 48) & 0xFFFF);
+    spm_rd2_stride_bytes = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 48) & 0xFFFF);
 
     if(optype == 0) {  // GEMM
 
@@ -94,8 +94,8 @@ void SystolicArray::execute(){
         remaining_start_acc_cycles = col_num_a + col_num_b + 1;
 
         // Compute Read SPM Cycles
-        spm_rd1_remaining = remaining_start_acc_cycles + 1;
-        spm_rd2_remaining = remaining_cycles;
+        spm_rd1_remaining = remaining_cycles;
+        spm_rd2_remaining = remaining_start_acc_cycles + 1;
 
         logger.log("[SystolicArray] GEMM Start, A:%d*%d, B:%d*%d, remaining = %d, remaining start acc = %d", 
             row_num_a, col_num_a, row_num_b, col_num_b, remaining_cycles, remaining_start_acc_cycles);
@@ -138,8 +138,8 @@ void SystolicArray::execute(){
         remaining_cycles = im2col_delay + input_a_row_num + input_b_col_num + input_a_col_num + 2;
         remaining_start_acc_cycles = im2col_delay + input_a_col_num + input_b_col_num + 1;
 
-        spm_rd1_remaining = input_a_col_num;
-        spm_rd2_remaining = remaining_start_acc_cycles;
+        spm_rd1_remaining = remaining_start_acc_cycles;
+        spm_rd2_remaining = input_a_col_num;
 
         logger.log("[SystolicArray] CONV Start, pad_t/b/l/r/mode=%d/%d/%d/%d/%d, weight_shape/stride/dilation=%d/%d/%d, "
             "ifm_w=%d, ifm_h=%d, cin=%d, cout=%d, remaining = %d, remaining start acc = %d", 

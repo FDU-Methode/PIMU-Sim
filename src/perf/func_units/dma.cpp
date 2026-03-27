@@ -88,6 +88,9 @@ void DMA::tick(){
                 access_ok = spm->ReadMemory(spm_addr);
             }
         }
+        
+        assert(access_ok && "DMA Read or Write SPM Error");
+        // assert((std::cerr <<"row_idx="<<current_row_idx<<"spm_row_stride_bytes="<<spm_row_stride_bytes<<"row_beat_idx="<<current_row_beat_idx<<"axi_beat_bytes="<<axi_beat_bytes<< std::endl, access_ok));
 
         // Port conflict/backpressure: stall this beat and retry next cycle.
         if(access_ok) {
