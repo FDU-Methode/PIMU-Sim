@@ -1,5 +1,5 @@
-#ifndef _HW_UTILIZATION_HPP_
-#define _HW_UTILIZATION_HPP_
+#ifndef _HW_UTILIZATION_HPP__
+#define _HW_UTILIZATION_HPP__
 
 #include <array>
 #include <sstream>

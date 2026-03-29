@@ -1,6 +1,54 @@
+#include <sstream>
+#include <cctype>
+#include <stdexcept>
 #include "../../include/perf/perf_npu_core.hpp"
 #include "../../include/perf/perf_sim.hpp"
 #include "../../include/util.hpp"
+
+namespace {
+    std::string trim(std::string s) {
+        while (!s.empty() && std::isspace(static_cast<unsigned char>(s.front()))) s.erase(s.begin());
+        while (!s.empty() && std::isspace(static_cast<unsigned char>(s.back()))) s.pop_back();
+        return s;
+    }
+
+    Inst parse_inst(std::string str) {
+        str = trim(str);
+
+        size_t comment_pos = str.find('#');
+        if(comment_pos != std::string::npos) {
+            str = trim(str.substr(0, comment_pos));
+        }
+
+        if(str.empty()) {
+            throw std::runtime_error("empty instruction line");
+        }
+
+        size_t h_pos = str.find("'h");
+        if(h_pos != std::string::npos) {
+            str = str.substr(h_pos + 2);
+        } else if (str.find("0x") == 0 || str.find("0X") == 0) {
+            str = str.substr(2);
+        }
+
+        str.erase(std::remove(str.begin(), str.end(), '_'), str.end());
+
+        if(str.size() > 32) {
+            throw std::runtime_error("128-bit instruction is wider than 32 hex chars");
+        }
+
+        if(str.size() < 32) {
+            str = std::string(32 - str.size(), '0') + str;
+        }
+
+        Inst inst{};
+        inst.high = std::stoull(str.substr(0, 16), nullptr, 16);
+        inst.low = std::stoull(str.substr(16, 16), nullptr, 16);
+        return inst;
+    }
+
+}  // namespace
+
 
 PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     : BaseModule(sim, cfg, logger), reg_file(cfg) {
@@ -12,6 +60,10 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     state = State::IDLE;
 
     // Initialize MicroArchitecture Components
+    inst_cache = std::make_unique<InstCache>(cfg);
+    inst_cache->clear();
+    logger.log("  Inst Cache created! Size=%d", cfg.inst_cache_size);
+
     util_tracker = std::make_unique<HardWareUtilizationTracker>(logger, cfg);
     util_tracker->reset();
     logger.log("  HardWare Utilization Tracker created!");
@@ -20,103 +72,114 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     logger.log("  Scratchpad created!");
 
     pipeline_controller = std::make_unique<PipelineController>(sim, logger, reg_file, cfg, util_tracker.get(), spm.get());
-    logger.log("  PipelineController created!");
+    logger.log("  Pipeline Controller created!");
 
-    logger.log("Loading instructions from file: %s", cfg.inst_file.c_str());
-    loadInstFromFile(cfg.inst_file);
-    logger.log("Loaded %zu instructions!", instMemory.size());
+    logger.log("Opening instructions from file: %s", cfg.inst_file.c_str());
+    openInstFile(cfg.inst_file);
     logger.log("----------------------------------------------------");
 }
 
-static uint64_t parse_verilog_hex(std::string str) {
-    // 1. 定位 'h' 的位置
-    size_t h_pos = str.find("'h");
-    if (h_pos != std::string::npos) {
-        // 截取 'h' 之后的部分 (例如 "C0" 或 "0000_0001")
-        str = str.substr(h_pos + 2);
-    } else if (str.find("0x") == 0 || str.find("0X") == 0) {
-        // 兼容普通的 0x 开头
-        str = str.substr(2);
+
+void PerfNpuCore::openInstFile(const std::string& inst_file) {
+    if(inst_ifs.is_open()) {
+        inst_ifs.close();
     }
 
-    // 2. 移除所有的下划线 '_' (Verilog 中常用作分隔符)
-    // std::remove 将不删除的字符移到前面，返回新逻辑结尾的迭代器，erase 真正删除
-    str.erase(std::remove(str.begin(), str.end(), '_'), str.end());
-
-    // 3. 转换为 64 位无符号整数，基数为 16
-    try {
-        return std::stoull(str, nullptr, 16);
-    } catch (...) {
-        return 0; // 解析失败返回0，或者可以在这里 throw 异常
+    inst_ifs.open(inst_file);
+    if(!inst_ifs.is_open()) {
+        throw std::runtime_error("Unable to open instruction file: " + inst_file);
     }
+
+    inst_cache->clear();
+    pc = 0;
+    fetched_inst_num = 0;
+    inst_file_line_num = 0;
+    inst_file_done = false;
+
+    logger.log("Instruction file opened successfully...");
 }
 
-void PerfNpuCore::loadInstFromFile(const std::string& inst_file) {
-    std::ifstream file(inst_file);
-    if (!file.is_open()) {
-        logger.log("Error: Unable to open file %s\n", inst_file.c_str());
-        return;
+
+bool PerfNpuCore::loadInstToCache() {
+    if(inst_file_done) {
+        return false;
     }
 
-    instMemory.clear();
-    pc = 0;
-    inst_num = 0;
+    if(!inst_ifs.is_open()) {
+        throw std::runtime_error("Instruction file stream is not open");
+    }
+
+    if(inst_cache->full()) {
+        logger.log("[InstLoader] Inst Cache is Full, Skip Loading This Cycle");
+        return false;
+    }
 
     std::string line;
-    int line_idx = 0;
+    while(std::getline(inst_ifs, line)) {
+        ++inst_file_line_num;
 
-    while (std::getline(file, line)) {
-        line_idx++;
-        // 忽略注释 #
-        size_t comment_pos = line.find('#');
-        if (comment_pos != std::string::npos) {
-            line = line.substr(0, comment_pos);
-        }
-
-        if (line.find_first_not_of(" \t\r\n") == std::string::npos) {
+        std::string trimmed = trim(line);
+        if(trimmed.empty()) {
             continue;
         }
 
-        std::stringstream ss(line);
-        std::string op_str, addr_str, data_str;
-
-        // 格式: [OpName] [AddrStr] [DataStr]
-        // 对应: MER      32'hC0    64'h01
-        if (ss >> op_str >> addr_str >> data_str) {
-            try {
-                Inst new_inst;
-                new_inst.op_name = op_str;
-                new_inst.reg_addr = (uint32_t)parse_verilog_hex(addr_str);
-                new_inst.inst_data = parse_verilog_hex(data_str);
-
-                instMemory.push_back(new_inst);
-
-            } catch (const std::exception& e) {
-                logger.log("Error parsing line %d: %s (Content: %s)\n", line_idx, e.what(), line.c_str());
-            }
-        } else {
-            // 如果一行只有1个或2个部分，视为格式错误，打印警告
-             logger.log("Warning: Malformed instruction at line %d: %s\n", line_idx, line.c_str());
+        size_t comment_pos = trimmed.find('#');
+        if(comment_pos != std::string::npos) {
+            trimmed = trim(trimmed.substr(0, comment_pos));
         }
+
+        if(trimmed.empty()) {
+            continue;
+        }
+
+        Inst inst = parse_inst(trimmed);
+
+        bool write_status = inst_cache->write_inst(inst);
+        if(!write_status) {
+            logger.log("[InstLoader][ERROR] Inst Cache Write Failed");
+            return false;
+        }
+
+        ++fetched_inst_num;
+        logger.log("[InstLoader] Line %d Loaded into Inst Cache, inst=0x%016llx%016llx, fetched inst num=%d, cache_size=%d, inst=%x", 
+            inst_file_line_num, (unsigned long long)inst.high, (unsigned long long)inst.low, fetched_inst_num, inst_cache->size());
+        return true;
     }
 
-    file.close();
-    inst_num = instMemory.size();
-    logger.log("Successfully loaded %d instructions from %s\n", inst_num, inst_file.c_str());
+    inst_file_done = true;
+    inst_ifs.close();
+    logger.log("[InstLoader] Instruction File Read Finished, total fetched = %d", fetched_inst_num);
+    return false;
 }
+
 
 void PerfNpuCore::WriteRegStage(){
     if(state != IDLE) return;
 
-    Inst inst = instMemory[pc];
-    reg_file.write(inst.reg_addr, inst.inst_data);
-    logger.log("WriteRegStage: Write Reg addr: 0x%x, Data: 0x%lx", inst.reg_addr, inst.inst_data);
+    // 这里假设你当前把 WriteRegStage 当成 decoder/consumer 入口
+    // 如果你有独立 decoder，就把下面 read_inst() 挪到 decoder 里
+    Inst inst{};
+    if(!inst_cache->read_inst(inst)) {
+        logger.log("WriteRegStage: inst cache empty");
+        return;
+    }
 
-    // 如果是启动寄存器，则将状态置为 BUSY，等待完成中断
-    if(inst.reg_addr == reg_file.start_reg_addr) {state = BUSY; opcode = inst.inst_data;}
+    // TODO:
+    // 在这里把 inst_word 送给 decoder
+    // 例如：
+    // decoder.decode(inst_word, reg_file, ...);
+
+
+    // // Inst inst = instMemory[pc];
+    // // reg_file.write(inst.reg_addr, inst.inst_data);
+    // // logger.log("WriteRegStage: Write Reg addr: 0x%x, Data: 0x%lx", inst.reg_addr, inst.inst_data);
+
+    // // // 如果是启动寄存器，则将状态置为 BUSY，等待完成中断
+    // // if(inst.reg_addr == reg_file.start_reg_addr) {state = BUSY; opcode = inst.inst_data;}
 
     pc++;
 }
+
 
 void PerfNpuCore::ExecuteStage(){
     if(state != BUSY) return;
@@ -129,15 +192,10 @@ void PerfNpuCore::ExecuteStage(){
         logger.log("ExecuteStage: start task execution");
         pipeline_controller->execute();
     } else if(pipeline_controller->isFinish()){
-        // // 更新 ISR 寄存器，产生活跃中断
-        // uint64_t read_start_data = reg_file.read(reg_file.start_reg_addr);
-        // uint64_t isr_val = read_start_data;
-
-        // logger.log("ExecuteStage: task execution completed, ISR register updated");
-        // reg_file.write(reg_file.isr_reg_addr, isr_val);
         pipeline_controller->setIdle();
     }
 }
+
 
 void PerfNpuCore::UpdataRegStage(){
     uint64_t read_mer_data = reg_file.read(reg_file.mer_reg_addr);
@@ -198,6 +256,8 @@ void PerfNpuCore::UpdataRegStage(){
 void PerfNpuCore::tick(){
     logger.log("NPU Core is ticked at cycle %d", getCycle());
 
+    loadInstToCache();
+
     // Connect DMA To DDR
     while(!outbox_.empty()){
         Message& req = outbox_.front();
@@ -253,8 +313,9 @@ void PerfNpuCore::tick(){
     checkCompletion();
 }
 
+
 void PerfNpuCore::checkCompletion(){
-    if(pc >= instMemory.size() && state == IDLE){
+    if(inst_file_done && inst_cache->empty() && state == IDLE) {
         _stats.isDone = true;
         _cycle --;
         _stats.cycle = getCycle();

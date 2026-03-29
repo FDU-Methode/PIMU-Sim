@@ -56,6 +56,9 @@ struct Config{
     int acc_ports = 2;
     int acc_data_width = 32;
 
+    // Inst Config
+    int inst_cache_size = 256;
+
     /*Add more configuration options here*/
 
     static Config from_file(const std::string &path);
