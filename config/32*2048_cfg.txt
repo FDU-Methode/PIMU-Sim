@@ -67,6 +67,7 @@ acc_data_width = 32
 
 # ---- Inst Configuration ----
 inst_cache_size = 256
+inst_queue_depth = 8
 
 # ---- File paths ----
 inst_file = ./benchmarks/tb_test/tb_32*2048.txt

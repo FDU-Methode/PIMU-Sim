@@ -81,6 +81,7 @@ Config Config::from_file(const std::string &path){
         else if (k == "acc_ports") c.acc_ports = std::stoi(v);
         else if (k == "acc_data_width") c.acc_data_width = std::stoi(v);
         else if (k == "inst_cache_size") c.inst_cache_size = std::stoi(v);
+        else if (k == "inst_queue_depth") c.inst_queue_depth = std::stoi(v);
         else if (k.length() > 9 && k.substr(k.length() - 9) == "_reg_addr") {
             uint32_t addr = parse_number(v);
             c.reg_addr_map[k] = addr;

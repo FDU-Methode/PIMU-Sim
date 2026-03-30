@@ -20,6 +20,7 @@ bool InstCache::read_inst(Inst& inst) {
     if(empty()) {
         return false;
     }
+    inst = inst_cache.front();
     inst_cache.pop();
     return true;
 }

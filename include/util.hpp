@@ -21,6 +21,14 @@ enum class UnitType {
     DMA, SPM, SystolicArray, Accumulator, AccSram, SFU, GEMV
 };
 
+enum class InstType {
+    NONE, DMA, SA, SFU, MATADD
+};
+
+enum class InstQueueType {
+    NONE, DMA, SA, SFU
+};
+
 struct Message {
     MsgType type;
     int row_num = 0;
@@ -143,6 +151,25 @@ inline std::string UnitTypeToStr(UnitType unit){
         case UnitType::SFU:           return "SFU";
         case UnitType::GEMV:          return "GEMV";
         default:                      return "UNKNOWN";
+    }
+}
+
+inline std::string InstTypeToStr(InstType type){
+    switch (type) {
+        case InstType::DMA:           return "DMA";
+        case InstType::SA:            return "SA";
+        case InstType::SFU:           return "SFU";
+        case InstType::MATADD:        return "MATADD";
+        default:                      return "NONE";
+    }
+}
+
+inline std::string InstQueueTypeToStr(InstQueueType type){
+        switch (type) {
+        case InstQueueType::DMA:      return "DMA";
+        case InstQueueType::SA:       return "SA";
+        case InstQueueType::SFU:      return "SFU";
+        default:                      return "NONE";
     }
 }
 

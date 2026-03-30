@@ -58,6 +58,7 @@ struct Config{
 
     // Inst Config
     int inst_cache_size = 256;
+    int inst_queue_depth = 8;
 
     /*Add more configuration options here*/
 

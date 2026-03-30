@@ -96,3 +96,5 @@
 ### 2026-03-29
 
 - 添加`InstCache`模块，删除原有`inst.hpp`，修改仿真读取指令逻辑为每周期从inst_file读取一条指令，各配置文件添加配置`inst_cache_size`(待添加)
+
+- 添加`InstQueue`模块，实现三种指令队列`DMAInstQueue`、`SAInstQueue`、`SFUInstQueue`。各配置文件添加配置`inst_queue_depth`(待添加)

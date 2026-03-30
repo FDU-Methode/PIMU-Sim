@@ -141,7 +141,7 @@ bool PerfNpuCore::loadInstToCache() {
         }
 
         ++fetched_inst_num;
-        logger.log("[InstLoader] Line %d Loaded into Inst Cache, inst=0x%016llx%016llx, fetched inst num=%d, cache_size=%d, inst=%x", 
+        logger.log("[InstLoader] Line %d Loaded into Inst Cache, inst=0x%016llx%016llx, fetched inst num=%d, cache_size=%d", 
             inst_file_line_num, (unsigned long long)inst.high, (unsigned long long)inst.low, fetched_inst_num, inst_cache->size());
         return true;
     }
