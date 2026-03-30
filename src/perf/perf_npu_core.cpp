@@ -64,6 +64,26 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     inst_cache->clear();
     logger.log("  Inst Cache created! Size=%d", cfg.inst_cache_size);
 
+    dma_1_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg);
+    dma_2_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg);
+    dma_3_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg);
+    sa_inst_queue    = std::make_unique<SAInstQueue>(logger, cfg);
+    sfu_inst_queue   = std::make_unique<SFUInstQueue>(logger, cfg);
+    dma_1_inst_queue->clear();
+    dma_2_inst_queue->clear();
+    dma_3_inst_queue->clear();
+    sa_inst_queue->clear();
+    sfu_inst_queue->clear();
+    logger.log("  DMA Inst Queue 1 created!");
+    logger.log("  DMA Inst Queue 2 created!");
+    logger.log("  DMA Inst Queue 3 created!");
+    logger.log("  SA  Inst Queue   created!");
+    logger.log("  SFU Inst Queue   created!");
+
+    decoder = std::make_unique<Decoder>(logger, inst_cache.get(), dma_1_inst_queue.get(), dma_2_inst_queue.get(), dma_3_inst_queue.get(), 
+                                        sa_inst_queue.get(), sfu_inst_queue.get());
+    logger.log("  Decoder created!");
+
     util_tracker = std::make_unique<HardWareUtilizationTracker>(logger, cfg);
     util_tracker->reset();
     logger.log("  HardWare Utilization Tracker created!");

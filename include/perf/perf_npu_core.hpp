@@ -10,6 +10,8 @@
 #include "scratchpad.hpp"
 #include "hw_utilization.hpp"
 #include "inst_cache.hpp"
+#include "inst_queue.hpp"
+#include "decoder.hpp"
 #include "../regfile.hpp"
 
 class PerfSim;
@@ -18,7 +20,15 @@ class PipelineController;
 class PerfNpuCore : public BaseModule{
 private:
     RegFile reg_file;
+
     std::unique_ptr<InstCache> inst_cache;
+    std::unique_ptr<DMAInstQueue> dma_1_inst_queue;
+    std::unique_ptr<DMAInstQueue> dma_2_inst_queue;
+    std::unique_ptr<DMAInstQueue> dma_3_inst_queue;
+    std::unique_ptr<SAInstQueue> sa_inst_queue;
+    std::unique_ptr<SFUInstQueue> sfu_inst_queue;
+    std::unique_ptr<Decoder> decoder;
+
     std::unique_ptr<PipelineController> pipeline_controller;
     std::unique_ptr<Scratchpad> spm;
     std::unique_ptr<HardWareUtilizationTracker> util_tracker;

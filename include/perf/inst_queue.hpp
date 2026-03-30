@@ -58,11 +58,11 @@ protected:
 
 public:
     InstQueue(const std::string& queue_name, InstQueueType queue_type, int inst_width, int queue_depth, int inst_count_upper, Logger& logger) : 
-            queue_name(queue_name), queue_type(queue_type), inst_width(inst_width), queue_depth(queue_depth), inst_count_upper(inst_count_upper), logger(logger);
+            queue_name(queue_name), queue_type(queue_type), inst_width(inst_width), queue_depth(queue_depth), inst_count_upper(inst_count_upper), logger(logger) {};
 
     virtual ~InstQueue() = default;
     
-    virtual bool in_queue(const Inst& inst, uint8_t opcode);
+    virtual bool in_queue(const Inst& inst, uint8_t opcode) = 0;
 
     virtual bool out_queue(InstPacketT& inst_packet) {
         if(inst_queue.empty()) {
@@ -71,7 +71,7 @@ public:
         }
 
         inst_packet = inst_queue.front();
-        queue.pop();
+        inst_queue.pop();
         current_inst_num--;
 
         logger.log("[%s] Out Queue Success: inst_id=%llu, opcode=0x%02x, current_inst_num=%d", 
@@ -80,7 +80,7 @@ public:
     };
 
     virtual bool inst_issue(InstPacketT& inst_packet) {
-        if(queue_state == InstQueueState::IDLE) {
+        if(queue_state == InstQueueState::BUSY) {
             logger.log("[%s] Inst Issue Skipped: queue is busy", queue_name.c_str());
             return false;
         }
@@ -88,6 +88,7 @@ public:
         bool sync_allow_issue = true;  // TODO: 查询同步控制模块
         if(!sync_allow_issue) {
             logger.log("[%s] Inst Issue Blocked by Event Sync Unit", queue_name.c_str());
+            return false;
         }
 
         if(!out_queue(inst_packet)) {
@@ -131,8 +132,8 @@ public:
     int getInstCountUpper() const { return inst_count_upper; }
 
 protected:
-    void inst_push(cosnt InstPacketT& inst_packet) {
-        isnt_queue.push(inst_packet);
+    void inst_push(const InstPacketT& inst_packet) {
+        inst_queue.push(inst_packet);
         current_inst_num++;
         inst_count = 0;
     }

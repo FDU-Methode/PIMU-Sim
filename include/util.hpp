@@ -22,7 +22,7 @@ enum class UnitType {
 };
 
 enum class InstType {
-    NONE, DMA, SA, SFU, MATADD
+    NONE, MVIN, MVOUT, SA, SFU, MATADD
 };
 
 enum class InstQueueType {
@@ -156,7 +156,8 @@ inline std::string UnitTypeToStr(UnitType unit){
 
 inline std::string InstTypeToStr(InstType type){
     switch (type) {
-        case InstType::DMA:           return "DMA";
+        case InstType::MVIN:          return "MVIN";
+        case InstType::MVOUT:         return "MVOUT";
         case InstType::SA:            return "SA";
         case InstType::SFU:           return "SFU";
         case InstType::MATADD:        return "MATADD";

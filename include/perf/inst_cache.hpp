@@ -20,7 +20,7 @@ private:
 
 
 public:
-    InstCache(Config& cfg);
+    InstCache(const Config& cfg);
     ~InstCache() = default;
 
     bool write_inst(const Inst& inst);
@@ -28,9 +28,9 @@ public:
 
     // Cache Status Function
     bool empty() { return inst_cache.empty(); }
-    bool full()  { return inst_cache.size() >= inst_cache_size; }
+    bool full()  { return static_cast<int>(inst_cache.size()) >= inst_cache_size; }
 
-    int size() { return inst_cache.size(); }
+    int size() { return static_cast<int>(inst_cache.size()); }
     int inst_cache_size_() { return inst_cache_size; }
 
     void clear();
