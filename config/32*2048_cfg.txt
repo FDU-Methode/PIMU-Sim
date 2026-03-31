@@ -56,11 +56,14 @@ ddr_channel_num =  4           # DRAM channel number (移动端/高端NPU的DDR�
 ddr_request_queue_depth = 8    # DRAM request queue depth
 
 # ---- SRAM Configuration ----
+sram_bank_num = 8
 sram_bytes = 131072
 sram_ports = 2
 sram_data_width = 8
 
 # ---- ACC Configuration ----
+acc_bank_num = 2
+bias_bank_num = 1
 acc_bytes = 524288
 acc_ports = 2
 acc_data_width = 32

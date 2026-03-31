@@ -100,3 +100,11 @@
 - 添加`InstQueue`模块，实现三种指令队列`DMAInstQueue`、`SAInstQueue`、`SFUInstQueue`。各配置文件添加配置`inst_queue_depth`(待添加)
 
 - 添加`Decoder`模块，实现`fetch`、`decode`、`dispatch`三个阶段
+
+### 2026-03-31
+
+- 添加`EventSyncUnit`模块，各配置文件添加配置`sram_bank_num`、`acc_bank_num`、`bias_bank_num`(待添加)
+
+- `EventSyncUnit`中需要确定同步控制方式
+
+- 下一步需要确定DMA分发机制，在发射和退休时调用`EventSyncUnit`，并在Core中从后向前实现整个流水线

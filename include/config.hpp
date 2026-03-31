@@ -47,11 +47,14 @@ struct Config{
     int ddr_request_queue_depth = 8; // DDR请求队列深度
 
     // SPM Config
+    int sram_bank_num = 8;
     int sram_bytes = 262144;
     int sram_ports = 2;
     int sram_data_width = 8;
 
     // ACC Config
+    int acc_bank_num = 2;
+    int bias_bank_num = 1;
     int acc_bytes = 262144;
     int acc_ports = 2;
     int acc_data_width = 32;
