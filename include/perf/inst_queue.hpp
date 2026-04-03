@@ -12,6 +12,8 @@
 #include "inst_cache.hpp"
 #include "event_sync_unit.hpp"
 
+class PerfNpuCore;
+
 enum class InstQueueState {
     IDLE, BUSY
 };
@@ -42,6 +44,7 @@ struct SFUInstPacket {
 template <typename InstPacketT>
 class InstQueue {
 protected:
+    PerfNpuCore* core;
     Logger& logger;
     RegFile& regfile;
     EventSyncUnit* event_sync_unit;
@@ -64,8 +67,8 @@ protected:
     InstPacketT inst_buffer;  // Store Current Issued Inst
 
 public:
-    InstQueue(const std::string& queue_name, InstQueueType queue_type, int inst_width, int queue_depth, int inst_count_upper, Logger& logger, RegFile& regfile, EventSyncUnit* event_sync_unit) : 
-            queue_name(queue_name), queue_type(queue_type), inst_width(inst_width), queue_depth(queue_depth), inst_count_upper(inst_count_upper), logger(logger), regfile(regfile), event_sync_unit(event_sync_unit) {};
+    InstQueue(const std::string& queue_name, InstQueueType queue_type, int inst_width, int queue_depth, int inst_count_upper, PerfNpuCore* core, Logger& logger, RegFile& regfile, EventSyncUnit* event_sync_unit) : 
+            queue_name(queue_name), queue_type(queue_type), inst_width(inst_width), queue_depth(queue_depth), inst_count_upper(inst_count_upper), core(core), logger(logger), regfile(regfile), event_sync_unit(event_sync_unit) {};
 
     virtual ~InstQueue() = default;
     
@@ -131,8 +134,8 @@ private:
     DMAInstPacket inst_packet;
 
 public:
-    DMAInstQueue(Logger& logger, RegFile& regfile, const Config& cfg, EventSyncUnit* event_sync_unit) : 
-                InstQueue<DMAInstPacket>("DMAInstQueue", InstQueueType::DMA, 256, cfg.inst_queue_depth, 2, logger, regfile, event_sync_unit) {};
+    DMAInstQueue(PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg, EventSyncUnit* event_sync_unit) : 
+                InstQueue<DMAInstPacket>("DMAInstQueue", InstQueueType::DMA, 256, cfg.inst_queue_depth, 2, core, logger, regfile, event_sync_unit) {};
 
     bool in_queue(const Inst& inst, uint8_t opcode) override;
     bool inst_issue() override;
@@ -148,8 +151,8 @@ private:
     SAInstPacket inst_packet{};
 
 public:
-    SAInstQueue(Logger& logger, RegFile& regfile, const Config& cfg, EventSyncUnit* event_sync_unit) : 
-                InstQueue<SAInstPacket>("SAInstQueue", InstQueueType::SA, 384, cfg.inst_queue_depth, 3, logger, regfile, event_sync_unit) {};
+    SAInstQueue(PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg, EventSyncUnit* event_sync_unit) : 
+                InstQueue<SAInstPacket>("SAInstQueue", InstQueueType::SA, 384, cfg.inst_queue_depth, 3, core, logger, regfile, event_sync_unit) {};
 
     bool in_queue(const Inst& inst, uint8_t opcode) override;
     bool inst_issue() override;
@@ -165,8 +168,8 @@ private:
     SFUInstPacket inst_packet{};
 
 public:
-    SFUInstQueue(Logger& logger, RegFile& regfile, const Config& cfg, EventSyncUnit* event_sync_unit) : 
-                InstQueue<SFUInstPacket>("SFUInstQueue", InstQueueType::SFU, 256, cfg.inst_queue_depth, 2, logger, regfile, event_sync_unit) {};
+    SFUInstQueue(PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg, EventSyncUnit* event_sync_unit) : 
+                InstQueue<SFUInstPacket>("SFUInstQueue", InstQueueType::SFU, 256, cfg.inst_queue_depth, 2, core, logger, regfile, event_sync_unit) {};
 
     bool in_queue(const Inst& inst, uint8_t opcode) override;
     bool inst_issue() override;

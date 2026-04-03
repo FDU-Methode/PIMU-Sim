@@ -1,9 +1,9 @@
 #include <cassert>
 #include "../../../include/perf/perf_func_unit.hpp"
-#include "../../../include/perf/pipeline_controller.hpp"
+#include "../../../include/perf/perf_npu_core.hpp"
 
-Accumulator::Accumulator(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, controller, logger, regfile, cfg) {
+Accumulator::Accumulator(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, core, logger, regfile, cfg) {
     UnitName = "Accumulator";
 
     acc_sram = std::make_unique<Scratchpad>(logger, cfg, cfg.acc_bytes, cfg.acc_ports, cfg.acc_data_width, cfg.systolic_array_size);
@@ -12,7 +12,7 @@ Accumulator::Accumulator(PerfSim* sim, PipelineController* controller, Logger& l
 void Accumulator::tick(){
     if(!isBusy()) return;
 
-    Scratchpad* spm = controller->getSpm();
+    Scratchpad* spm = core->getSpm();
     assert(spm && "Accumulator requires a valid Scratchpad");
     assert(acc_sram && "Accumulator local SRAM is NULL");
 
@@ -29,7 +29,7 @@ void Accumulator::tick(){
             assert(read_status_b && "[Accumulator] Local SRAM Read Request Failed");
             // Compute Bandwidth
             if(read_status_a && read_status_b) {
-                HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+                HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
                 if(util_tracker) {
                     util_tracker->addAccReadBytes(2 * cfg.systolic_array_size * cfg.acc_data_width / 8);
                 }
@@ -43,7 +43,7 @@ void Accumulator::tick(){
             assert(write_status && "[Accumulator] SPM Write Request Failed");
             // Compute Bandwidth
             if(write_status) {
-                HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+                HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
                 if(util_tracker) {
                     util_tracker->addSpmWriteBytes(cfg.systolic_array_size * cfg.sram_data_width / 8);
                 }
@@ -62,7 +62,7 @@ void Accumulator::tick(){
                 assert(read_status && "[Accumulator] Local SRAM Read Request Failed");
                 // Compute Bandwidth
                 if(read_status) {
-                    HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+                    HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
                     if(util_tracker) {
                         util_tracker->addAccReadBytes(cfg.systolic_array_size * cfg.acc_data_width / 8);
                     }
@@ -81,7 +81,7 @@ void Accumulator::tick(){
                 assert(write_status && "[Accumulator] Local SRAM Write Request Failed");
                 // Compute Bandwidth
                 if(write_status) {
-                    HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+                    HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
                     if(util_tracker) {
                         util_tracker->addAccWriteBytes(cfg.systolic_array_size * cfg.acc_data_width / 8);
                     }
@@ -98,7 +98,7 @@ void Accumulator::tick(){
                 assert(write_status && "[Accumulator] SPM Write Request Failed");
                 // Compute Bandwidth
                 if(write_status) {
-                    HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+                    HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
                     if(util_tracker) {
                         util_tracker->addSpmWriteBytes(cfg.systolic_array_size * cfg.sram_data_width / 8);
                     }

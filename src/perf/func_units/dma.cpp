@@ -3,7 +3,6 @@
 #include <cstdint>
 #include "../../../include/perf/perf_func_unit.hpp"
 #include "../../../include/perf/perf_sim.hpp"
-#include "../../../include/perf/pipeline_controller.hpp"
 
 namespace {
 
@@ -116,17 +115,17 @@ void build_dma_plans(uint32_t dram_base_addr,
 
 }  // namespace
 
-DMA::DMA(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, controller, logger, regfile, cfg) {
+DMA::DMA(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, core, logger, regfile, cfg) {
     UnitName = "DMA";
 }
 
 void DMA::tick(){
     if(!isBusy()) return;
 
-    Scratchpad* spm = controller->getSpm();
+    Scratchpad* spm = core->getSpm();
     assert(spm && "DMA requires a valid Scratchpad");
-    Scratchpad* acc_sram = controller->getAccSram();
+    Scratchpad* acc_sram = core->getAccSram();
     assert(acc_sram && "DMA requires a valid ACC SRAM");
 
     // 1) local memory side transfer (models sram_rd/sram_wr side in DMA RTL)
@@ -162,7 +161,7 @@ void DMA::tick(){
 
         // Match RTL behavior closer: if local memory is not ready, stall this beat and retry.
         if (access_ok) {
-            HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+            HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
             if (util_tracker) {
                 const int local_payload_bytes = scale_by_log2_shift(beat_payload_bytes, local_minus_dram_log2);
 

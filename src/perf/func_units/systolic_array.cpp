@@ -1,16 +1,16 @@
 #include <cassert>
 #include "../../../include/perf/perf_func_unit.hpp"
-#include "../../../include/perf/pipeline_controller.hpp"
+#include "../../../include/perf/perf_npu_core.hpp"
 
-SystolicArray::SystolicArray(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, controller, logger, regfile, cfg) {
+SystolicArray::SystolicArray(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, core, logger, regfile, cfg) {
     UnitName = "SystolicArray";
 }
 
 void SystolicArray::tick(){
     if(!isBusy()) return;
 
-    Scratchpad* spm = controller->getSpm();
+    Scratchpad* spm = core->getSpm();
     assert(spm && "SystolicArray requires a valid Scratchpad");
 
     // Port 0: activation / im2col stream
@@ -20,7 +20,7 @@ void SystolicArray::tick(){
         spm_rd1_addr += spm_rd1_stride_bytes;
         --spm_rd1_remaining;
 
-        HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+        HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
         if(util_tracker) {
             util_tracker->addSpmReadBytes(cfg.systolic_array_size * cfg.sram_data_width / 8);
         }
@@ -33,7 +33,7 @@ void SystolicArray::tick(){
         spm_rd2_addr += spm_rd2_stride_bytes;
         --spm_rd2_remaining;
 
-        HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+        HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
         if(util_tracker) {
             util_tracker->addSpmReadBytes(cfg.systolic_array_size * cfg.sram_data_width / 8);
         }
@@ -43,7 +43,7 @@ void SystolicArray::tick(){
 
     if(remaining_start_acc_cycles == 0) {
         if(!acc_started) {
-            PerfFunctionalUnit* acc = controller->getUnit(UnitType::Accumulator);
+            PerfFunctionalUnit* acc = core->getUnit(UnitType::Accumulator);
             assert(acc && acc->isIdle());
             logger.log("  [SystolicArray] start Accumulator");
             acc->execute();

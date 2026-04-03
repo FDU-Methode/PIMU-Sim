@@ -60,6 +60,7 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     state = State::IDLE;
 
     // Initialize MicroArchitecture Components
+    // Create Instruction Unit
     inst_cache = std::make_unique<InstCache>(cfg);
     inst_cache->clear();
     logger.log("  Inst Cache created! Size=%d", cfg.inst_cache_size);
@@ -67,11 +68,11 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     event_sync_unit = std::make_unique<EventSyncUnit>(cfg, logger);
     logger.log("  Event Sync created!");
 
-    dma_1_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg, reg_file, event_sync_unit.get());
-    dma_2_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg, reg_file, event_sync_unit.get());
-    dma_3_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg, reg_file, event_sync_unit.get());
-    sa_inst_queue    = std::make_unique<SAInstQueue>(logger, cfg, reg_file, event_sync_unit.get());
-    sfu_inst_queue   = std::make_unique<SFUInstQueue>(logger, cfg, reg_file, event_sync_unit.get());
+    dma_1_inst_queue = std::make_unique<DMAInstQueue>(logger, reg_file, cfg, event_sync_unit.get());
+    dma_2_inst_queue = std::make_unique<DMAInstQueue>(logger, reg_file, cfg, event_sync_unit.get());
+    dma_3_inst_queue = std::make_unique<DMAInstQueue>(logger, reg_file, cfg, event_sync_unit.get());
+    sa_inst_queue    = std::make_unique<SAInstQueue>(logger, reg_file, cfg, event_sync_unit.get());
+    sfu_inst_queue   = std::make_unique<SFUInstQueue>(logger, reg_file, cfg, event_sync_unit.get());
     dma_1_inst_queue->clear();
     dma_2_inst_queue->clear();
     dma_3_inst_queue->clear();
@@ -87,15 +88,25 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
                                         sa_inst_queue.get(), sfu_inst_queue.get());
     logger.log("  Decoder created!");
 
-    util_tracker = std::make_unique<HardWareUtilizationTracker>(logger, cfg);
-    util_tracker->reset();
-    logger.log("  HardWare Utilization Tracker created!");
+    // Create Function Unit
+    dma  = std::make_unique<DMA>(sim, this, logger, reg_file, cfg);
+    sa   = std::make_unique<SystolicArray>(sim, this, logger, reg_file, cfg);
+    acc  = std::make_unique<Accumulator>(sim, this, logger, reg_file, cfg);
+    sfu  = std::make_unique<SFU>(sim, this, logger, reg_file, cfg);
+    gemv = std::make_unique<GEMV>(sim, this, logger, reg_file, cfg);
+    logger.log("  DMA created!");
+    logger.log("  SystolicArray created!");
+    logger.log("  Accumulator created!");
+    logger.log("  SFU created!");
+    logger.log("  GEMV created!");
 
     spm = std::make_unique<Scratchpad>(logger, cfg);
     logger.log("  Scratchpad created!");
 
-    pipeline_controller = std::make_unique<PipelineController>(sim, logger, reg_file, cfg, util_tracker.get(), spm.get());
-    logger.log("  Pipeline Controller created!");
+    // Create Utilization
+    util_tracker = std::make_unique<HardWareUtilizationTracker>(logger, cfg);
+    util_tracker->reset();
+    logger.log("  HardWare Utilization Tracker created!");
 
     logger.log("Opening instructions from file: %s", cfg.inst_file.c_str());
     openInstFile(cfg.inst_file);
@@ -297,7 +308,7 @@ void PerfNpuCore::tick(){
 
     // Set SPM && ACC SRAM Idle
     spm->clearPorts();
-    Scratchpad* acc_sram = pipeline_controller->getAccSram();
+    Scratchpad* acc_sram = getAccSram();
     acc_sram->clearPorts();
 
     // 执行指令
@@ -350,8 +361,16 @@ void PerfNpuCore::checkCompletion(){
     }
 }
 
-HardWareUtilizationTracker* PerfNpuCore::getUtilTracker() {
-    return util_tracker.get();
+
+PerfFunctionalUnit* PerfNpuCore::getUnit(UnitType name) {
+    switch(name) {
+        case UnitType::DMA           : return dma.get();
+        case UnitType::SystolicArray : return sa.get();
+        case UnitType::Accumulator   : return acc.get();
+        case UnitType::SFU           : return sfu.get();
+        case UnitType::GEMV          : return gemv.get();
+        default                      : return nullptr;
+    }
 }
 
 //Connect DMA To DDR

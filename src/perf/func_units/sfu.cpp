@@ -1,16 +1,16 @@
 #include <cassert>
 #include "../../../include/perf/perf_func_unit.hpp"
-#include "../../../include/perf/pipeline_controller.hpp"
+#include "../../../include/perf/perf_npu_core.hpp"
 
-SFU::SFU(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, controller, logger, regfile, cfg) {
+SFU::SFU(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, core, logger, regfile, cfg) {
     UnitName = "SFU";
 }
 
 void SFU::tick(){
     if(!isBusy()) return;
 
-    Scratchpad* spm = controller->getSpm();
+    Scratchpad* spm = core->getSpm();
     assert(spm && "SFU requires a valid Scratchpad");
 
     int current_cycle = sfu_cycle;
@@ -141,7 +141,7 @@ void SFU::tick(){
         assert(read_status && "[SFU] SPM Read Request Failed");
         // Compute Bandwidth
         if(read_status) {
-            HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+            HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
             if(util_tracker) {
                 util_tracker->addSpmReadBytes(cfg.systolic_array_size * cfg.sram_data_width / 8);
             }
@@ -154,7 +154,7 @@ void SFU::tick(){
         assert(write_status && "[SFU] SPM Write Request Failed");
         // Compute Bandwidth
         if(write_status) {
-            HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+            HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
             if(util_tracker) {
                 util_tracker->addSpmWriteBytes(cfg.systolic_array_size * cfg.sram_data_width / 8);
             }

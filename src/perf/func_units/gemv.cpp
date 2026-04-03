@@ -1,8 +1,9 @@
 #include <cassert>
 #include "../../../include/perf/perf_func_unit.hpp"
+#include "../../../include/perf/perf_npu_core.hpp"
 
-GEMV::GEMV(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, controller, logger, regfile, cfg) {
+GEMV::GEMV(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg) :
+    PerfFunctionalUnit(sim, core, logger, regfile, cfg) {
     UnitName = "GEMV";
 }
 

@@ -6,7 +6,6 @@
 #include <fstream>
 #include "base_module.hpp"
 #include "perf_func_unit.hpp"
-#include "pipeline_controller.hpp"
 #include "scratchpad.hpp"
 #include "hw_utilization.hpp"
 #include "inst_cache.hpp"
@@ -22,17 +21,28 @@ class PerfNpuCore : public BaseModule{
 private:
     RegFile reg_file;
 
+    // Instruction Unit
     std::unique_ptr<InstCache> inst_cache;
     std::unique_ptr<EventSyncUnit> event_sync_unit;
+
     std::unique_ptr<DMAInstQueue> dma_1_inst_queue;
     std::unique_ptr<DMAInstQueue> dma_2_inst_queue;
     std::unique_ptr<DMAInstQueue> dma_3_inst_queue;
     std::unique_ptr<SAInstQueue> sa_inst_queue;
     std::unique_ptr<SFUInstQueue> sfu_inst_queue;
+
     std::unique_ptr<Decoder> decoder;
 
-    std::unique_ptr<PipelineController> pipeline_controller;
+    // Function Unit
+    std::unique_ptr<DMA> dma;
+    std::unique_ptr<SystolicArray> sa;
+    std::unique_ptr<Accumulator> acc;
+    std::unique_ptr<SFU> sfu;
+    std::unique_ptr<GEMV> gemv;
+
     std::unique_ptr<Scratchpad> spm;
+
+    // Utilization
     std::unique_ptr<HardWareUtilizationTracker> util_tracker;
 
     bool irq;
@@ -62,7 +72,10 @@ public:
     void ExecuteStage();
     void UpdataRegStage();
 
-    HardWareUtilizationTracker* getUtilTracker();
+    PerfFunctionalUnit* getUnit(UnitType name);
+    HardWareUtilizationTracker* getUtilTracker() { return util_tracker.get(); };
+    Scratchpad* getSpm() { return spm.get(); }
+    Scratchpad* getAccSram() { return acc->getScratchpad(); }
 
 //Add DMA Connect To DDR
 private:

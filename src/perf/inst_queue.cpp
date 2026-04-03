@@ -1,4 +1,5 @@
 #include "../../include/perf/inst_queue.hpp"
+#include "../../include/perf/perf_npu_core.hpp"
 
 ////////////////////////////
 //     DMA Inst Queue     //
@@ -61,10 +62,13 @@ bool DMAInstQueue::inst_issue() {
     queue_state = InstQueueState::BUSY;
     logger.log("[DMAInstQueue] Inst Issue Success: inst_id=%llu, opcode=0x%02x", (unsigned long long)inst_packet.inst_id, inst_packet.opcode);
 
-    // TODO: 写同步控制模块busy，写对应配置寄存器， 启动首个功能模块
+    // Update Event Sync Unit
     event_sync_unit->issueUpdate(inst_packet);
+    // Write Config Register
     writeReg(inst_packet);
-    // TODO: start unit
+    // Start the First Functional Unit
+    PerfFunctionalUnit* dma = core->getUnit(UnitType::DMA);
+    dma->execute();
 
     return true;
 };
@@ -124,8 +128,23 @@ void DMAInstQueue::inst_retire() {
     queue_state = InstQueueState::IDLE;
     logger.log("[DMAInstQueue] Inst Retire: state -> IDLE");
 
-    // TODO: 写同步控制模块valid和busy/写中断
-    // Write Event Sync Unit Based on Inst Buffer
+    // Update Event Sync Unit
+    event_sync_unit->retireUpdate(inst_buffer);
+
+    // Write ISR
+    uint64_t isr_val = regfile.read(regfile.isr_reg_addr);
+    if(inst_buffer.opcode == 0x01) {
+        isr_val |= (1ULL << 0);
+        regfile.write(regfile.isr_reg_addr, isr_val);
+        logger.log("[DMAInstQueue] ISR Reg[0] Updated");
+    } else if(inst_buffer.opcode == 0x02) {
+        isr_val |= (1ULL << 1);
+        regfile.write(regfile.isr_reg_addr, isr_val);
+        logger.log("[DMAInstQueue] ISR Reg[1] Updated");
+    } else {
+        throw std::runtime_error("DMAInstQueue: unsupported opcode in inst_retire");
+    }
+
     inst_buffer = DMAInstPacket{};  // Clear Inst Buffer
 };
 
@@ -187,7 +206,13 @@ bool SAInstQueue::inst_issue() {
     queue_state = InstQueueState::BUSY;
     logger.log("[SAInstQueue] Inst Issue Success: inst_id=%llu, opcode=0x%02x", (unsigned long long)inst_packet.inst_id, inst_packet.opcode);
 
-    // TODO: 写对应配置寄存器， 启动首个功能模块
+    // Update Event Sync Unit
+    event_sync_unit->issueUpdate(inst_packet);
+    // Write Config Register
+    writeReg(inst_packet);
+    // Start the First Functional Unit
+    PerfFunctionalUnit* sa = core->getUnit(UnitType::SystolicArray);
+    sa->execute();
 
     return true;
 };
@@ -303,8 +328,23 @@ void SAInstQueue::inst_retire() {
     queue_state = InstQueueState::IDLE;
     logger.log("[SAInstQueue] Inst Retire: state -> IDLE");
 
-    // TODO: 写同步控制模块/写中断
-    // Write Event Sync Unit Based on Inst Buffer
+    // Update Event Sync Unit
+    event_sync_unit->retireUpdate(inst_buffer);
+
+    // Write ISR
+    uint64_t isr_val = regfile.read(regfile.isr_reg_addr);
+    if(inst_buffer.opcode == 0x03) {
+        isr_val |= (1ULL << 2);
+        regfile.write(regfile.isr_reg_addr, isr_val);
+        logger.log("[SAInstQueue] ISR Reg[2] Updated");
+    } else if(inst_buffer.opcode == 0x04) {
+        isr_val |= (1ULL << 3);
+        regfile.write(regfile.isr_reg_addr, isr_val);
+        logger.log("[SAInstQueue] ISR Reg[3] Updated");
+    } else {
+        throw std::runtime_error("SAInstQueue: unsupported opcode in inst_retire");
+    }
+
     inst_buffer = SAInstPacket{};  // Clear Inst Buffer
 };
 
@@ -364,7 +404,13 @@ bool SFUInstQueue::inst_issue() {
     queue_state = InstQueueState::BUSY;
     logger.log("[SFUInstQueue] Inst Issue Success: inst_id=%llu, opcode=0x%02x", (unsigned long long)inst_packet.inst_id, inst_packet.opcode);
 
-    // TODO: 写对应配置寄存器， 启动首个功能模块
+    // Update Event Sync Unit
+    event_sync_unit->issueUpdate(inst_packet);
+    // Write Config Register
+    writeReg(inst_packet);
+    // Start the First Functional Unit
+    PerfFunctionalUnit* sfu = core->getUnit(UnitType::SFU);
+    sfu->execute();
 
     return true;
 };
@@ -394,12 +440,12 @@ void SFUInstQueue::writeReg(SFUInstPacket& inst_packet) {
 
     uint64_t config_sfu_rs1   = static_cast<uint64_t>(config) |
                                 (static_cast<uint64_t>(output_zeropoint) << 16) |
-                                (static_cast<uint64_t>(input_zeropoint));
+                                (static_cast<uint64_t>(input_zeropoint) << 32);
 
     uint64_t config_sfu_rs2   = static_cast<uint64_t>(input_scale) |
                                 (static_cast<uint64_t>(input_scaleshift) << 16) |
-                                (static_cast<uint64_t>(output_scale)) |
-                                (static_cast<uint64_t>(output_scaleshift));
+                                (static_cast<uint64_t>(output_scale) << 32) |
+                                (static_cast<uint64_t>(output_scaleshift) << 48);
 
     uint64_t compute_sfu_rs1  = static_cast<uint64_t>(input_addr) |
                                 (static_cast<uint64_t>(col_num) << 32) |
@@ -418,7 +464,18 @@ void SFUInstQueue::inst_retire() {
     queue_state = InstQueueState::IDLE;
     logger.log("[SFUInstQueue] Inst Retire: state -> IDLE");
 
-    // TODO: 写同步控制模块/写中断
-    // Write Event Sync Unit Based on Inst Buffer
+    // Update Event Sync Unit
+    event_sync_unit->retireUpdate(inst_buffer);
+
+    // Write ISR
+    uint64_t isr_val = regfile.read(regfile.isr_reg_addr);
+    if(inst_buffer.opcode == 0x05) {
+        isr_val |= (1ULL << 5);
+        regfile.write(regfile.isr_reg_addr, isr_val);
+        logger.log("[SFUInstQueue] ISR Reg[5] Updated");
+    } else {
+        throw std::runtime_error("SFUInstQueue: unsupported opcode in inst_retire");
+    }
+
     inst_buffer = SFUInstPacket{};  // Clear Inst Buffer
 };

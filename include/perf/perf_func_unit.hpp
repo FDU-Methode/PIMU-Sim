@@ -8,12 +8,12 @@
 #include "scratchpad.hpp"
 
 class PerfSim;
-class PipelineController;
+class PerfNpuCore;
 
 class PerfFunctionalUnit{
 protected:
     PerfSim* simulator;
-    PipelineController* controller;
+    PerfNpuCore* core;
     Config cfg;
     Logger& logger;
     RegFile& regfile;
@@ -29,7 +29,7 @@ protected:
     virtual void completeInstruction();
 
 public:
-    PerfFunctionalUnit(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
+    PerfFunctionalUnit(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg);
     virtual ~PerfFunctionalUnit() = default;
 
     // 状态查询
@@ -51,7 +51,7 @@ public:
 
 class DMA : public PerfFunctionalUnit{
 public:
-    DMA(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
+    DMA(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg);
     ~DMA() = default;
 
     void execute() override;
@@ -100,7 +100,7 @@ protected:
 
 class SystolicArray : public PerfFunctionalUnit{
 public:
-    SystolicArray(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
+    SystolicArray(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg);
     ~SystolicArray() = default;
 
     void execute() override;
@@ -126,7 +126,7 @@ protected:
 
 class Accumulator : public PerfFunctionalUnit{
 public:
-    Accumulator(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
+    Accumulator(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg);
     ~Accumulator() = default;
 
     void execute() override;
@@ -164,7 +164,7 @@ protected:
 
 class SFU : public PerfFunctionalUnit{
 public:
-    SFU(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
+    SFU(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg);
     ~SFU() = default;
 
     void execute() override;
@@ -210,7 +210,7 @@ protected:
 
 class GEMV : public PerfFunctionalUnit{
 public:
-    GEMV(PerfSim* sim, PipelineController* controller, Logger& logger, RegFile& regfile, const Config& cfg);
+    GEMV(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg);
     ~GEMV() = default;
 
     void execute() override;
