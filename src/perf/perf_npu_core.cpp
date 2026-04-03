@@ -64,11 +64,14 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     inst_cache->clear();
     logger.log("  Inst Cache created! Size=%d", cfg.inst_cache_size);
 
-    dma_1_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg);
-    dma_2_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg);
-    dma_3_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg);
-    sa_inst_queue    = std::make_unique<SAInstQueue>(logger, cfg);
-    sfu_inst_queue   = std::make_unique<SFUInstQueue>(logger, cfg);
+    event_sync_unit = std::make_unique<EventSyncUnit>(cfg, logger);
+    logger.log("  Event Sync created!");
+
+    dma_1_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg, reg_file, event_sync_unit.get());
+    dma_2_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg, reg_file, event_sync_unit.get());
+    dma_3_inst_queue = std::make_unique<DMAInstQueue>(logger, cfg, reg_file, event_sync_unit.get());
+    sa_inst_queue    = std::make_unique<SAInstQueue>(logger, cfg, reg_file, event_sync_unit.get());
+    sfu_inst_queue   = std::make_unique<SFUInstQueue>(logger, cfg, reg_file, event_sync_unit.get());
     dma_1_inst_queue->clear();
     dma_2_inst_queue->clear();
     dma_3_inst_queue->clear();

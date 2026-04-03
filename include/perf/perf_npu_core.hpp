@@ -12,6 +12,7 @@
 #include "inst_cache.hpp"
 #include "inst_queue.hpp"
 #include "decoder.hpp"
+#include "event_sync_unit.hpp"
 #include "../regfile.hpp"
 
 class PerfSim;
@@ -22,6 +23,7 @@ private:
     RegFile reg_file;
 
     std::unique_ptr<InstCache> inst_cache;
+    std::unique_ptr<EventSyncUnit> event_sync_unit;
     std::unique_ptr<DMAInstQueue> dma_1_inst_queue;
     std::unique_ptr<DMAInstQueue> dma_2_inst_queue;
     std::unique_ptr<DMAInstQueue> dma_3_inst_queue;

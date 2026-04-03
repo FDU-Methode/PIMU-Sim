@@ -6,7 +6,10 @@
 #include <vector>
 #include "../config.hpp"
 #include "../logger.hpp"
-#include "inst_queue.hpp"
+
+struct DMAInstPacket;
+struct SAInstPacket;
+struct SFUInstPacket;
 
 class EventSyncUnit {
 private:
@@ -32,8 +35,16 @@ public:
     bool allowIssue(const SAInstPacket& inst_packet);
     bool allowIssue(const SFUInstPacket& inst_packet);
 
-    bool updateValid(int bit, bool status);
-    bool updateBusy(int bit, bool status);
+    void issueUpdate(const DMAInstPacket& inst_packet);
+    void issueUpdate(const SAInstPacket& inst_packet);
+    void issueUpdate(const SFUInstPacket& inst_packet);
+
+    void retireUpdate(const DMAInstPacket& inst_packet);
+    void retireUpdate(const SAInstPacket& inst_packet);
+    void retireUpdate(const SFUInstPacket& inst_packet);
+
+    // bool updateValid(int bit, bool status);
+    // bool updateBusy(int bit, bool status);
 
 };
 

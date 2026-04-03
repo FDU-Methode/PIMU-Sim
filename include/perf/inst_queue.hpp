@@ -8,7 +8,9 @@
 #include "../util.hpp"
 #include "../config.hpp"
 #include "../logger.hpp"
+#include "../regfile.hpp"
 #include "inst_cache.hpp"
+#include "event_sync_unit.hpp"
 
 enum class InstQueueState {
     IDLE, BUSY
@@ -32,6 +34,7 @@ struct SAInstPacket {
 struct SFUInstPacket {
     uint8_t opcode = 0;
     Inst inst0{};
+    Inst inst1{};
     uint64_t inst_id = 0;
 };
 
@@ -40,6 +43,8 @@ template <typename InstPacketT>
 class InstQueue {
 protected:
     Logger& logger;
+    RegFile& regfile;
+    EventSyncUnit* event_sync_unit;
 
     std::string queue_name;
     InstQueueType queue_type;
@@ -56,9 +61,11 @@ protected:
 
     std::queue<InstPacketT> inst_queue;
 
+    InstPacketT inst_buffer;  // Store Current Issued Inst
+
 public:
-    InstQueue(const std::string& queue_name, InstQueueType queue_type, int inst_width, int queue_depth, int inst_count_upper, Logger& logger) : 
-            queue_name(queue_name), queue_type(queue_type), inst_width(inst_width), queue_depth(queue_depth), inst_count_upper(inst_count_upper), logger(logger) {};
+    InstQueue(const std::string& queue_name, InstQueueType queue_type, int inst_width, int queue_depth, int inst_count_upper, Logger& logger, RegFile& regfile, EventSyncUnit* event_sync_unit) : 
+            queue_name(queue_name), queue_type(queue_type), inst_width(inst_width), queue_depth(queue_depth), inst_count_upper(inst_count_upper), logger(logger), regfile(regfile), event_sync_unit(event_sync_unit) {};
 
     virtual ~InstQueue() = default;
     
@@ -71,6 +78,7 @@ public:
         }
 
         inst_packet = inst_queue.front();
+        inst_buffer = inst_packet;
         inst_queue.pop();
         current_inst_num--;
 
@@ -79,36 +87,11 @@ public:
         return true;
     };
 
-    virtual bool inst_issue(InstPacketT& inst_packet) {
-        if(queue_state == InstQueueState::BUSY) {
-            logger.log("[%s] Inst Issue Skipped: queue is busy", queue_name.c_str());
-            return false;
-        }
+    virtual bool inst_issue() = 0;
 
-        bool sync_allow_issue = true;  // TODO: 查询同步控制模块
-        if(!sync_allow_issue) {
-            logger.log("[%s] Inst Issue Blocked by Event Sync Unit", queue_name.c_str());
-            return false;
-        }
+    virtual void writeReg(InstPacketT& inst_packet) = 0;
 
-        if(!out_queue(inst_packet)) {
-            return false;
-        }
-
-        queue_state = InstQueueState::BUSY;
-        logger.log("[%s] Inst Issue Success: inst_id=%llu, opcode=0x%02x", queue_name.c_str(), (unsigned long long)inst_packet.inst_id, inst_packet.opcode);
-
-        // TODO: 写对应配置寄存器， 启动首个功能模块
-
-        return true;
-    };
-
-    virtual void inst_retire() {
-        queue_state = InstQueueState::IDLE;
-        logger.log("[%s] Inst Retire: state -> IDLE", queue_name.c_str());
-
-        // TODO: 写同步控制模块/写中断
-    };
+    virtual void inst_retire() = 0;
 
     virtual void clear() {
         current_inst_num = 0;
@@ -141,45 +124,23 @@ protected:
 };
 
 
+
+
 class DMAInstQueue : public InstQueue<DMAInstPacket> {
 private:
     DMAInstPacket inst_packet;
 
 public:
-    DMAInstQueue(Logger& logger, const Config& cfg) : 
-                InstQueue<DMAInstPacket>("DMAInstQueue", InstQueueType::DMA, 256, cfg.inst_queue_depth, 2, logger) {};
+    DMAInstQueue(Logger& logger, RegFile& regfile, const Config& cfg, EventSyncUnit* event_sync_unit) : 
+                InstQueue<DMAInstPacket>("DMAInstQueue", InstQueueType::DMA, 256, cfg.inst_queue_depth, 2, logger, regfile, event_sync_unit) {};
 
-    bool in_queue(const Inst& inst, uint8_t opcode) override {
-        if(full()) {
-            logger.log("[%s] In Queue Blocked: queue full", queue_name.c_str());
-            return false;
-        }
-
-        if(inst_count == 0) {
-            inst_packet = DMAInstPacket{};
-            inst_packet.opcode = opcode;
-            inst_packet.inst_id = inst_id_counter++;
-            inst_packet.inst0 = inst;
-        } else if(inst_count == 1) {
-            inst_packet.inst1 = inst;
-        } else {
-            throw std::runtime_error(queue_name + ": invalid inst_count");
-        }
-
-        inst_count++;
-        logger.log("[%s] In Queue: word=0x%016llx%016llx, inst_count=%d/%d", queue_name.c_str(), (unsigned long long)inst.high, 
-                    (unsigned long long)inst.low, inst_count, inst_count_upper);
-
-        if(inst_count == inst_count_upper) {
-            inst_push(inst_packet);
-            logger.log("[%s] Complete Instruction Push: inst_id=%llu, opcode=0x%02x, current_inst_num=%d", queue_name.c_str(), 
-                        (unsigned long long)inst_packet.inst_id, inst_packet.opcode, current_inst_num);
-            inst_packet = DMAInstPacket{};
-        }
-
-        return true;
-    }
+    bool in_queue(const Inst& inst, uint8_t opcode) override;
+    bool inst_issue() override;
+    void writeReg(DMAInstPacket& inst_packet) override;
+    void inst_retire() override;
 };
+
+
 
 
 class SAInstQueue : public InstQueue<SAInstPacket> {
@@ -187,42 +148,16 @@ private:
     SAInstPacket inst_packet{};
 
 public:
-    SAInstQueue(Logger& logger, const Config& cfg) : 
-                InstQueue<SAInstPacket>("SAInstQueue", InstQueueType::SA, 384, cfg.inst_queue_depth, 3, logger) {};
+    SAInstQueue(Logger& logger, RegFile& regfile, const Config& cfg, EventSyncUnit* event_sync_unit) : 
+                InstQueue<SAInstPacket>("SAInstQueue", InstQueueType::SA, 384, cfg.inst_queue_depth, 3, logger, regfile, event_sync_unit) {};
 
-    bool in_queue(const Inst& inst, uint8_t opcode) override {
-        if(full()) {
-            logger.log("[%s] In Queue Blocked: queue full", queue_name.c_str());
-            return false;
-        }
-
-        if(inst_count == 0) {
-            inst_packet = SAInstPacket{};
-            inst_packet.opcode = opcode;
-            inst_packet.inst_id = inst_id_counter++;
-            inst_packet.inst0 = inst;
-        } else if(inst_count == 1) {
-            inst_packet.inst1 = inst;
-        } else if(inst_count == 2) {
-            inst_packet.inst2 = inst;
-        } else {
-            throw std::runtime_error(queue_name + ": invalid inst_count");
-        }
-
-        inst_count++;
-        logger.log("[%s] In Queue : word=0x%016llx%016llx, inst_count=%d/%d", queue_name.c_str(), (unsigned long long)inst.high, 
-                    (unsigned long long)inst.low, inst_count, inst_count_upper);
-
-        if(inst_count == inst_count_upper) {
-            inst_push(inst_packet);
-            logger.log("[%s] Complete Instruction Push: inst_id=%llu, opcode=0x%02x, current_inst_num=%d", queue_name.c_str(), 
-                        (unsigned long long)inst_packet.inst_id, inst_packet.opcode, current_inst_num);
-            inst_packet = SAInstPacket{};
-        }
-
-        return true;
-    }
+    bool in_queue(const Inst& inst, uint8_t opcode) override;
+    bool inst_issue() override;
+    void writeReg(SAInstPacket& inst_packet) override;
+    void inst_retire() override;
 };
+
+
 
 
 class SFUInstQueue : public InstQueue<SFUInstPacket> {
@@ -230,33 +165,13 @@ private:
     SFUInstPacket inst_packet{};
 
 public:
-    SFUInstQueue(Logger& logger, const Config& cfg) : 
-                InstQueue<SFUInstPacket>("SFUInstQueue", InstQueueType::SFU, 128, cfg.inst_queue_depth, 1, logger) {};
+    SFUInstQueue(Logger& logger, RegFile& regfile, const Config& cfg, EventSyncUnit* event_sync_unit) : 
+                InstQueue<SFUInstPacket>("SFUInstQueue", InstQueueType::SFU, 256, cfg.inst_queue_depth, 2, logger, regfile, event_sync_unit) {};
 
-    bool in_queue(const Inst& inst, uint8_t opcode) override {
-        if(full()) {
-            logger.log("[%s] In Queue Blocked: queue full", queue_name.c_str());
-            return false;
-        }
-
-        inst_packet = SFUInstPacket{};
-        inst_packet.opcode = opcode;
-        inst_packet.inst_id = inst_id_counter++;
-        inst_packet.inst0 = inst;
-
-        inst_count++;
-        logger.log("[%s] In Queue : word=0x%016llx%016llx, inst_count=%d/%d", queue_name.c_str(), (unsigned long long)inst.high, 
-                    (unsigned long long)inst.low, inst_count, inst_count_upper);
-
-        if(inst_count == inst_count_upper) {
-            inst_push(inst_packet);
-            logger.log("[%s] Complete Instruction Push: inst_id=%llu, opcode=0x%02x, current_inst_num=%d", queue_name.c_str(), 
-                        (unsigned long long)inst_packet.inst_id, inst_packet.opcode, current_inst_num);
-            inst_packet = SFUInstPacket{};
-        }
-
-        return true;
-    }
+    bool in_queue(const Inst& inst, uint8_t opcode) override;
+    bool inst_issue() override;
+    void writeReg(SFUInstPacket& inst_packet) override;
+    void inst_retire() override;
 };
 
 

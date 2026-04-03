@@ -108,3 +108,7 @@
 - `EventSyncUnit`中需要确定同步控制方式
 
 - 下一步需要确定DMA分发机制，在发射和退休时调用`EventSyncUnit`，并在Core中从后向前实现整个流水线
+
+### 2026-04-02
+
+- 完善`EventSyncUnit`模块，修改`issue`
