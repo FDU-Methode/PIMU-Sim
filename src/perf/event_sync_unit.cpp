@@ -7,7 +7,7 @@ EventSyncUnit::EventSyncUnit(const Config& cfg, Logger& logger) : cfg(cfg), logg
         throw std::invalid_argument("Event Sync Unit: bank_num must be greater than 0");
     }
     spm_bank_num = cfg.sram_bank_num;
-    spm_bank_bytes = cfg.sram_bytes;
+    spm_bank_bytes = cfg.sram_bank_bytes;
     acc_bank_num = cfg.acc_bank_num;
     bias_bank_num = cfg.bias_bank_num;
     acc_bytes = cfg.acc_bytes;

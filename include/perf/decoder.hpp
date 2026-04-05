@@ -7,6 +7,10 @@
 #include "inst_cache.hpp"
 #include "inst_queue.hpp"
 
+enum class DMATarget {
+    NONE, DMA1, DMA2, DMA3
+};
+
 struct DecodedLine {
     Inst inst{};
     InstType type = InstType::NONE;

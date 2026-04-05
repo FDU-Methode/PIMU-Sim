@@ -43,10 +43,10 @@ void SystolicArray::tick(){
 
     if(remaining_start_acc_cycles == 0) {
         if(!acc_started) {
-            PerfFunctionalUnit* acc = core->getUnit(UnitType::Accumulator);
+            auto* acc = dynamic_cast<Accumulator*>(core->getUnit(UnitType::Accumulator));
             assert(acc && acc->isIdle());
             logger.log("  [SystolicArray] start Accumulator");
-            acc->execute();
+            acc->execute(0x03);
             acc_started = true;
             remaining_start_acc_cycles = -1;
         }

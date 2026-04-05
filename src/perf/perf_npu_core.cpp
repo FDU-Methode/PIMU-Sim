@@ -68,11 +68,11 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     event_sync_unit = std::make_unique<EventSyncUnit>(cfg, logger);
     logger.log("  Event Sync created!");
 
-    dma_1_inst_queue = std::make_unique<DMAInstQueue>(logger, reg_file, cfg, event_sync_unit.get());
-    dma_2_inst_queue = std::make_unique<DMAInstQueue>(logger, reg_file, cfg, event_sync_unit.get());
-    dma_3_inst_queue = std::make_unique<DMAInstQueue>(logger, reg_file, cfg, event_sync_unit.get());
-    sa_inst_queue    = std::make_unique<SAInstQueue>(logger, reg_file, cfg, event_sync_unit.get());
-    sfu_inst_queue   = std::make_unique<SFUInstQueue>(logger, reg_file, cfg, event_sync_unit.get());
+    dma_1_inst_queue = std::make_unique<DMAInstQueue>(this, logger, reg_file, cfg, event_sync_unit.get(), 1);
+    dma_2_inst_queue = std::make_unique<DMAInstQueue>(this, logger, reg_file, cfg, event_sync_unit.get(), 2);
+    dma_3_inst_queue = std::make_unique<DMAInstQueue>(this, logger, reg_file, cfg, event_sync_unit.get(), 3);
+    sa_inst_queue    = std::make_unique<SAInstQueue>(this, logger, reg_file, cfg, event_sync_unit.get());
+    sfu_inst_queue   = std::make_unique<SFUInstQueue>(this, logger, reg_file, cfg, event_sync_unit.get());
     dma_1_inst_queue->clear();
     dma_2_inst_queue->clear();
     dma_3_inst_queue->clear();
@@ -89,15 +89,19 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     logger.log("  Decoder created!");
 
     // Create Function Unit
-    dma  = std::make_unique<DMA>(sim, this, logger, reg_file, cfg);
-    sa   = std::make_unique<SystolicArray>(sim, this, logger, reg_file, cfg);
-    acc  = std::make_unique<Accumulator>(sim, this, logger, reg_file, cfg);
-    sfu  = std::make_unique<SFU>(sim, this, logger, reg_file, cfg);
-    gemv = std::make_unique<GEMV>(sim, this, logger, reg_file, cfg);
-    logger.log("  DMA created!");
+    dma_1  = std::make_unique<DMA>(sim, this, logger, reg_file, cfg);
+    logger.log("  DMA 1 created!");
+    dma_2  = std::make_unique<DMA>(sim, this, logger, reg_file, cfg);
+    logger.log("  DMA 2 created!");
+    dma_3  = std::make_unique<DMA>(sim, this, logger, reg_file, cfg);
+    logger.log("  DMA 3 created!");
+    sa     = std::make_unique<SystolicArray>(sim, this, logger, reg_file, cfg);
     logger.log("  SystolicArray created!");
+    acc    = std::make_unique<Accumulator>(sim, this, logger, reg_file, cfg);
     logger.log("  Accumulator created!");
+    sfu    = std::make_unique<SFU>(sim, this, logger, reg_file, cfg);
     logger.log("  SFU created!");
+    gemv   = std::make_unique<GEMV>(sim, this, logger, reg_file, cfg);
     logger.log("  GEMV created!");
 
     spm = std::make_unique<Scratchpad>(logger, cfg);
@@ -187,112 +191,160 @@ bool PerfNpuCore::loadInstToCache() {
 }
 
 
-void PerfNpuCore::WriteRegStage(){
-    if(state != IDLE) return;
+void PerfNpuCore::handleInterrupts() {
+    uint64_t mer_val = reg_file.read(reg_file.mer_reg_addr);
+    uint64_t ier_val = reg_file.read(reg_file.ier_reg_addr);
+    uint64_t isr_val = reg_file.read(reg_file.isr_reg_addr);
+    uint64_t iar_val = reg_file.read(reg_file.iar_reg_addr);
 
-    // 这里假设你当前把 WriteRegStage 当成 decoder/consumer 入口
-    // 如果你有独立 decoder，就把下面 read_inst() 挪到 decoder 里
-    Inst inst{};
-    if(!inst_cache->read_inst(inst)) {
-        logger.log("WriteRegStage: inst cache empty");
-        return;
+    // Clear Interrupt Status Bits
+    if(iar_val != 0) {
+        uint64_t new_isr_val = isr_val & (~iar_val);
+        reg_file.write(reg_file.isr_reg_addr, new_isr_val);
+        reg_file.write(reg_file.iar_reg_addr, 0);
+
+        logger.log("[Core] Clear IRQ: IAR=0x%lx, new ISR=0x%lx", iar_val, new_isr_val);
+        isr_val = new_isr_val;
+        iar_val = 0;
     }
 
-    // TODO:
-    // 在这里把 inst_word 送给 decoder
-    // 例如：
-    // decoder.decode(inst_word, reg_file, ...);
+    // Recompute Pending Interrupt
+    bool global_irq_enable = (mer_val & 0x1ULL) != 0;
+    uint64_t ipr_val = global_irq_enable ? (isr_val & ier_val) : 0;
 
+    reg_file.write(reg_file.ipr_reg_addr, ipr_val);
+    irq = (ipr_val != 0);
 
-    // // Inst inst = instMemory[pc];
-    // // reg_file.write(inst.reg_addr, inst.inst_data);
-    // // logger.log("WriteRegStage: Write Reg addr: 0x%x, Data: 0x%lx", inst.reg_addr, inst.inst_data);
-
-    // // // 如果是启动寄存器，则将状态置为 BUSY，等待完成中断
-    // // if(inst.reg_addr == reg_file.start_reg_addr) {state = BUSY; opcode = inst.inst_data;}
-
-    pc++;
-}
-
-
-void PerfNpuCore::ExecuteStage(){
-    if(state != BUSY) return;
-
-    if(pipeline_controller->isBusy()){
-        logger.log("ExecuteStage: waiting for completion");
-        pipeline_controller->tick();
-    } else if(pipeline_controller->isIdle()){
-        logger.log("ExecuteStage: 1");
-        logger.log("ExecuteStage: start task execution");
-        pipeline_controller->execute();
-    } else if(pipeline_controller->isFinish()){
-        pipeline_controller->setIdle();
+    if(irq) {
+        reg_file.write(reg_file.iar_reg_addr, ipr_val);
+        logger.log("[Core] Detect IRQ Pending: ISR=0x%lx, IER=0x%lx, IPR=0x%lx, Write IAR=0x%lx", isr_val, ier_val, ipr_val, ipr_val);
     }
 }
 
 
-void PerfNpuCore::UpdataRegStage(){
-    uint64_t read_mer_data = reg_file.read(reg_file.mer_reg_addr);
-    uint64_t read_ier_data = reg_file.read(reg_file.ier_reg_addr);
-
-    if(!(read_mer_data == 0x1 && read_ier_data == 0x3f)) {irq = false; return;}
-
-    uint64_t read_isr_data = reg_file.read(reg_file.isr_reg_addr);;
-    uint64_t ipr_val = 0;
-
-    auto get_active_bits_str = [](uint64_t data) -> std::string {
-        std::string str = "";
-        for (int i = 0; i < 64; ++i) {
-            if ((data >> i) & 0x1) {
-                if (!str.empty()) {
-                    str += ", ";
-                }
-                str += std::to_string(i);
-            }
-        }
-        return str;
-    };
-
-    if(state == BUSY){
-        if(read_isr_data != 0){ // 硬件执行完成，产生活跃中断信号
-            std::string isr_str = get_active_bits_str(read_isr_data);
-            logger.log("UpdataRegStage: Detected ISR Interrupt bit [%s] at cycle %d", isr_str.c_str(), getCycle());
-
-            // ISR 与 IER 进行逻辑与，写入 IPR 寄存器
-            ipr_val = read_isr_data & read_ier_data;
-            reg_file.write(reg_file.ipr_reg_addr, ipr_val);
-            logger.log("  Write IPR Reg addr: 0x%x, Data: 0x%lx", reg_file.ipr_reg_addr, ipr_val);
-        } else{
-            reg_file.write(reg_file.ipr_reg_addr, 0);
-        }
-    } else if(state == DONE){
-        uint64_t read_iar_data = reg_file.read(reg_file.iar_reg_addr);
-        if(read_iar_data != 0){
-            std::string iar_str = get_active_bits_str(read_iar_data);
-            logger.log("UpdataRegStage: IAR received for bits [%s]", iar_str.c_str());
-
-            // 清除 ISR 对应标志位
-            uint64_t new_isr_val = read_isr_data & (~read_iar_data);
-            reg_file.write(reg_file.isr_reg_addr, new_isr_val);
-            // 更新 IPR 对应标志位
-            ipr_val = new_isr_val & read_ier_data;
-            reg_file.write(reg_file.ipr_reg_addr, ipr_val);
-            // 自清除 IAR
-            reg_file.write(reg_file.iar_reg_addr, 0);
-
+void PerfNpuCore::issueInstQueues() {
+    // Issue Priority: SA > SFU > DMA
+    if(sa_inst_queue->isIdle() && sa->isIdle() && acc->isIdle()) {
+        if(sa_inst_queue->inst_issue()) {
+            logger.log("[Core] SA Queue Issued");
         }
     }
 
-    // 中断信号 irq
-    irq = ipr_val != 0;
+    if(sfu_inst_queue->isIdle() && sfu->isIdle()) {
+        if(sfu_inst_queue->inst_issue()) {
+            logger.log("[Core] SFU Queue Issued");
+        }
+    }
+
+    if(dma_1_inst_queue->isIdle() && dma_1->isIdle()) {
+        if(dma_1_inst_queue->inst_issue()) {
+            logger.log("[Core] DMA 1 Queue Issued");
+        }
+    }
+
+    if(dma_2_inst_queue->isIdle() && dma_2->isIdle()) {
+        if(dma_2_inst_queue->inst_issue()) {
+            logger.log("[Core] DMA 2 Queue Issued");
+        }
+    }
+
+    if(dma_3_inst_queue->isIdle() && dma_3->isIdle()) {
+        if(dma_3_inst_queue->inst_issue()) {
+            logger.log("[Core] DMA 3 Queue Issued");
+        }
+    }
 }
+
+
+void PerfNpuCore::retireInstQueues() {
+    if(dma_1->isFinish()) {
+        dma_1_inst_queue->inst_retire();
+        dma_1->setIdle();
+        logger.log("[Core] DMA 1 Instruction Retired");
+    }
+
+    if(dma_2->isFinish()) {
+        dma_2_inst_queue->inst_retire();
+        dma_2->setIdle();
+        logger.log("[Core] DMA 2 Instruction Retired");
+    }
+
+    if(dma_3->isFinish()) {
+        dma_3_inst_queue->inst_retire();
+        dma_3->setIdle();
+        logger.log("[Core] DMA 3 Instruction Retired");
+    }
+
+    if(sa->isFinish()) {
+        sa->setIdle();
+        logger.log("[Core] SA Finished");
+    }
+
+    if(acc->isFinish()) {
+        sa_inst_queue->inst_retire();
+        acc->setIdle();
+        logger.log("[Core] SA Instruction Retired");
+    }
+
+    if(sfu->isFinish()) {
+        sfu_inst_queue->inst_retire();
+        sfu->setIdle();
+        logger.log("[Core] SFU Instruction Retired");
+    }
+
+    if(gemv->isFinish()) {
+        gemv->setIdle();
+    }
+}
+
+
+bool PerfNpuCore::isBusy() {
+    return
+        !inst_file_done ||
+        !inst_cache->empty() ||
+        decoder->fetchBufferValid() ||
+        decoder->decodeBufferValid() ||
+        (decoder->currentInstType() != InstType::NONE) ||
+
+        !dma_1_inst_queue->empty() || dma_1_inst_queue->isBusy() ||
+        !dma_2_inst_queue->empty() || dma_2_inst_queue->isBusy() ||
+        !dma_3_inst_queue->empty() || dma_3_inst_queue->isBusy() ||
+        !sa_inst_queue->empty()    || sa_inst_queue->isBusy()    ||
+        !sfu_inst_queue->empty()   || sfu_inst_queue->isBusy()   ||
+
+        dma_1->isBusy()  || dma_1->isFinish() ||
+        dma_2->isBusy()  || dma_2->isFinish() ||
+        dma_3->isBusy()  || dma_3->isFinish() ||
+        sa->isBusy()     || sa->isFinish()    ||
+        acc->isBusy()    || acc->isFinish()   ||
+        sfu->isBusy()    || sfu->isFinish()   ||
+        gemv->isBusy()   || gemv->isFinish()  ||
+
+        !outbox_.empty() || !inbox_.empty();
+}
+
 
 void PerfNpuCore::tick(){
     logger.log("NPU Core is ticked at cycle %d", getCycle());
 
-    loadInstToCache();
+    // 1. Handle Irq
+    handleInterrupts();
 
-    // Connect DMA To DDR
+    // 2. Set SPM && ACC SRAM Idle
+    spm->clearPorts();
+    Scratchpad* acc_sram = getAccSram();
+    acc_sram->clearPorts();
+
+    // 3. Tick Function Unit
+    if(dma_1->isBusy())    dma_1->tick();
+    if(dma_2->isBusy())    dma_2->tick();
+    if(dma_3->isBusy())    dma_3->tick();
+    if(sa->isBusy())       sa->tick();
+    if(acc->isBusy())      acc->tick();
+    if(sfu->isBusy())      sfu->tick();
+    if(gemv->isBusy())     gemv->tick();
+
+    // 4. Connect DMA To DDR
     while(!outbox_.empty()){
         Message& req = outbox_.front();
         auto DDR = sim->getDDR();
@@ -306,57 +358,46 @@ void PerfNpuCore::tick(){
         outbox_.pop();
     }
 
-    // Set SPM && ACC SRAM Idle
-    spm->clearPorts();
-    Scratchpad* acc_sram = getAccSram();
-    acc_sram->clearPorts();
+    // 5. Sample Util Tracker
+    HardWareUtilizationTracker::ModuleState state{};
+    state.dma1      = dma_1->isBusy();
+    state.dma2      = dma_2->isBusy();
+    state.dma3      = dma_3->isBusy();
+    state.spm        = spm->isBusy();
+    state.sa         = sa->isBusy();
+    state.acc        = acc->isBusy();
+    state.acc_sram   = (acc_sram != nullptr) ? acc_sram->isBusy() : false;
+    state.sfu        = sfu->isBusy();
+    state.gemv       = gemv->isBusy();
 
-    // 执行指令
-    ExecuteStage();
-    UpdataRegStage();
-    WriteRegStage();
+    util_tracker->sample(state);
+
+    // 6. Issue Inst Queue
+    issueInstQueues();
+
+    // 7. Tick Decoder
+    decoder->tick();
+
+    // 8. Load Inst To Cache
+    loadInstToCache();
+
+    // 9. Inst Retire
+    retireInstQueues();
 
     _cycle++;
-
-    // 处理中断
-    if(state == BUSY){
-        if(!irq) return;
-        else{
-            logger.log("Simulator Detectes an irq signal at cycle %d", getCycle());
-            // 读取 IPR 寄存器
-            uint64_t read_ipr_data = reg_file.read(reg_file.ipr_reg_addr);
-            // 比较 IPR 寄存器值 与 opcode
-            if(read_ipr_data != opcode){
-                logger.log("Error: IPR Reg does not match expected opcode %d", opcode);
-                std::cout << "ipr val: " << read_ipr_data << " opcode: " << opcode << std::endl;
-                throw std::runtime_error("IPR Reg does not match expected opcode");
-            } else{
-                logger.log("  IPR Reg matches expected opcode %d", opcode);
-                reg_file.write(reg_file.iar_reg_addr, opcode);
-                state = DONE;
-            }
-        }
-    } else if(state == DONE){
-        if(irq) return;
-        else{
-            logger.log("IRQ signal successfully cleared at cycle %d", getCycle());
-            state = IDLE;
-        }
-    }
 
     checkCompletion();
 }
 
 
 void PerfNpuCore::checkCompletion(){
-    if(inst_file_done && inst_cache->empty() && state == IDLE) {
+    if(!isBusy()) {
         _stats.isDone = true;
-        _cycle --;
         _stats.cycle = getCycle();
-        _stats.inst_num = pc;
+        _stats.inst_num = fetched_inst_num;
         logger.log("NPU Core: Simulation completed at cycle %d", getCycle());
     } else if(_cycle >= cfg.max_sim_cycle-1){
-        _stats.inst_num = pc;
+        _stats.inst_num = fetched_inst_num;
         logger.log("NPU Core: Simulation timeout at cycle %d", getCycle());
     }
 }
@@ -364,12 +405,14 @@ void PerfNpuCore::checkCompletion(){
 
 PerfFunctionalUnit* PerfNpuCore::getUnit(UnitType name) {
     switch(name) {
-        case UnitType::DMA           : return dma.get();
-        case UnitType::SystolicArray : return sa.get();
-        case UnitType::Accumulator   : return acc.get();
-        case UnitType::SFU           : return sfu.get();
-        case UnitType::GEMV          : return gemv.get();
-        default                      : return nullptr;
+        case UnitType::DMA1           : return dma_1.get();
+        case UnitType::DMA2           : return dma_2.get();
+        case UnitType::DMA3           : return dma_3.get();
+        case UnitType::SystolicArray  : return sa.get();
+        case UnitType::Accumulator    : return acc.get();
+        case UnitType::SFU            : return sfu.get();
+        case UnitType::GEMV           : return gemv.get();
+        default                       : return nullptr;
     }
 }
 

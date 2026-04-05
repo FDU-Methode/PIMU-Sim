@@ -1,3 +1,4 @@
+#include <cassert>
 #include "../../include/perf/inst_queue.hpp"
 #include "../../include/perf/perf_npu_core.hpp"
 
@@ -67,10 +68,26 @@ bool DMAInstQueue::inst_issue() {
     // Write Config Register
     writeReg(inst_packet);
     // Start the First Functional Unit
-    PerfFunctionalUnit* dma = core->getUnit(UnitType::DMA);
-    dma->execute();
+    DMA* dma = nullptr;
+    switch(queue_id) {
+        case 1: {
+            dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA1));
+            break;
+        }
+        case 2: {
+            dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA2));
+            break;
+        }
+        case 3: {
+            dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA3));
+            break;
+        }
+        default: throw std::runtime_error("[DMAInstQueue] No Valid Queue ID");
+    }
+    dma->execute(inst_packet.opcode);
 
     return true;
+
 };
 
 
@@ -192,6 +209,11 @@ bool SAInstQueue::inst_issue() {
         return false;
     }
 
+    if(inst_queue.empty()) {
+        logger.log("[SAInstQueue] Inst Issue Skipped: queue is empty");
+        return false;
+    }
+
     SAInstPacket inst_packet = inst_queue.front();
     bool sync_allow_issue = event_sync_unit->allowIssue(inst_packet);
     if(!sync_allow_issue) {
@@ -211,8 +233,16 @@ bool SAInstQueue::inst_issue() {
     // Write Config Register
     writeReg(inst_packet);
     // Start the First Functional Unit
-    PerfFunctionalUnit* sa = core->getUnit(UnitType::SystolicArray);
-    sa->execute();
+    if(inst_packet.opcode == 0x03) {
+        PerfFunctionalUnit* sa = core->getUnit(UnitType::SystolicArray);
+        sa->execute();
+    } else if(inst_packet.opcode == 0x04) {
+        auto* acc = dynamic_cast<Accumulator*>(core->getUnit(UnitType::Accumulator));
+        assert(acc && "[SAInstQueue] Accumulator is NULL");
+        acc->execute(inst_packet.opcode);
+    } else {
+        throw std::runtime_error("[SAInstQueue] Not Correct Opcode");
+    }
 
     return true;
 };
@@ -251,37 +281,37 @@ void SAInstQueue::writeReg(SAInstPacket& inst_packet) {
 
         uint64_t cfg_compute_rs1 = 0;
         cfg_compute_rs1    |= static_cast<uint64_t>(config_1);
-        cfg_compute_rs1    |= static_cast<uint64_t>((config_2 & 0x3F) << 24);
-        cfg_compute_rs1    |= static_cast<uint64_t>(input_a_zeropoint << 32);
-        cfg_compute_rs1    |= static_cast<uint64_t>(input_b_zeropoint << 48);
+        cfg_compute_rs1    |= (static_cast<uint64_t>(config_2 & 0x3F) << 24);
+        cfg_compute_rs1    |= (static_cast<uint64_t>(input_a_zeropoint) << 32);
+        cfg_compute_rs1    |= (static_cast<uint64_t>(input_b_zeropoint) << 48);
 
         uint64_t cfg_compute_rs2 = 0;
         cfg_compute_rs2    |= static_cast<uint64_t>(output_zeropoint);
-        cfg_compute_rs2    |= static_cast<uint64_t>(output_scale << 32);
-        cfg_compute_rs2    |= static_cast<uint64_t>(output_scaleshift << 48);
+        cfg_compute_rs2    |= (static_cast<uint64_t>(output_scale) << 32);
+        cfg_compute_rs2    |= (static_cast<uint64_t>(output_scaleshift) << 48);
 
         uint64_t cfg_accumulate_rs1 = 0;
         cfg_accumulate_rs1 |= static_cast<uint64_t>(biaspsum_addr);
-        cfg_accumulate_rs1 |= static_cast<uint64_t>(biaspsum_stride << 32);
-        cfg_accumulate_rs1 |= static_cast<uint64_t>(biaspsum_width << 48);
-        cfg_accumulate_rs1 |= static_cast<uint64_t>(biaspsum_height << 56);
+        cfg_accumulate_rs1 |= (static_cast<uint64_t>(biaspsum_stride) << 32);
+        cfg_accumulate_rs1 |= (static_cast<uint64_t>(biaspsum_width) << 48);
+        cfg_accumulate_rs1 |= (static_cast<uint64_t>(biaspsum_height) << 56);
 
         uint64_t cfg_accumulate_rs2 = 0;
         cfg_accumulate_rs2 |= static_cast<uint64_t>(output_addr);
-        cfg_accumulate_rs2 |= static_cast<uint64_t>(output_stride << 32);
-        cfg_accumulate_rs2 |= static_cast<uint64_t>(((config_2 >> 7) & 0x7F) << 48);
+        cfg_accumulate_rs2 |= (static_cast<uint64_t>(output_stride) << 32);
+        cfg_accumulate_rs2 |= (static_cast<uint64_t>((config_2 >> 7) & 0x7F) << 48);
 
         uint64_t compute_sa_rs1 = 0;
         compute_sa_rs1     |= static_cast<uint64_t>(input_a_addr);
-        compute_sa_rs1     |= static_cast<uint64_t>(input_a_col_num << 32);
-        compute_sa_rs1     |= static_cast<uint64_t>(input_a_row_num << 43);
-        compute_sa_rs1     |= static_cast<uint64_t>(input_a_stride << 48);
+        compute_sa_rs1     |= (static_cast<uint64_t>(input_a_col_num) << 32);
+        compute_sa_rs1     |= (static_cast<uint64_t>(input_a_row_num) << 43);
+        compute_sa_rs1     |= (static_cast<uint64_t>(input_a_stride) << 48);
 
         uint64_t compute_sa_rs2 = 0;
         compute_sa_rs2     |= static_cast<uint64_t>(input_b_addr);
-        compute_sa_rs2     |= static_cast<uint64_t>(input_b_col_num << 32);
-        compute_sa_rs2     |= static_cast<uint64_t>(input_b_row_num << 37);
-        compute_sa_rs2     |= static_cast<uint64_t>(input_b_stride << 48);
+        compute_sa_rs2     |= (static_cast<uint64_t>(input_b_col_num) << 32);
+        compute_sa_rs2     |= (static_cast<uint64_t>(input_b_row_num) << 37);
+        compute_sa_rs2     |= (static_cast<uint64_t>(input_b_stride) << 48);
 
         regfile.write(regfile.config_compute_rs1_reg_addr, cfg_compute_rs1);
         regfile.write(regfile.config_compute_rs2_reg_addr, cfg_compute_rs2);
@@ -311,8 +341,8 @@ void SAInstQueue::writeReg(SAInstPacket& inst_packet) {
 
         uint64_t cfg_compute_rs2 = 0;
         cfg_compute_rs2 |= static_cast<uint64_t>(output_zeropoint);
-        cfg_compute_rs2 |= static_cast<uint64_t>(output_scale << 32);
-        cfg_compute_rs2 |= static_cast<uint64_t>(output_shift << 48);
+        cfg_compute_rs2 |= (static_cast<uint64_t>(output_scale) << 32);
+        cfg_compute_rs2 |= (static_cast<uint64_t>(output_shift) << 48);
 
         regfile.write(regfile.compute_matadd_rs1_reg_addr, compute_matadd_rs1);
         regfile.write(regfile.compute_matadd_rs2_reg_addr, compute_matadd_rs2);
@@ -387,6 +417,11 @@ bool SFUInstQueue::in_queue(const Inst& inst, uint8_t opcode) {
 bool SFUInstQueue::inst_issue() {
     if(queue_state == InstQueueState::BUSY) {
         logger.log("[SFUInstQueue] Inst Issue Skipped: queue is busy");
+        return false;
+    }
+
+    if(inst_queue.empty()) {
+        logger.log("[SFUInstQueue] Inst Issue Skipped: queue is empty");
         return false;
     }
 

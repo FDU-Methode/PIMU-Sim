@@ -54,10 +54,13 @@ public:
     DMA(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg);
     ~DMA() = default;
 
-    void execute() override;
+    void execute() override;  // Not Used
+    void execute(uint8_t opcode);
     void tick() override;
 
 protected:
+    DMATaskType current_task = DMATaskType::NONE;
+
     bool mvin_start = false;
     bool mvout_start = false;
     MsgType expectedMsgType;
@@ -129,7 +132,8 @@ public:
     Accumulator(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg);
     ~Accumulator() = default;
 
-    void execute() override;
+    void execute() override;  // Not Used
+    void execute(uint8_t opcode);
     void tick() override;
 
     Scratchpad* getScratchpad() { return acc_sram.get(); }
@@ -137,6 +141,8 @@ public:
 protected:
     // ACC SRAM
     std::unique_ptr<Scratchpad> acc_sram;
+
+    SATaskType current_task = SATaskType::NONE;
 
     bool matadd_start = false;
     bool sa_start = false;

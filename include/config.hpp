@@ -48,7 +48,7 @@ struct Config{
 
     // SPM Config
     int sram_bank_num = 8;
-    int sram_bytes = 262144;
+    int sram_bank_bytes = 262144;
     int sram_ports = 2;
     int sram_data_width = 8;
 

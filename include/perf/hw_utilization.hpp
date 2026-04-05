@@ -13,7 +13,7 @@ private:
     Logger& logger;
 
     double core_freq_ghz = 1.0;
-    static constexpr int UnitNum = 7;
+    static constexpr int UnitNum = 10;
     int total_cycles = 0;
     std::array<int, UnitNum> busy_cycles{};
 
@@ -41,7 +41,9 @@ public:
     ~HardWareUtilizationTracker() = default;
 
     struct ModuleState {  // true - busy, false - not busy
-        bool dma      = false;
+        bool dma1     = false;
+        bool dma2     = false;
+        bool dma3     = false;
         bool spm      = false;
         bool sa       = false;
         bool acc      = false;

@@ -57,7 +57,7 @@ ddr_request_queue_depth = 8    # DRAM request queue depth
 
 # ---- SRAM Configuration ----
 sram_bank_num = 8
-sram_bytes = 131072
+sram_bank_bytes = 131072
 sram_ports = 2
 sram_data_width = 8
 

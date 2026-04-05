@@ -220,11 +220,21 @@ void DMA::tick(){
 
 }
 
-void DMA::execute(){
+void DMA::execute() {
+    logger.log("[DMA][ERROR] execute() without opcode is no longer supported");
+    assert(false && "DMA::execute(uint8_t opcode) should be used");
+}
+
+void DMA::execute(uint8_t opcode){
     assert(!isBusy() && !isFinish());
     assert(state == State::IDLE);
 
     state = State::BUSY;
+
+    // Store Task Type
+    if(opcode == 0x01) current_task = DMATaskType::MVIN;
+    else if(opcode == 0x02) current_task = DMATaskType::MVOUT;
+    else throw std::runtime_error("[DMA] Unsupported Opcode");
 
     resp_done = false;
     row_beat_plan.clear();
@@ -235,9 +245,8 @@ void DMA::execute(){
     current_burst_idx = 0;
     current_burst_beats_remaining = 0;
 
-    uint64_t start_reg = regfile.read(regfile.start_reg_addr);
-    mvin_start  = (start_reg & (1ULL << 0)) != 0;
-    mvout_start = (start_reg & (1ULL << 1)) != 0;
+    mvin_start  = (current_task == DMATaskType::MVIN);
+    mvout_start = (current_task == DMATaskType::MVOUT);
 
     Message req{};
     uint64_t cfg_word = 0;
@@ -284,8 +293,8 @@ void DMA::execute(){
         req.data_size = sizes.dram_bytes;
 
         req.quant = ((cfg_word >> 4) & 0x1) != 0;
-        req.src_addr = (uint32_t)(regfile.read(regfile.mvout_rs1_reg_addr) & 0xFFFFFFFF);
-        req.dst_addr = (uint32_t)(regfile.read(regfile.mvout_rs2_reg_addr) & 0xFFFFFFFF);
+        req.src_addr = (uint32_t)(regfile.read(regfile.mvout_rs2_reg_addr) & 0xFFFFFFFF);
+        req.dst_addr = (uint32_t)(regfile.read(regfile.mvout_rs1_reg_addr) & 0xFFFFFFFF);
         expectedMsgType = MsgType::ST_RESP;
 
         logger.log("[DMA] MVOUT: send ST_REQ, src=0x%x dst=0x%x rows=%d cols=%d dram_stride=%d sram_stride=%d dram_bytes=%d local_bytes=%d source=%s quant=%d",
@@ -294,7 +303,7 @@ void DMA::execute(){
                    source ? "ACC" : "SPM", req.quant ? 1 : 0);
 
     } else{
-        logger.log("[DMA][ERROR] Invalid start_reg for DMA: 0x%lx", start_reg);
+        logger.log("[DMA][ERROR] Invalid DMATaskType for DMA");
         assert(false && "DMA execute requires exactly one of MVIN/MVOUT");
     }
 
@@ -341,21 +350,7 @@ void DMA::completeInstruction(){
     current_burst_idx = 0;
     current_burst_beats_remaining = 0;
 
-    // Update ISR Reg
-    assert((mvin_start || mvout_start) && "DMA No ISR Reg Write");
-    uint64_t isr_val = regfile.read(regfile.isr_reg_addr);
-
-    if(mvin_start) {
-        isr_val |= (1ULL << 0);
-        regfile.write(regfile.isr_reg_addr, isr_val);
-        logger.log("[DMA] ISR Reg[0] Updated");
-        mvin_start = false;
-    }
-
-    if(mvout_start) {
-        isr_val |= (1ULL << 1);
-        regfile.write(regfile.isr_reg_addr, isr_val);
-        logger.log("[DMA] ISR Reg[1] Updated");
-        mvout_start = false;
-    }
+    mvin_start = false;
+    mvout_start = false;
+    current_task = DMATaskType::NONE;
 }

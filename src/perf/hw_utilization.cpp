@@ -26,7 +26,9 @@ void HardWareUtilizationTracker::reset() {
 
 void HardWareUtilizationTracker::sample(const ModuleState& state) {
     ++total_cycles;
-    if (state.dma)      ++busy_cycles[UnitTypeToIndex(UnitType::DMA)];
+    if (state.dma1)     ++busy_cycles[UnitTypeToIndex(UnitType::DMA1)];
+    if (state.dma2)     ++busy_cycles[UnitTypeToIndex(UnitType::DMA2)];
+    if (state.dma3)     ++busy_cycles[UnitTypeToIndex(UnitType::DMA3)];
     if (state.spm)      ++busy_cycles[UnitTypeToIndex(UnitType::SPM)];
     if (state.sa)       ++busy_cycles[UnitTypeToIndex(UnitType::SystolicArray)];
     if (state.acc)      ++busy_cycles[UnitTypeToIndex(UnitType::Accumulator)];
@@ -104,7 +106,7 @@ void HardWareUtilizationTracker::report() {
     emit(border1);
 
     const UnitType units[] = {
-        UnitType::DMA, UnitType::SPM, UnitType::SystolicArray,
+        UnitType::DMA1, UnitType::DMA2, UnitType::DMA3, UnitType::SPM, UnitType::SystolicArray,
         UnitType::Accumulator, UnitType::AccSram, UnitType::SFU, UnitType::GEMV
     };
 

@@ -34,7 +34,9 @@ private:
     std::unique_ptr<Decoder> decoder;
 
     // Function Unit
-    std::unique_ptr<DMA> dma;
+    std::unique_ptr<DMA> dma_1;
+    std::unique_ptr<DMA> dma_2;
+    std::unique_ptr<DMA> dma_3;
     std::unique_ptr<SystolicArray> sa;
     std::unique_ptr<Accumulator> acc;
     std::unique_ptr<SFU> sfu;
@@ -64,13 +66,12 @@ public:
     bool recvMsg(Message& msg) override;
 
     void openInstFile(const std::string& inst_file);  // Prepare to Read Inst File
-    bool loadInstToCache();  // Read From Inst File
+    bool loadInstToCache();   // Read From Inst File
+    void handleInterrupts();  // Handle Irq
+    void issueInstQueues();   // Issue Inst From InstQueue
+    void retireInstQueues();  // Retire Inst To InstQueue
+    bool isBusy();            // Check If Core is Busy
     void checkCompletion();
-
-    // 执行流水线
-    void WriteRegStage();
-    void ExecuteStage();
-    void UpdataRegStage();
 
     PerfFunctionalUnit* getUnit(UnitType name);
     HardWareUtilizationTracker* getUtilTracker() { return util_tracker.get(); };

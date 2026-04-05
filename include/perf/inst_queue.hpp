@@ -132,10 +132,11 @@ protected:
 class DMAInstQueue : public InstQueue<DMAInstPacket> {
 private:
     DMAInstPacket inst_packet;
+    int queue_id = 0;
 
 public:
-    DMAInstQueue(PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg, EventSyncUnit* event_sync_unit) : 
-                InstQueue<DMAInstPacket>("DMAInstQueue", InstQueueType::DMA, 256, cfg.inst_queue_depth, 2, core, logger, regfile, event_sync_unit) {};
+    DMAInstQueue(PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg, EventSyncUnit* event_sync_unit, int queue_id) : 
+                InstQueue<DMAInstPacket>("DMAInstQueue", InstQueueType::DMA, 256, cfg.inst_queue_depth, 2, core, logger, regfile, event_sync_unit), queue_id(queue_id) {};
 
     bool in_queue(const Inst& inst, uint8_t opcode) override;
     bool inst_issue() override;
@@ -176,35 +177,6 @@ public:
     void writeReg(SFUInstPacket& inst_packet) override;
     void inst_retire() override;
 };
-
-
-// class InstIssueArbiter {
-// public:
-//     // 优先级：SA > SFU > DMA
-//     static bool issue_by_priority(SAInstQueue& sa_queue,
-//                                   SFUInstQueue& sfu_queue,
-//                                   DMAInstQueue& dma_queue,
-//                                   SAInstPacket& sa_inst,
-//                                   SFUInstPacket& sfu_inst,
-//                                   DMAInstPacket& dma_inst,
-//                                   InstType& issued_type) {
-//         issued_type = InstType::NONE;
-
-//         if (sa_queue.inst_issue(sa_inst)) {
-//             issued_type = InstType::SA;
-//             return true;
-//         }
-//         if (sfu_queue.inst_issue(sfu_inst)) {
-//             issued_type = InstType::SFU;
-//             return true;
-//         }
-//         if (dma_queue.inst_issue(dma_inst)) {
-//             issued_type = InstType::DMA;
-//             return true;
-//         }
-//         return false;
-//     }
-// };
 
 
 #endif

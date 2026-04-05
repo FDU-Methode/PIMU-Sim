@@ -115,14 +115,23 @@ void Accumulator::tick(){
     }
 }
 
-void Accumulator::execute(){
+void Accumulator::execute() {
+    logger.log("[Accumulator][ERROR] execute() without opcode is no longer supported");
+    assert(false && "Accumulator::execute(uint8_t opcode) should be used");
+}
+
+void Accumulator::execute(uint8_t opcode){
     assert(!isBusy() && !isFinish());
     assert(state == State::IDLE);
 
     state = State::BUSY;
 
-    matadd_start = (regfile.read(regfile.start_reg_addr) >> 3) & 0x1;
-    sa_start     = (regfile.read(regfile.start_reg_addr) >> 2) & 0x1;
+    if(opcode == 0x03) current_task = SATaskType::SA;
+    else if(opcode == 0x04) current_task = SATaskType::MATADD;
+    else throw std::runtime_error("[Accumulator] Unsupported Opcode");
+
+    matadd_start = (current_task == SATaskType::MATADD);
+    sa_start     = (current_task == SATaskType::SA);
 
     optype = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 25) & 0x3);
     is_bias = (regfile.read(regfile.config_accumulate_rs2_reg_addr) >> 48) & 0x1;
@@ -205,28 +214,15 @@ void Accumulator::execute(){
         }
     }
 
-    logger.log("[Accumulator][ERROR] Unsupported Execute: start_reg=0x%lx, optype=%u", regfile.read(regfile.start_reg_addr), optype);
-    assert(false && "Accumulator Unsupported Excute");
+    logger.log("[Accumulator][ERROR] Unsupported Execute: opcode=0x%02x, optype=%u", opcode, optype);
+    assert(false && "Accumulator Unsupported Execute");
 }
 
 void Accumulator::completeInstruction(){
     PerfFunctionalUnit::completeInstruction();
     total_cycles = 0;
 
-    // Update ISR Reg
-    assert((matadd_start || sa_start) && "Accumulator No ISR Reg Write");
-    uint64_t isr_val = regfile.read(regfile.isr_reg_addr);
-    if(matadd_start) {
-        isr_val |= (1ULL << 3);
-        regfile.write(regfile.isr_reg_addr, isr_val);
-        logger.log("[Accumulator] ISR Reg[3] Updated");
-        matadd_start = false;
-    }
-
-    if(sa_start) {
-        isr_val |= (1ULL << 2);
-        regfile.write(regfile.isr_reg_addr, isr_val);
-        logger.log("[Accumulator] ISR Reg[2] Updated");
-        sa_start = false;
-    }
+    matadd_start = false;
+    sa_start = false;
+    current_task = SATaskType::NONE;
 }
