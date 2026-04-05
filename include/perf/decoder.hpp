@@ -39,6 +39,11 @@ private:
     InstType inst_type = InstType::NONE;
     int remaining_inst = 0;
 
+    // DMA Dispatch Status
+    DMATarget current_dma_target = DMATarget::NONE;
+    bool next_spm_mvin_to_dma2 = true;
+    bool next_spm_mvout_to_dma2 = true;
+
 public:
     Decoder(Logger& logger, InstCache* inst_cache, DMAInstQueue* dma_1_inst_queue, DMAInstQueue* dma_2_inst_queue, 
             DMAInstQueue* dma_3_inst_queue, SAInstQueue* sa_inst_queue, SFUInstQueue* sfu_inst_queue);
@@ -55,6 +60,9 @@ public:
     bool decodeBufferValid() { return decode_valid; };
     InstType currentInstType() { return inst_type; };
     int remainingInst() { return remaining_inst; };
+
+    // DMA Dispatch Option
+    DMATarget selectDMATarget(uint8_t opcode, const Inst& inst);
 
 private:
     uint8_t getOpcode(const Inst& inst);

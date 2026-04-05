@@ -101,15 +101,41 @@ bool Decoder::dispatch() {
 
     // Dispatch Decode Buffer
     bool dispatch_status = false;
+
     switch(decode_buffer.type) {
-        case InstType::MVIN: {
-            dispatch_status =  dma_1_inst_queue->in_queue(decode_buffer.inst, decode_buffer.opcode);  // TODO: 如何设计分发机制？
-            break;
-        }
+        case InstType::MVIN:
         case InstType::MVOUT: {
-            dispatch_status =  dma_3_inst_queue->in_queue(decode_buffer.inst, decode_buffer.opcode);
+            DMAInstQueue* target_queue = nullptr;
+            // First Line of DMA Inst
+            if(decode_buffer.opcode != 0) {
+                DMATarget target = selectDMATarget(decode_buffer.opcode, decode_buffer.inst);
+                if(target == DMATarget::NONE) {  // All DMA Queues Are Full
+                    logger.log("[Decoder][Dispatch] DMA Dispatch Blocked: no available DMA queue");
+                    return false;
+                }
+                // Store DMA Queue
+                current_dma_target = target;
+            }
+
+            switch(current_dma_target) {
+                case DMATarget::DMA1: target_queue = dma_1_inst_queue; break;
+                case DMATarget::DMA2: target_queue = dma_2_inst_queue; break;
+                case DMATarget::DMA3: target_queue = dma_3_inst_queue; break;
+                default: throw std::runtime_error("Decoder DMA Dispatch Without Valid Target");
+            }
+
+            dispatch_status =  target_queue->in_queue(decode_buffer.inst, decode_buffer.opcode);
+            if(!dispatch_status) {
+                return false;
+            }
+
+            // Clear DMA Target When DMA Inst Finish
+            if(inst_type == InstType::NONE && remaining_inst == 0) {
+                current_dma_target = DMATarget::NONE;
+            }
             break;
         }
+
         case InstType::SA: {
             dispatch_status =  sa_inst_queue->in_queue(decode_buffer.inst, decode_buffer.opcode);
             break;
@@ -141,6 +167,57 @@ bool Decoder::dispatch() {
 }
 
 
+DMATarget Decoder::selectDMATarget(uint8_t opcode, const Inst& inst) {
+    bool is_acc  = isAccDma(inst);
+    if(is_acc) {
+        return DMATarget::DMA1;
+    }
+
+    bool dma1_full = dma_1_inst_queue->full();
+    bool dma2_full = dma_2_inst_queue->full();
+    bool dma3_full = dma_3_inst_queue->full();
+    // Compute Load of Each Inst Queue
+    int load1 = dmaQueueLoad(dma_1_inst_queue);
+    int load2 = dmaQueueLoad(dma_2_inst_queue);
+    int load3 = dmaQueueLoad(dma_3_inst_queue);
+
+    if(opcode == 0x01) {  // MVIN To SPM
+        if(!dma2_full && !dma3_full) {
+            if(load2 < load3) return DMATarget::DMA2;
+            if(load3 < load2) return DMATarget::DMA3;
+            // Round - Robin
+            DMATarget target = next_spm_mvin_to_dma2 ? DMATarget::DMA2 : DMATarget::DMA3;
+            next_spm_mvin_to_dma2 = !next_spm_mvin_to_dma2;
+            return target;
+        }
+        if(!dma2_full) return DMATarget::DMA2;
+        if(!dma3_full) return DMATarget::DMA3;
+        if(!dma1_full) return DMATarget::DMA1;
+        return DMATarget::NONE;
+    }
+
+    if(opcode == 0x02) {  // MVOUT From SPM
+        if(!dma1_full && load1 == 0) {
+            return DMATarget::DMA1;
+        }
+        if(!dma2_full && !dma3_full) {
+            if(load2 < load3) return DMATarget::DMA2;
+            if(load3 < load2) return DMATarget::DMA3;
+            // Round - Robin
+            DMATarget target = next_spm_mvout_to_dma2 ? DMATarget::DMA2 : DMATarget::DMA3;
+            next_spm_mvout_to_dma2 = ~next_spm_mvout_to_dma2;
+            return target;
+        }
+        if(!dma2_full) return DMATarget::DMA2;
+        if(!dma3_full) return DMATarget::DMA3;
+        if(!dma1_full) return DMATarget::DMA1;
+        return DMATarget::NONE;
+    }
+
+    return DMATarget::NONE;
+}
+
+
 uint8_t Decoder::getOpcode(const Inst& inst) {
     return static_cast<uint8_t>(inst.low & 0xFF);
 }
@@ -167,4 +244,15 @@ int Decoder::getInstLineCount(uint8_t opcode) {
         case 0x05:        return 2;
         default:          return 0;
     }
+}
+
+
+// Helper Function
+bool isAccDma(const Inst& inst) {  // Decide Whether to Transfer Between DMA and SPM
+    return ((inst.low >> 13) & 0x1) != 0;
+}
+
+
+int dmaQueueLoad(DMAInstQueue* inst_queue) {
+    return inst_queue->getCurrentInstNum() + (inst_queue->isBusy() ? 1 : 0) + (inst_queue->getInstCount() ? 1 : 0);
 }
