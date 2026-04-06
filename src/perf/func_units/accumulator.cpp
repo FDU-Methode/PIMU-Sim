@@ -54,18 +54,16 @@ void Accumulator::tick(){
     // CONV / GEMM
     if(sa_start) {
         // Read From Local SRAM
-        if(!is_bias) {
-            if(remaining_cycles >= tail_cycles) {
-                int read_beat = total_cycles - remaining_cycles;
-                uint32_t read_addr = biaspsum_base_addr + static_cast<uint32_t>(read_beat) * cfg.systolic_array_size * cfg.acc_data_width / 8;
-                bool read_status = acc_sram->ReadMemory(read_addr);
-                assert(read_status && "[Accumulator] Local SRAM Read Request Failed");
-                // Compute Bandwidth
-                if(read_status) {
-                    HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
-                    if(util_tracker) {
-                        util_tracker->addAccReadBytes(cfg.systolic_array_size * cfg.acc_data_width / 8);
-                    }
+        if(is_acc && remaining_cycles >= tail_cycles) {
+            int read_beat = total_cycles - remaining_cycles;
+            uint32_t read_addr = biaspsum_base_addr + static_cast<uint32_t>(read_beat) * cfg.systolic_array_size * cfg.acc_data_width / 8;
+            bool read_status = acc_sram->ReadMemory(read_addr);
+            assert(read_status && "[Accumulator] Local SRAM Read Request Failed");
+            // Compute Bandwidth
+            if(read_status) {
+                HardWareUtilizationTracker* util_tracker = controller->getUtilTracker();
+                if(util_tracker) {
+                    util_tracker->addAccReadBytes(cfg.systolic_array_size * cfg.acc_data_width / 8);
                 }
             }
         }
@@ -125,7 +123,8 @@ void Accumulator::execute(){
     sa_start     = (regfile.read(regfile.start_reg_addr) >> 2) & 0x1;
 
     optype = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 25) & 0x3);
-    is_bias = (regfile.read(regfile.config_accumulate_rs2_reg_addr) >> 48) & 0x1;
+    is_acc = (regfile.read(regfile.config_accumulate_rs2_reg_addr) >> 48) & 0x1;
+    is_bias = (regfile.read(regfile.config_accumulate_rs2_reg_addr) >> 53) & 0x1;
     acc_dest = (regfile.read(regfile.config_compute_rs1_reg_addr) >> 27) & 0x1;
 
     biaspsum_base_addr = (regfile.read(regfile.config_accumulate_rs1_reg_addr)) & 0xFFFFFFFF;
@@ -229,4 +228,7 @@ void Accumulator::completeInstruction(){
         logger.log("[Accumulator] ISR Reg[2] Updated");
         sa_start = false;
     }
+
+    is_acc = false;
+    is_bias = false;
 }
