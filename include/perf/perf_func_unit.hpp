@@ -148,6 +148,7 @@ protected:
     bool matadd_start = false;
     bool sa_start = false;
     uint8_t optype = 0;
+    bool is_acc = false;
     bool is_bias = false;
     bool acc_dest = false;
     int tail_cycles = 0;
