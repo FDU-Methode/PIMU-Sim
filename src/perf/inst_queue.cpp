@@ -299,7 +299,7 @@ void SAInstQueue::writeReg(SAInstPacket& inst_packet) {
         uint64_t cfg_accumulate_rs2 = 0;
         cfg_accumulate_rs2 |= static_cast<uint64_t>(output_addr);
         cfg_accumulate_rs2 |= (static_cast<uint64_t>(output_stride) << 32);
-        cfg_accumulate_rs2 |= (static_cast<uint64_t>((config_2 >> 7) & 0x7F) << 48);
+        cfg_accumulate_rs2 |= (static_cast<uint64_t>((config_2 >> 6) & 0x7F) << 48);
 
         uint64_t compute_sa_rs1 = 0;
         compute_sa_rs1     |= static_cast<uint64_t>(input_a_addr);
@@ -460,7 +460,7 @@ void SFUInstQueue::writeReg(SFUInstPacket& inst_packet) {
         throw std::runtime_error("SFUInstQueue: unsupported opcode");
     }
 
-    uint8_t  config            = static_cast<uint8_t>((inst0.low >> 8) & 0xFF);
+    uint8_t  config            = static_cast<uint8_t>((inst0.low >> 8) & 0x7FF);
     uint16_t col_num           = static_cast<uint16_t>((inst0.low >> 32) & 0xFFFF);
     uint16_t row_num           = static_cast<uint16_t>((inst0.low >> 48) & 0xFFFF);
     uint32_t input_addr        = static_cast<uint32_t>(inst0.high & 0xFFFFFFFF);

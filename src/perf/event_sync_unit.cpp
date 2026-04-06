@@ -92,13 +92,13 @@ bool EventSyncUnit::allowIssue(const SAInstPacket& inst_packet) {
     Inst inst1 = inst_packet.inst1;
     Inst inst2 = inst_packet.inst2;
 
-    bool is_acc = (inst1.low >> 10) & 0x1;
-    bool is_bias = (inst1.low >> 15) & 0x1;
-    bool acc_dest = (inst1.low >> 9) & 0x1;
+    bool is_acc = (inst1.low >> 6) & 0x1;
+    bool is_bias = (inst1.low >> 11) & 0x1;
+    bool acc_dest = (inst1.low >> 3) & 0x1;
 
-    bool a_valid = (inst0.low >> 26) & 0x1;
-    bool b_valid = (inst0.low >> 27) & 0x1;
-    bool bias_valid = (inst0.low >> 28) & 0x1;
+    bool a_valid = (inst1.low >> 4) & 0x1;
+    bool b_valid = (inst1.low >> 5) & 0x1;
+    bool bias_valid = (inst1.low >> 12) & 0x1;
 
     if(opcode == 0x03) {  // SA
 
@@ -243,13 +243,13 @@ void EventSyncUnit::issueUpdate(const SAInstPacket& inst_packet) {
     Inst inst1 = inst_packet.inst1;
     Inst inst2 = inst_packet.inst2;
 
-    bool is_acc = (inst1.low >> 10) & 0x1;
-    bool is_bias = (inst1.low >> 15) & 0x1;
-    bool acc_dest = (inst1.low >> 9) & 0x1;
+    bool is_acc = (inst1.low >> 6) & 0x1;
+    bool is_bias = (inst1.low >> 11) & 0x1;
+    bool acc_dest = (inst1.low >> 3) & 0x1;
 
-    bool a_valid = (inst0.low >> 26) & 0x1;
-    bool b_valid = (inst0.low >> 27) & 0x1;
-    bool bias_valid = (inst0.low >> 28) & 0x1;
+    bool a_valid = (inst1.low >> 4) & 0x1;
+    bool b_valid = (inst1.low >> 5) & 0x1;
+    bool bias_valid = (inst1.low >> 12) & 0x1;
 
     if(opcode == 0x03) {  // SA
 
@@ -340,13 +340,13 @@ void EventSyncUnit::retireUpdate(const SAInstPacket& inst_packet) {
     Inst inst1 = inst_packet.inst1;
     Inst inst2 = inst_packet.inst2;
 
-    bool is_acc = (inst1.low >> 10) & 0x1;
-    bool is_bias = (inst1.low >> 15) & 0x1;
-    bool acc_dest = (inst1.low >> 9) & 0x1;
+    bool is_acc = (inst1.low >> 6) & 0x1;
+    bool is_bias = (inst1.low >> 11) & 0x1;
+    bool acc_dest = (inst1.low >> 3) & 0x1;
 
-    bool a_valid = (inst0.low >> 26) & 0x1;
-    bool b_valid = (inst0.low >> 27) & 0x1;
-    bool bias_valid = (inst0.low >> 28) & 0x1;
+    bool a_valid = (inst1.low >> 4) & 0x1;
+    bool b_valid = (inst1.low >> 5) & 0x1;
+    bool bias_valid = (inst1.low >> 12) & 0x1;
 
     if(opcode == 0x03) {  // SA
 
