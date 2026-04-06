@@ -15,7 +15,7 @@ void SystolicArray::tick(){
 
     // Port 0: activation / im2col stream
     if(spm_rd1_remaining > 0) {
-        bool read_status_1 = spm->accessPort(0, spm_rd1_addr);
+        bool read_status_1 = spm->ReadMemory(spm_rd1_addr);
         assert(read_status_1 && "[SystolicArray] SPM port 0 (Activation) read failed");
         spm_rd1_addr += spm_rd1_stride_bytes;
         --spm_rd1_remaining;
@@ -28,7 +28,7 @@ void SystolicArray::tick(){
 
     // Port 1: weight stream
     if(spm_rd2_remaining > 0) {
-        bool read_status_2 = spm->accessPort(1, spm_rd2_addr);
+        bool read_status_2 = spm->ReadMemory(spm_rd2_addr);
         assert(read_status_2 && "[SystolicArray] SPM port 1 (Weight) read failed");
         spm_rd2_addr += spm_rd2_stride_bytes;
         --spm_rd2_remaining;

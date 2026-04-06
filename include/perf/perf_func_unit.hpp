@@ -6,6 +6,7 @@
 #include "../logger.hpp"
 #include "../regfile.hpp"
 #include "scratchpad.hpp"
+#include "acc_sram.hpp"
 
 class PerfSim;
 class PerfNpuCore;
@@ -136,11 +137,11 @@ public:
     void execute(uint8_t opcode);
     void tick() override;
 
-    Scratchpad* getScratchpad() { return acc_sram.get(); }
+    AccSram* getScratchpad() { return acc_sram.get(); }
 
 protected:
     // ACC SRAM
-    std::unique_ptr<Scratchpad> acc_sram;
+    std::unique_ptr<AccSram> acc_sram;
 
     SATaskType current_task = SATaskType::NONE;
 

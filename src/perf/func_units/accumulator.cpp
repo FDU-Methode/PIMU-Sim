@@ -6,7 +6,7 @@ Accumulator::Accumulator(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFil
     PerfFunctionalUnit(sim, core, logger, regfile, cfg) {
     UnitName = "Accumulator";
 
-    acc_sram = std::make_unique<Scratchpad>(logger, cfg, cfg.acc_bytes, cfg.acc_ports, cfg.acc_data_width, cfg.systolic_array_size);
+    acc_sram = std::make_unique<AccSram>(logger, cfg);
 }
 
 void Accumulator::tick(){
@@ -14,6 +14,7 @@ void Accumulator::tick(){
 
     Scratchpad* spm = core->getSpm();
     assert(spm && "Accumulator requires a valid Scratchpad");
+    AccSram* acc_sram = core->getAccSram();
     assert(acc_sram && "Accumulator local SRAM is NULL");
 
     // Matadd
@@ -23,15 +24,15 @@ void Accumulator::tick(){
             int read_beat = total_cycles - remaining_cycles;
             uint32_t read_addr_a = matadd_a_base_addr + static_cast<uint32_t>(read_beat) * cfg.systolic_array_size * cfg.acc_data_width / 8;
             uint32_t read_addr_b = matadd_b_base_addr + static_cast<uint32_t>(read_beat) * cfg.systolic_array_size * cfg.acc_data_width / 8;
-            bool read_status_a = acc_sram->accessPort(0, read_addr_a);
+            bool read_status_a = acc_sram->accessDataPort(0, read_addr_a);
             assert(read_status_a && "[Accumulator] Local SRAM Read Request Failed");
-            bool read_status_b = acc_sram->accessPort(1, read_addr_b);
+            bool read_status_b = acc_sram->accessDataPort(1, read_addr_b);
             assert(read_status_b && "[Accumulator] Local SRAM Read Request Failed");
             // Compute Bandwidth
             if(read_status_a && read_status_b) {
                 HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
                 if(util_tracker) {
-                    util_tracker->addAccReadBytes(2 * cfg.systolic_array_size * cfg.acc_data_width / 8);
+                    util_tracker->addAccDataReadBytes(2 * cfg.systolic_array_size * cfg.acc_data_width / 8);
                 }
             }
         }
@@ -54,18 +55,17 @@ void Accumulator::tick(){
     // CONV / GEMM
     if(sa_start) {
         // Read From Local SRAM
-        if(!is_bias) {
-            if(remaining_cycles >= tail_cycles) {
-                int read_beat = total_cycles - remaining_cycles;
-                uint32_t read_addr = biaspsum_base_addr + static_cast<uint32_t>(read_beat) * cfg.systolic_array_size * cfg.acc_data_width / 8;
-                bool read_status = acc_sram->ReadMemory(read_addr);
-                assert(read_status && "[Accumulator] Local SRAM Read Request Failed");
-                // Compute Bandwidth
-                if(read_status) {
-                    HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
-                    if(util_tracker) {
-                        util_tracker->addAccReadBytes(cfg.systolic_array_size * cfg.acc_data_width / 8);
-                    }
+        if(remaining_cycles >= tail_cycles) {
+            int read_beat = total_cycles - remaining_cycles;
+            uint32_t read_addr = biaspsum_base_addr + static_cast<uint32_t>(read_beat) * cfg.systolic_array_size * cfg.acc_data_width / 8;
+            bool read_status = is_bias ? acc_sram->ReadBias(read_addr) : acc_sram->ReadData(read_addr);
+            assert(read_status && "[Accumulator] ACC SRAM Read Request Failed");
+            // Compute Bandwidth
+            if(read_status) {
+                HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
+                if(util_tracker) {
+                    if(is_bias) util_tracker->addAccBiasReadBytes(cfg.systolic_array_size * cfg.acc_data_width / 8);
+                    else        util_tracker->addAccDataReadBytes(cfg.systolic_array_size * cfg.acc_data_width / 8);
                 }
             }
         }
@@ -77,13 +77,13 @@ void Accumulator::tick(){
                 uint32_t write_addr = (optype == 0) ? (sa_output_base_addr + static_cast<uint32_t>(write_beat) * sa_output_stride * cfg.acc_data_width / 8) :
                                       (optype == 1) ? (sa_output_base_addr + static_cast<uint32_t>(write_beat) * sa_output_stride * sa_input_b_col_num * cfg.acc_data_width / 8) :
                                       0;
-                bool write_status = acc_sram->WriteMemory(write_addr);
+                bool write_status = acc_sram->WriteData(write_addr);
                 assert(write_status && "[Accumulator] Local SRAM Write Request Failed");
                 // Compute Bandwidth
                 if(write_status) {
                     HardWareUtilizationTracker* util_tracker = core->getUtilTracker();
                     if(util_tracker) {
-                        util_tracker->addAccWriteBytes(cfg.systolic_array_size * cfg.acc_data_width / 8);
+                        util_tracker->addAccDataWriteBytes(cfg.systolic_array_size * cfg.acc_data_width / 8);
                     }
                 }
             }

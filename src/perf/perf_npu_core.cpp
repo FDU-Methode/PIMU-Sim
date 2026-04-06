@@ -332,7 +332,7 @@ void PerfNpuCore::tick(){
 
     // 2. Set SPM && ACC SRAM Idle
     spm->clearPorts();
-    Scratchpad* acc_sram = getAccSram();
+    AccSram* acc_sram = getAccSram();
     acc_sram->clearPorts();
 
     // 3. Tick Function Unit
@@ -366,7 +366,8 @@ void PerfNpuCore::tick(){
     state.spm        = spm->isBusy();
     state.sa         = sa->isBusy();
     state.acc        = acc->isBusy();
-    state.acc_sram   = (acc_sram != nullptr) ? acc_sram->isBusy() : false;
+    state.acc_bias   = (acc_sram != nullptr) ? acc_sram->isBiasBusy() : false;
+    state.acc_data   = (acc_sram != nullptr) ? acc_sram->isDataBusy() : false;
     state.sfu        = sfu->isBusy();
     state.gemv       = gemv->isBusy();
 

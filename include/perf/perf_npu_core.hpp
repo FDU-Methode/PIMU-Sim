@@ -76,7 +76,7 @@ public:
     PerfFunctionalUnit* getUnit(UnitType name);
     HardWareUtilizationTracker* getUtilTracker() { return util_tracker.get(); };
     Scratchpad* getSpm() { return spm.get(); }
-    Scratchpad* getAccSram() { return acc->getScratchpad(); }
+    AccSram* getAccSram() { return acc->getScratchpad(); }
 
 //Add DMA Connect To DDR
 private:

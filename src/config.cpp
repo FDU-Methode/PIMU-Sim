@@ -76,12 +76,11 @@ Config Config::from_file(const std::string &path){
         else if (k == "axi_data_width") c.axi_data_width = std::stod(v);
         else if (k == "sram_bank_num") c.sram_bank_num = std::stoi(v);
         else if (k == "sram_bank_bytes") c.sram_bank_bytes = std::stoi(v);
-        else if (k == "sram_ports") c.sram_ports = std::stoi(v);
         else if (k == "sram_data_width") c.sram_data_width = std::stoi(v);
-        else if (k == "acc_bank_num") c.acc_bank_num = std::stoi(v);
         else if (k == "bias_bank_num") c.bias_bank_num = std::stoi(v);
+        else if (k == "bias_bytes") c.bias_bytes = std::stoi(v);
+        else if (k == "acc_bank_num") c.acc_bank_num = std::stoi(v);
         else if (k == "acc_bytes") c.acc_bytes = std::stoi(v);
-        else if (k == "acc_ports") c.acc_ports = std::stoi(v);
         else if (k == "acc_data_width") c.acc_data_width = std::stoi(v);
         else if (k == "inst_cache_size") c.inst_cache_size = std::stoi(v);
         else if (k == "inst_queue_depth") c.inst_queue_depth = std::stoi(v);

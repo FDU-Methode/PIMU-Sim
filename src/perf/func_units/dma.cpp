@@ -125,7 +125,7 @@ void DMA::tick(){
 
     Scratchpad* spm = core->getSpm();
     assert(spm && "DMA requires a valid Scratchpad");
-    Scratchpad* acc_sram = core->getAccSram();
+    AccSram* acc_sram = core->getAccSram();
     assert(acc_sram && "DMA requires a valid ACC SRAM");
 
     // 1) local memory side transfer (models sram_rd/sram_wr side in DMA RTL)
@@ -150,9 +150,17 @@ void DMA::tick(){
 
         bool access_ok = false;
         if (mvin_start) {
-            access_ok = source ? acc_sram->WriteMemory(local_addr) : spm->WriteMemory(local_addr);
+            if(source) {
+                access_ok = is_bias ? acc_sram->WriteBias(local_addr) : acc_sram->WriteData(local_addr);
+            } else {
+                access_ok = spm->WriteMemory(local_addr);
+            }
         } else if (mvout_start) {
-            access_ok = source ? acc_sram->ReadMemory(local_addr) : spm->ReadMemory(local_addr);
+            if(source) {
+                access_ok = acc_sram->ReadData(local_addr);
+            } else {
+                access_ok = spm->ReadMemory(local_addr);
+            }
         }
         
         assert(access_ok && "DMA Read or Write SPM Error");
@@ -168,13 +176,14 @@ void DMA::tick(){
                 if (mvin_start) {
                     util_tracker->addDdrReadBytes(axi_beat_bytes);
                     if (source) {
-                        util_tracker->addAccWriteBytes(static_cast<uint64_t>(std::max(local_payload_bytes, 0)));
+                        if(is_bias) util_tracker->addAccBiasWriteBytes(static_cast<uint64_t>(std::max(local_payload_bytes, 0)));
+                        else        util_tracker->addAccDataWriteBytes(static_cast<uint64_t>(std::max(local_payload_bytes, 0)));
                     } else {
                         util_tracker->addSpmWriteBytes(static_cast<uint64_t>(std::max(local_payload_bytes, 0)));
                     }
                 } else if (mvout_start) {
                     if (source) {
-                        util_tracker->addAccReadBytes(static_cast<uint64_t>(std::max(local_payload_bytes, 0)));
+                        util_tracker->addAccDataReadBytes(static_cast<uint64_t>(std::max(local_payload_bytes, 0)));
                     } else {
                         util_tracker->addSpmReadBytes(static_cast<uint64_t>(std::max(local_payload_bytes, 0)));
                     }

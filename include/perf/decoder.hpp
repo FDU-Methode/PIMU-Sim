@@ -68,6 +68,8 @@ private:
     uint8_t getOpcode(const Inst& inst);
     InstType classifyOpcode(uint8_t opcode);
     int getInstLineCount(uint8_t opcode);
+    bool isAccDma(const Inst& inst);
+    int dmaQueueLoad(DMAInstQueue* queue);
  
 };
 

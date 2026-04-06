@@ -19,13 +19,13 @@ EventSyncUnit::EventSyncUnit(const Config& cfg, Logger& logger) : cfg(cfg), logg
 
 int EventSyncUnit::getBankId(uint32_t addr, bool is_acc) {
     if(is_acc) {
-        if(addr > acc_bytes) {
+        if(addr >= acc_bytes) {
             logger.log("[EventSyncUnit][ERROR] ACC Addr Exceeds The Boundary");
             throw std::out_of_range("Event Sync Unit: acc addr out of range, addr=" + std::to_string(addr));
         }
         return ((addr * acc_bank_num) / acc_bytes + spm_bank_num);
     } else {
-        if(addr > (spm_bank_num * spm_bank_bytes)) {
+        if(addr >= (spm_bank_num * spm_bank_bytes)) {
             logger.log("[EventSyncUnit][ERROR] SPM Addr Exceeds The Boundary");
             throw std::out_of_range("Event Sync Unit: spm addr out of range, addr=" + std::to_string(addr));
         }
@@ -124,7 +124,7 @@ bool EventSyncUnit::allowIssue(const SAInstPacket& inst_packet) {
                 else bias_valid = true;
             } else {
                 if(bank_busy[spm_bank_num] || bank_busy[spm_bank_num + 1]) bias_valid = false;
-                else if((!bank_valid[spm_bank_num]) && (!bank_valid[spm_bank_num + 1])) bias_valid = false;
+                else if((!bank_valid[spm_bank_num]) || (!bank_valid[spm_bank_num + 1])) bias_valid = false;
                 else bias_valid = true;
             }
         } else {

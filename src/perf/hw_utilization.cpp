@@ -9,19 +9,24 @@ void HardWareUtilizationTracker::reset() {
     ddr_write_bytes_total = 0;
     spm_read_bytes_total = 0;
     spm_write_bytes_total = 0;
-    acc_read_bytes_total = 0;
-    acc_write_bytes_total = 0;
+    acc_bias_read_bytes_total = 0;
+    acc_bias_write_bytes_total = 0;
+    acc_data_read_bytes_total = 0;
+    acc_data_write_bytes_total = 0;
 
     ddr_read_bytes_current = 0;
     ddr_write_bytes_current = 0;
     spm_read_bytes_current = 0;
     spm_write_bytes_current = 0;
-    acc_read_bytes_current = 0;
-    acc_write_bytes_current = 0;
+    acc_bias_read_bytes_current = 0;
+    acc_bias_write_bytes_current = 0;
+    acc_data_read_bytes_current = 0;
+    acc_data_write_bytes_current = 0;
 
     ddr_peak_bytes_per_cycle = 0;
     spm_peak_bytes_per_cycle = 0;
-    acc_peak_bytes_per_cycle = 0;
+    acc_bias_peak_bytes_per_cycle = 0;
+    acc_data_peak_bytes_per_cycle = 0;
 }
 
 void HardWareUtilizationTracker::sample(const ModuleState& state) {
@@ -32,14 +37,16 @@ void HardWareUtilizationTracker::sample(const ModuleState& state) {
     if (state.spm)      ++busy_cycles[UnitTypeToIndex(UnitType::SPM)];
     if (state.sa)       ++busy_cycles[UnitTypeToIndex(UnitType::SystolicArray)];
     if (state.acc)      ++busy_cycles[UnitTypeToIndex(UnitType::Accumulator)];
-    if (state.acc_sram) ++busy_cycles[UnitTypeToIndex(UnitType::AccSram)];
+    if (state.acc_bias) ++busy_cycles[UnitTypeToIndex(UnitType::AccBiasSram)];
+    if (state.acc_data) ++busy_cycles[UnitTypeToIndex(UnitType::AccDataSram)];
     if (state.sfu)      ++busy_cycles[UnitTypeToIndex(UnitType::SFU)];
     if (state.gemv)     ++busy_cycles[UnitTypeToIndex(UnitType::GEMV)];
 
     // Update Peak Bandwidth
     uint64_t ddr_total_current = ddr_read_bytes_current + ddr_write_bytes_current;
     uint64_t spm_total_current = spm_read_bytes_current + spm_write_bytes_current;
-    uint64_t acc_total_current = acc_read_bytes_current + acc_write_bytes_current;
+    uint64_t acc_bias_total_current = acc_bias_read_bytes_current + acc_bias_write_bytes_current;
+    uint64_t acc_data_total_current = acc_data_read_bytes_current + acc_data_write_bytes_current;
 
     if(ddr_total_current > ddr_peak_bytes_per_cycle) {
         ddr_peak_bytes_per_cycle = ddr_total_current;
@@ -47,16 +54,21 @@ void HardWareUtilizationTracker::sample(const ModuleState& state) {
     if(spm_total_current > spm_peak_bytes_per_cycle) {
         spm_peak_bytes_per_cycle = spm_total_current;
     }
-    if(acc_total_current > acc_peak_bytes_per_cycle) {
-        acc_peak_bytes_per_cycle = acc_total_current;
+    if(acc_bias_total_current > acc_bias_peak_bytes_per_cycle) {
+        acc_bias_peak_bytes_per_cycle = acc_bias_total_current;
+    }
+    if(acc_data_total_current > acc_data_peak_bytes_per_cycle) {
+        acc_data_peak_bytes_per_cycle = acc_data_total_current;
     }
 
     ddr_read_bytes_current = 0;
     ddr_write_bytes_current = 0;
     spm_read_bytes_current = 0;
     spm_write_bytes_current = 0;
-    acc_read_bytes_current = 0;
-    acc_write_bytes_current = 0;
+    acc_bias_read_bytes_current = 0;
+    acc_bias_write_bytes_current = 0;
+    acc_data_read_bytes_current = 0;
+    acc_data_write_bytes_current = 0;
 }
 
 double HardWareUtilizationTracker::utilization(UnitType unit) {
@@ -107,7 +119,7 @@ void HardWareUtilizationTracker::report() {
 
     const UnitType units[] = {
         UnitType::DMA1, UnitType::DMA2, UnitType::DMA3, UnitType::SPM, UnitType::SystolicArray,
-        UnitType::Accumulator, UnitType::AccSram, UnitType::SFU, UnitType::GEMV
+        UnitType::Accumulator, UnitType::AccBiasSram, UnitType::AccDataSram, UnitType::SFU, UnitType::GEMV
     };
 
     for (UnitType unit : units) {
@@ -123,7 +135,7 @@ void HardWareUtilizationTracker::report() {
 
     emit(border1);
 
-    const int w_path  = 10;
+    const int w_path  = 12;
     const int w_read  = 14;
     const int w_write = 14;
     const int w_bpc   = 12;
@@ -185,12 +197,25 @@ void HardWareUtilizationTracker::report() {
     {
         std::ostringstream os;
         os << std::fixed << std::setprecision(2);
-        os << "| " << std::left  << std::setw(w_path)  << "ACC SRAM"
-           << " | " << std::right << std::setw(w_read)  << acc_read_bytes_total
-           << " | " << std::right << std::setw(w_write) << acc_write_bytes_total
-           << " | " << std::right << std::setw(w_bpc)   << avgBytesPerCycle(acc_read_bytes_total + acc_write_bytes_total)
-           << " | " << std::right << std::setw(w_gbps)  << avgBandwidthGBps(acc_read_bytes_total + acc_write_bytes_total)
-           << " | " << std::right << std::setw(w_peak)  << acc_peak_bytes_per_cycle
+        os << "| " << std::left  << std::setw(w_path)  << "ACC Bias"
+           << " | " << std::right << std::setw(w_read)  << acc_bias_read_bytes_total
+           << " | " << std::right << std::setw(w_write) << acc_bias_write_bytes_total
+           << " | " << std::right << std::setw(w_bpc)   << avgBytesPerCycle(acc_bias_read_bytes_total + acc_bias_write_bytes_total)
+           << " | " << std::right << std::setw(w_gbps)  << avgBandwidthGBps(acc_bias_read_bytes_total + acc_bias_write_bytes_total)
+           << " | " << std::right << std::setw(w_peak)  << acc_bias_peak_bytes_per_cycle
+           << " |";
+        emit(os.str());
+    }
+
+    {
+        std::ostringstream os;
+        os << std::fixed << std::setprecision(2);
+        os << "| " << std::left  << std::setw(w_path)  << "ACC Data"
+           << " | " << std::right << std::setw(w_read)  << acc_data_read_bytes_total
+           << " | " << std::right << std::setw(w_write) << acc_data_write_bytes_total
+           << " | " << std::right << std::setw(w_bpc)   << avgBytesPerCycle(acc_data_read_bytes_total + acc_data_write_bytes_total)
+           << " | " << std::right << std::setw(w_gbps)  << avgBandwidthGBps(acc_data_read_bytes_total + acc_data_write_bytes_total)
+           << " | " << std::right << std::setw(w_peak)  << acc_data_peak_bytes_per_cycle
            << " |";
         emit(os.str());
     }
@@ -220,14 +245,24 @@ void HardWareUtilizationTracker::addSpmWriteBytes(uint64_t bytes) {
     spm_write_bytes_current += bytes;
 }
 
-void HardWareUtilizationTracker::addAccReadBytes(uint64_t bytes) {
-    acc_read_bytes_total += bytes;
-    acc_read_bytes_current += bytes;
+void HardWareUtilizationTracker::addAccBiasReadBytes(uint64_t bytes) {
+    acc_bias_read_bytes_total += bytes;
+    acc_bias_read_bytes_current += bytes;
 }
 
-void HardWareUtilizationTracker::addAccWriteBytes(uint64_t bytes) {
-    acc_write_bytes_total += bytes;
-    acc_write_bytes_current += bytes;
+void HardWareUtilizationTracker::addAccBiasWriteBytes(uint64_t bytes) {
+    acc_bias_write_bytes_total += bytes;
+    acc_bias_write_bytes_current += bytes;
+}
+
+void HardWareUtilizationTracker::addAccDataReadBytes(uint64_t bytes) {
+    acc_data_read_bytes_total += bytes;
+    acc_data_read_bytes_current += bytes;
+}
+
+void HardWareUtilizationTracker::addAccDataWriteBytes(uint64_t bytes) {
+    acc_data_write_bytes_total += bytes;
+    acc_data_write_bytes_current += bytes;
 }
 
 double HardWareUtilizationTracker::avgBytesPerCycle(uint64_t bytes) {

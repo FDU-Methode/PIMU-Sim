@@ -205,7 +205,7 @@ DMATarget Decoder::selectDMATarget(uint8_t opcode, const Inst& inst) {
             if(load3 < load2) return DMATarget::DMA3;
             // Round - Robin
             DMATarget target = next_spm_mvout_to_dma2 ? DMATarget::DMA2 : DMATarget::DMA3;
-            next_spm_mvout_to_dma2 = ~next_spm_mvout_to_dma2;
+            next_spm_mvout_to_dma2 = !next_spm_mvout_to_dma2;
             return target;
         }
         if(!dma2_full) return DMATarget::DMA2;
@@ -248,11 +248,11 @@ int Decoder::getInstLineCount(uint8_t opcode) {
 
 
 // Helper Function
-bool isAccDma(const Inst& inst) {  // Decide Whether to Transfer Between DMA and SPM
+bool Decoder::isAccDma(const Inst& inst) {  // Decide Whether to Transfer Between DMA and SPM
     return ((inst.low >> 13) & 0x1) != 0;
 }
 
 
-int dmaQueueLoad(DMAInstQueue* inst_queue) {
+int Decoder::dmaQueueLoad(DMAInstQueue* inst_queue) {
     return inst_queue->getCurrentInstNum() + (inst_queue->isBusy() ? 1 : 0) + (inst_queue->getInstCount() ? 1 : 0);
 }
