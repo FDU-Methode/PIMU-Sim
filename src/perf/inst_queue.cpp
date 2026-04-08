@@ -29,6 +29,7 @@ bool DMAInstQueue::in_queue(const Inst& inst, uint8_t opcode) {
 
     if(inst_count == inst_count_upper) {
         inst_push(inst_packet);
+        core->addInstNum();
         logger.log("[%s] Complete Instruction Push: inst_id=%llu, opcode=0x%02x, current_inst_num=%d", queue_name.c_str(), 
                     (unsigned long long)inst_packet.inst_id, inst_packet.opcode, current_inst_num);
         inst_packet = DMAInstPacket{};
@@ -52,7 +53,15 @@ bool DMAInstQueue::inst_issue() {
     DMAInstPacket inst_packet = inst_queue.front();
     bool sync_allow_issue = event_sync_unit->allowIssue(inst_packet);
     if(!sync_allow_issue) {
-        logger.log("[DMAInstQueue] Inst Issue Blocked by Event Sync Unit");
+        Inst inst0 = inst_packet.inst0;
+        uint8_t opcode = inst_packet.opcode;
+        bool is_acc = (inst0.low >> 13) & 0x1;
+        bool is_bias = (inst0.low >> 14) & 0x1;
+        uint32_t sram_addr = static_cast<uint32_t>(inst0.high & 0xFFFFFFFF);
+        uint32_t dram_addr = static_cast<uint32_t>((inst0.high >> 32) & 0xFFFFFFFF);
+        logger.log("[DMAInstQueue] Inst Issue Blocked by Event Sync Unit: "
+                   "queue_id=%d inst_id=%llu opcode=0x%02x is_acc=%d is_bias=%d sram_addr=0x%08x dram_addr=0x%08x",
+                   queue_id, (unsigned long long)inst_packet.inst_id, opcode, is_acc, is_bias, sram_addr, dram_addr);
         return false;
     }
 
@@ -194,6 +203,7 @@ bool SAInstQueue::in_queue(const Inst& inst, uint8_t opcode) {
 
     if(inst_count == inst_count_upper) {
         inst_push(inst_packet);
+        core->addInstNum();
         logger.log("[%s] Complete Instruction Push: inst_id=%llu, opcode=0x%02x, current_inst_num=%d", queue_name.c_str(), 
                     (unsigned long long)inst_packet.inst_id, inst_packet.opcode, current_inst_num);
         inst_packet = SAInstPacket{};
@@ -217,7 +227,25 @@ bool SAInstQueue::inst_issue() {
     SAInstPacket inst_packet = inst_queue.front();
     bool sync_allow_issue = event_sync_unit->allowIssue(inst_packet);
     if(!sync_allow_issue) {
-        logger.log("[SAInstQueue] Inst Issue Blocked by Event Sync Unit");
+        Inst inst1 = inst_packet.inst1;
+        Inst inst2 = inst_packet.inst2;
+
+        bool is_acc = (inst1.low >> 6) & 0x1;
+        bool is_bias = (inst1.low >> 11) & 0x1;
+        bool acc_dest = (inst1.low >> 3) & 0x1;
+        bool a_keep = (inst1.low >> 4) & 0x1;
+        bool b_keep = (inst1.low >> 5) & 0x1;
+        bool bias_keep = (inst1.low >> 12) & 0x1;
+        uint32_t biaspsum_addr = static_cast<uint32_t>(inst1.high & 0xFFFFFFFF);
+        uint32_t output_addr = static_cast<uint32_t>((inst1.high >> 32) & 0xFFFFFFFF);
+        uint32_t a_addr = static_cast<uint32_t>(inst2.low & 0xFFFFFFFF);
+        uint32_t b_addr = static_cast<uint32_t>(inst2.high & 0xFFFFFFFF);
+        logger.log("[SAInstQueue] Inst Issue Blocked by Event Sync Unit: "
+                   "inst_id=%llu opcode=0x%02x is_acc=%d is_bias=%d acc_dest=%d "
+                   "a_keep=%d b_keep=%d bias_keep=%d a_addr=0x%08x b_addr=0x%08x "
+                   "biaspsum_addr=0x%08x output_addr=0x%08x",
+                   (unsigned long long)inst_packet.inst_id, inst_packet.opcode, is_acc, is_bias,
+                   acc_dest, a_keep, b_keep, bias_keep, a_addr, b_addr, biaspsum_addr, output_addr);
         return false;
     }
 
@@ -405,6 +433,7 @@ bool SFUInstQueue::in_queue(const Inst& inst, uint8_t opcode) {
 
     if(inst_count == inst_count_upper) {
         inst_push(inst_packet);
+        core->addInstNum();
         logger.log("[%s] Complete Instruction Push: inst_id=%llu, opcode=0x%02x, current_inst_num=%d", queue_name.c_str(), 
                     (unsigned long long)inst_packet.inst_id, inst_packet.opcode, current_inst_num);
         inst_packet = SFUInstPacket{};

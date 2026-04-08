@@ -395,12 +395,19 @@ void PerfNpuCore::checkCompletion(){
     if(!isBusy()) {
         _stats.isDone = true;
         _stats.cycle = getCycle();
-        _stats.inst_num = fetched_inst_num;
+        _stats.inst_line_num = fetched_inst_num;
+        _stats.inst_num = simulated_inst_num;
         logger.log("NPU Core: Simulation completed at cycle %d", getCycle());
     } else if(_cycle >= cfg.max_sim_cycle-1){
-        _stats.inst_num = fetched_inst_num;
+        _stats.inst_line_num = fetched_inst_num;
+        _stats.inst_num = simulated_inst_num;
         logger.log("NPU Core: Simulation timeout at cycle %d", getCycle());
     }
+}
+
+
+void PerfNpuCore::addInstNum() {
+    ++simulated_inst_num;
 }
 
 

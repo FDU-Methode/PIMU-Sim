@@ -81,6 +81,7 @@ void PerfSim::run() {
 
 void PerfSim::print_stats() {
     double sim_time_s = sim_time_us / 1000000.0;
+    int sim_inst_line_num = core->getStats().inst_line_num;
     int sim_inst_num = core->getStats().inst_num;
     //double ips = (double)(sim_inst_num * 1000000) / sim_time_us;
     double ips = sim_inst_num / (sim_time_us / 1000000.0);
@@ -95,6 +96,7 @@ void PerfSim::print_stats() {
     logger_.log("  Early termination: %s", early_termination ? "Yes" : "No");
     logger_.log("  Final state: %s", core->getStats().isDone ? "DONE" : "RUNNING");
     logger_.log("  Total cycles: %d", sim_cycles);
+    logger_.log("  Total simulated instruction lines: %d", sim_inst_line_num);
     logger_.log("  Total simulated instructions: %d", sim_inst_num);
     logger_.log("  Simulated instructions per second: %3f", ips);
 
@@ -103,6 +105,7 @@ void PerfSim::print_stats() {
     std::cout << "  Total cycles: " <<core->getCycle() << std::endl;
     std::cout << "  Maximum cycle limit: " << max_sim_cycle << std::endl;
     std::cout << "  Simulation time: " << sim_time_s << " s" << std::endl;
+    std::cout << "  Total simulated instruction lines: " << sim_inst_line_num << std::endl;
     std::cout << "  Total simulated instructions: " << sim_inst_num << std::endl;
     std::cout << "  Simulated instructions per second: " << ips << std::endl;
 

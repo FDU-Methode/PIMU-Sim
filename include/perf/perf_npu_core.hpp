@@ -53,6 +53,7 @@ private:
 
     size_t pc;
     int fetched_inst_num;
+    int simulated_inst_num;
     int inst_file_line_num;
     bool inst_file_done = false;
     std::ifstream inst_ifs;
@@ -72,6 +73,8 @@ public:
     void retireInstQueues();  // Retire Inst To InstQueue
     bool isBusy();            // Check If Core is Busy
     void checkCompletion();
+
+    void addInstNum();
 
     PerfFunctionalUnit* getUnit(UnitType name);
     HardWareUtilizationTracker* getUtilTracker() { return util_tracker.get(); };

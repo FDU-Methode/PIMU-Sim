@@ -4,7 +4,7 @@
 
 # ---- "Simulator Configuration" ----
 simulator_type = PERFORMANCE
-max_sim_cycle = 10000          # maximum simulation cycles
+max_sim_cycle = 200000        # maximum simulation cycles
 
 # ---- Core Configuration ----
 core_mode = 0                  # core type: 1 (analytic) or 0 (detail)
@@ -73,9 +73,9 @@ inst_cache_size = 256
 inst_queue_depth = 8
 
 # ---- File paths ----
-inst_file = ./benchmarks/tb_test/tb_resnet_block_1024.txt
+inst_file = ./benchmarks/tb_test/tb_resnet_block.txt
 enable_log = 1                 # enable log file: 1 (enable) or 0 (disable)
-log_file   = ./log/tb_resnet_block_1024_log.txt
+log_file   = ./log/tb_resnet_block_log.txt
 
 # ---- (Optional future extension) ----
 # core_count = 4

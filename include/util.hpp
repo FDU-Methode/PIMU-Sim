@@ -10,6 +10,7 @@
 struct Stats {
     int cycle = 0;
     bool isDone = false;
+    int inst_line_num = 0;
     int inst_num = 0;
 };
 
