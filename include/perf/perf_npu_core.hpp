@@ -28,6 +28,9 @@ private:
     std::unique_ptr<DMAInstQueue> dma_1_inst_queue;
     std::unique_ptr<DMAInstQueue> dma_2_inst_queue;
     std::unique_ptr<DMAInstQueue> dma_3_inst_queue;
+    std::unique_ptr<DMAInstQueue> dma_4_inst_queue;
+    std::unique_ptr<DMAInstQueue> dma_5_inst_queue;
+    std::unique_ptr<DMAInstQueue> dma_6_inst_queue;
     std::unique_ptr<SAInstQueue> sa_inst_queue;
     std::unique_ptr<SFUInstQueue> sfu_inst_queue;
 
@@ -37,6 +40,9 @@ private:
     std::unique_ptr<DMA> dma_1;
     std::unique_ptr<DMA> dma_2;
     std::unique_ptr<DMA> dma_3;
+    std::unique_ptr<DMA> dma_4;
+    std::unique_ptr<DMA> dma_5;
+    std::unique_ptr<DMA> dma_6;
     std::unique_ptr<SystolicArray> sa;
     std::unique_ptr<Accumulator> acc;
     std::unique_ptr<SFU> sfu;
@@ -82,6 +88,9 @@ public:
             case 1: return dma_1_inst_queue.get();
             case 2: return dma_2_inst_queue.get();
             case 3: return dma_3_inst_queue.get();
+            case 4: return dma_4_inst_queue.get();
+            case 5: return dma_5_inst_queue.get();
+            case 6: return dma_6_inst_queue.get();
             default: return nullptr;
         }
     }

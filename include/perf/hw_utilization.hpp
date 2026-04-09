@@ -13,7 +13,7 @@ private:
     Logger& logger;
 
     double core_freq_ghz = 1.0;
-    static constexpr int UnitNum = 11;
+    static constexpr int UnitNum = 14;
     int total_cycles = 0;
     std::array<int, UnitNum> busy_cycles{};
 
@@ -49,6 +49,9 @@ public:
         bool dma1     = false;
         bool dma2     = false;
         bool dma3     = false;
+        bool dma4     = false;
+        bool dma5     = false;
+        bool dma6     = false;
         bool spm      = false;
         bool sa       = false;
         bool acc      = false;

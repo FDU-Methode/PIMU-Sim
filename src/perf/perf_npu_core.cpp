@@ -71,11 +71,17 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     dma_1_inst_queue = std::make_unique<DMAInstQueue>(this, logger, cfg, event_sync_unit.get(), 1);
     dma_2_inst_queue = std::make_unique<DMAInstQueue>(this, logger, cfg, event_sync_unit.get(), 2);
     dma_3_inst_queue = std::make_unique<DMAInstQueue>(this, logger, cfg, event_sync_unit.get(), 3);
+    dma_4_inst_queue = std::make_unique<DMAInstQueue>(this, logger, cfg, event_sync_unit.get(), 4);
+    dma_5_inst_queue = std::make_unique<DMAInstQueue>(this, logger, cfg, event_sync_unit.get(), 5);
+    dma_6_inst_queue = std::make_unique<DMAInstQueue>(this, logger, cfg, event_sync_unit.get(), 6);
     sa_inst_queue    = std::make_unique<SAInstQueue>(this, logger, cfg, event_sync_unit.get());
     sfu_inst_queue   = std::make_unique<SFUInstQueue>(this, logger, cfg, event_sync_unit.get());
     dma_1_inst_queue->clear();
     dma_2_inst_queue->clear();
     dma_3_inst_queue->clear();
+    dma_4_inst_queue->clear();
+    dma_5_inst_queue->clear();
+    dma_6_inst_queue->clear();
     sa_inst_queue->clear();
     sfu_inst_queue->clear();
     logger.log("  DMA Inst Queue 1 created!");
@@ -84,8 +90,8 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     logger.log("  SA  Inst Queue   created!");
     logger.log("  SFU Inst Queue   created!");
 
-    decoder = std::make_unique<Decoder>(logger, inst_cache.get(), dma_1_inst_queue.get(), dma_2_inst_queue.get(), dma_3_inst_queue.get(), 
-                                        sa_inst_queue.get(), sfu_inst_queue.get());
+    decoder = std::make_unique<Decoder>(logger, cfg, inst_cache.get(), dma_1_inst_queue.get(), dma_2_inst_queue.get(), dma_3_inst_queue.get(), 
+                                        dma_4_inst_queue.get(), dma_5_inst_queue.get(), dma_6_inst_queue.get(), sa_inst_queue.get(), sfu_inst_queue.get());
     logger.log("  Decoder created!");
 
     // Create Function Unit
@@ -95,6 +101,12 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     logger.log("  DMA 2 created!");
     dma_3  = std::make_unique<DMA>(sim, this, logger, cfg, 3);
     logger.log("  DMA 3 created!");
+    dma_4  = std::make_unique<DMA>(sim, this, logger, cfg, 4);
+    logger.log("  DMA 4 created!");
+    dma_5  = std::make_unique<DMA>(sim, this, logger, cfg, 5);
+    logger.log("  DMA 5 created!");
+    dma_6  = std::make_unique<DMA>(sim, this, logger, cfg, 6);
+    logger.log("  DMA 6 created!");
     sa     = std::make_unique<SystolicArray>(sim, this, logger, cfg);
     logger.log("  SystolicArray created!");
     acc    = std::make_unique<Accumulator>(sim, this, logger, cfg);
@@ -254,6 +266,24 @@ void PerfNpuCore::issueInstQueues() {
             logger.log("[Core] DMA 3 Queue Issued");
         }
     }
+
+    if(dma_4_inst_queue->isIdle() && dma_4->isIdle()) {
+        if(dma_4_inst_queue->inst_issue()) {
+            logger.log("[Core] DMA 4 Queue Issued");
+        }
+    }
+
+    if(dma_5_inst_queue->isIdle() && dma_5->isIdle()) {
+        if(dma_5_inst_queue->inst_issue()) {
+            logger.log("[Core] DMA 5 Queue Issued");
+        }
+    }
+
+    if(dma_6_inst_queue->isIdle() && dma_6->isIdle()) {
+        if(dma_6_inst_queue->inst_issue()) {
+            logger.log("[Core] DMA 6 Queue Issued");
+        }
+    }
 }
 
 
@@ -274,6 +304,24 @@ void PerfNpuCore::retireInstQueues() {
         dma_3_inst_queue->inst_retire();
         dma_3->setIdle();
         logger.log("[Core] DMA 3 Instruction Retired");
+    }
+
+    if(dma_4->isFinish()) {
+        dma_4_inst_queue->inst_retire();
+        dma_4->setIdle();
+        logger.log("[Core] DMA 4 Instruction Retired");
+    }
+
+    if(dma_5->isFinish()) {
+        dma_5_inst_queue->inst_retire();
+        dma_5->setIdle();
+        logger.log("[Core] DMA 5 Instruction Retired");
+    }
+
+    if(dma_6->isFinish()) {
+        dma_6_inst_queue->inst_retire();
+        dma_6->setIdle();
+        logger.log("[Core] DMA 6 Instruction Retired");
     }
 
     if(sa->isFinish()) {
@@ -310,12 +358,18 @@ bool PerfNpuCore::isBusy() {
         !dma_1_inst_queue->empty() || dma_1_inst_queue->isBusy() ||
         !dma_2_inst_queue->empty() || dma_2_inst_queue->isBusy() ||
         !dma_3_inst_queue->empty() || dma_3_inst_queue->isBusy() ||
+        !dma_4_inst_queue->empty() || dma_4_inst_queue->isBusy() ||
+        !dma_5_inst_queue->empty() || dma_5_inst_queue->isBusy() ||
+        !dma_6_inst_queue->empty() || dma_6_inst_queue->isBusy() ||
         !sa_inst_queue->empty()    || sa_inst_queue->isBusy()    ||
         !sfu_inst_queue->empty()   || sfu_inst_queue->isBusy()   ||
 
         dma_1->isBusy()  || dma_1->isFinish() ||
         dma_2->isBusy()  || dma_2->isFinish() ||
         dma_3->isBusy()  || dma_3->isFinish() ||
+        dma_4->isBusy()  || dma_4->isFinish() ||
+        dma_5->isBusy()  || dma_5->isFinish() ||
+        dma_6->isBusy()  || dma_6->isFinish() ||
         sa->isBusy()     || sa->isFinish()    ||
         acc->isBusy()    || acc->isFinish()   ||
         sfu->isBusy()    || sfu->isFinish()   ||
@@ -340,6 +394,9 @@ void PerfNpuCore::tick(){
     if(dma_1->isBusy())    dma_1->tick();
     if(dma_2->isBusy())    dma_2->tick();
     if(dma_3->isBusy())    dma_3->tick();
+    if(dma_4->isBusy())    dma_4->tick();
+    if(dma_5->isBusy())    dma_5->tick();
+    if(dma_6->isBusy())    dma_6->tick();
     if(sa->isBusy())       sa->tick();
     if(acc->isBusy())      acc->tick();
     if(sfu->isBusy())      sfu->tick();
@@ -364,6 +421,9 @@ void PerfNpuCore::tick(){
     state.dma1      = dma_1->isBusy();
     state.dma2      = dma_2->isBusy();
     state.dma3      = dma_3->isBusy();
+    state.dma4      = dma_4->isBusy();
+    state.dma5      = dma_5->isBusy();
+    state.dma6      = dma_6->isBusy();
     state.spm        = spm->isBusy();
     state.sa         = sa->isBusy();
     state.acc        = acc->isBusy();
@@ -417,6 +477,9 @@ PerfFunctionalUnit* PerfNpuCore::getUnit(UnitType name) {
         case UnitType::DMA1           : return dma_1.get();
         case UnitType::DMA2           : return dma_2.get();
         case UnitType::DMA3           : return dma_3.get();
+        case UnitType::DMA4           : return dma_4.get();
+        case UnitType::DMA5           : return dma_5.get();
+        case UnitType::DMA6           : return dma_6.get();
         case UnitType::SystolicArray  : return sa.get();
         case UnitType::Accumulator    : return acc.get();
         case UnitType::SFU            : return sfu.get();

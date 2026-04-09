@@ -46,6 +46,13 @@ public:
     // bool updateValid(int bit, bool status);
     // bool updateBusy(int bit, bool status);
 
+private:
+    // Helper Function
+    bool isABank(int bank_id);
+    bool isBBank(int bank_id);
+    bool isOutputBank(int bank_id);
+    bool isLegalDmaRoute(const DMAInstPacket& inst_packet);
+
 };
 
 #endif

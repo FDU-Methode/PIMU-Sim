@@ -22,6 +22,7 @@ struct DMAInstPacket {
     Inst inst0{};
     Inst inst1{};
     uint64_t inst_id = 0;
+    int dma_id = 0;
 };
 
 struct SAInstPacket {

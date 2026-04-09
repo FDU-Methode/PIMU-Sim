@@ -1,33 +1,20 @@
-# gen_resnet_block_serial.py
-# Typical flow per output tile:
-#   for each k-tile:
-#       MVIN A
-#       MVIN B
-#       SA A, B, C
-#   MVOUT C
-#   MVIN A
-#   MVIN C
-#   MATADD A, C, D
-#   MVOUT D
+# gen_resnet_block_dma6.py
+# D = A * B + A
 #
-# Notes:
-# - This version is strictly tile-serial.
-# - No next-tile prefetch is inserted before current tile finishes MVOUT D.
-# - This matches your intended execution style and avoids cross-tile FIFO deadlock.
-# - SA semantics:
-#     first k tile: is_acc=0, acc_dest=1   -> output to ACC data
-#     middle k:     is_acc=1, acc_dest=1   -> accumulate in ACC data
-#     last k:       is_acc=1, acc_dest=0   -> write final C tile to SPM
-# - Then C tile is MVOUT to DDR temp.
-# - For MATADD:
-#     MVIN residual A -> ACC bank0
-#     MVIN temp C     -> ACC bank1
-#     MATADD -> SPM final D
-#     MVOUT D -> DRAM
+# Per output tile flow:
+#   for each k-tile:
+#       MVIN A(i,k) -> SPM bank0/1
+#       MVIN B(k,j) -> SPM bank2/3
+#       SA
+#   MVOUT C(i,j) -> DRAM temp              (from SPM bank4/5, via DMA5/6)
+#   MVIN residual A(i,j) -> ACC bank0      (via DMA3)
+#   MVIN temp C(i,j) -> ACC bank1          (via DMA3)
+#   MATADD(ACC0, ACC1) -> SPM bank6/7
+#   MVOUT D(i,j) -> DRAM output            (from SPM bank6/7, via DMA5/6)
 
 TILE = 32
 
-# Change as needed
+# change as needed
 M = 256
 N = 256
 K = 256
@@ -45,28 +32,22 @@ LDC = N
 
 DRAM_A_BASE   = 0x01000000
 DRAM_B_BASE   = 0x02000000
-DRAM_TMP_BASE = 0x03000000   # temporary GEMM output C
-DRAM_D_BASE   = 0x04000000   # final output D
+DRAM_TMP_BASE = 0x03000000
+DRAM_D_BASE   = 0x04000000
 
-# Current cfg:
-# sram_bank_num   = 8
-# sram_bank_bytes = 0x40000
-# acc_bank_num    = 2
-# acc_bytes       = 0x100000
-
-# SPM bank map
-A_BANK0   = 0x00000000   # bank0
-A_BANK1   = 0x00040000   # bank1
-B_BANK0   = 0x00080000   # bank2
-B_BANK1   = 0x000C0000   # bank3
-C_BANK0   = 0x00100000   # bank4  GEMM output C
-C_BANK1   = 0x00140000   # bank5  GEMM output C
-D_BANK0   = 0x00180000   # bank6  MATADD output D
-D_BANK1   = 0x001C0000   # bank7  MATADD output D
+# SPM layout under current policy
+A_BANK0 = 0x00000000   # bank0
+A_BANK1 = 0x00040000   # bank1
+B_BANK0 = 0x00080000   # bank2
+B_BANK1 = 0x000C0000   # bank3
+C_BANK0 = 0x00100000   # bank4
+C_BANK1 = 0x00140000   # bank5
+D_BANK0 = 0x00180000   # bank6
+D_BANK1 = 0x001C0000   # bank7
 
 # ACC data banks
-ACC_BANK0 = 0x00000000   # MATADD input A
-ACC_BANK1 = 0x00080000   # MATADD input C / SA psum
+ACC_BANK0 = 0x00000000
+ACC_BANK1 = 0x00080000
 
 TMP_TILE_BYTES = TILE * TILE * 4
 
@@ -98,10 +79,12 @@ def emit_dma(opcode, data_type, precision, is_quant, source, is_bias,
 
     return [inst_hex(high0, low0), inst_hex(high1, low1)]
 
-def emit_sa(config1, input_a_zp, input_b_zp, output_scale, output_shift, output_zp,
-            config2, bias_w, bias_h, bias_stride, output_stride, biaspsum_addr, output_addr,
+def emit_sa(config1, config2,
+            bias_w, bias_h, bias_stride, output_stride,
+            biaspsum_addr, output_addr,
             a_addr, a_col_num, a_row_num, a_stride,
-            b_addr, b_col_num, b_row_num, b_stride):
+            b_addr, b_col_num, b_row_num, b_stride,
+            input_a_zp=0, input_b_zp=0, output_scale=1, output_shift=0, output_zp=0):
     low0 = (
         0x03
         | (config1 << 8)
@@ -148,12 +131,6 @@ def emit_matadd(a_addr, b_addr, out_addr, col_num, row_num,
     return [inst_hex(high0, low0), inst_hex(high1, low1), inst_hex(high2, low2)]
 
 def sa_config2(acc_dest, a_keep=0, b_keep=0, is_acc=0, is_bias=0, bias_keep=0):
-    # bit3  acc_dest
-    # bit4  a_valid
-    # bit5  b_valid
-    # bit6  is_acc
-    # bit11 is_bias
-    # bit12 bias_valid
     cfg = 0
     cfg |= (acc_dest  & 0x1) << 3
     cfg |= (a_keep    & 0x1) << 4
@@ -181,15 +158,11 @@ def dram_addr_d(i_tile, j_tile):
 
 def generate():
     lines = []
-    lines.append("# ResNet-like block")
-    lines.append("# D = MATADD(A, C), where C = A * B")
-    lines.append(f"# shape: A={M}x{K}, B={K}x{N}, D={M}x{N}")
-    lines.append(f"# tile: {TILE}x{TILE}")
-    lines.append("# Strict per-tile flow:")
-    lines.append("#   MVIN A, MVIN B, SA ... , MVOUT C, MVIN A, MVIN C, MATADD, MVOUT D")
+    lines.append("# ResNet block under fixed-bank / fixed-DMA policy")
+    lines.append("# bank0-1:A bank2-3:B bank4-5:C bank6-7:D")
+    lines.append("# D = A * B + A")
 
     config1_gemm = 0
-
     cfg_sa_first = sa_config2(acc_dest=1, is_acc=0, is_bias=0)
     cfg_sa_mid   = sa_config2(acc_dest=1, is_acc=1, is_bias=0)
     cfg_sa_last  = sa_config2(acc_dest=0, is_acc=1, is_bias=0)
@@ -201,19 +174,18 @@ def generate():
             c_bank = C_BANK0 if ((i + j) & 1) == 0 else C_BANK1
             d_bank = D_BANK0 if ((i + j) & 1) == 0 else D_BANK1
 
-            # GEMM stage
             for k in range(KT):
                 a_bank = A_BANK0 if (k & 1) == 0 else A_BANK1
                 b_bank = B_BANK0 if (k & 1) == 0 else B_BANK1
 
-                lines.append(f"# MVIN A tile ({i},{k})")
+                lines.append(f"# MVIN A tile ({i},{k}) -> bank{'0' if (k & 1) == 0 else '1'}")
                 lines.extend(
                     emit_dma(
                         opcode=0x01,
                         data_type=0,
                         precision=1,
                         is_quant=0,
-                        source=0,   # SPM
+                        source=0,   # dest = SPM
                         is_bias=0,
                         col_num=TILE - 1,
                         row_num=TILE - 1,
@@ -224,14 +196,14 @@ def generate():
                     )
                 )
 
-                lines.append(f"# MVIN B tile ({k},{j})")
+                lines.append(f"# MVIN B tile ({k},{j}) -> bank{'2' if (k & 1) == 0 else '3'}")
                 lines.extend(
                     emit_dma(
                         opcode=0x01,
                         data_type=0,
                         precision=1,
                         is_quant=0,
-                        source=0,   # SPM
+                        source=0,   # dest = SPM
                         is_bias=0,
                         col_num=TILE - 1,
                         row_num=TILE - 1,
@@ -259,11 +231,6 @@ def generate():
                 lines.extend(
                     emit_sa(
                         config1=config1_gemm,
-                        input_a_zp=0,
-                        input_b_zp=0,
-                        output_scale=1,
-                        output_shift=0,
-                        output_zp=0,
                         config2=cfg2,
                         bias_w=0,
                         bias_h=0,
@@ -282,7 +249,6 @@ def generate():
                     )
                 )
 
-            # MVOUT C
             lines.append(f"# MVOUT C tile ({i},{j}) -> DDR temp")
             lines.extend(
                 emit_dma(
@@ -290,7 +256,7 @@ def generate():
                     data_type=0,
                     precision=1,
                     is_quant=0,
-                    source=0,   # SPM
+                    source=0,   # source = SPM
                     is_bias=0,
                     col_num=TILE - 1,
                     row_num=TILE - 1,
@@ -301,7 +267,6 @@ def generate():
                 )
             )
 
-            # MVIN A to ACC for MATADD
             lines.append(f"# MVIN residual A tile ({i},{j}) -> ACC bank0")
             lines.extend(
                 emit_dma(
@@ -309,7 +274,7 @@ def generate():
                     data_type=2,
                     precision=1,
                     is_quant=0,
-                    source=1,   # ACC
+                    source=1,   # dest = ACC
                     is_bias=0,
                     col_num=TILE - 1,
                     row_num=TILE - 1,
@@ -320,7 +285,6 @@ def generate():
                 )
             )
 
-            # MVIN C to ACC for MATADD
             lines.append(f"# MVIN temp C tile ({i},{j}) -> ACC bank1")
             lines.extend(
                 emit_dma(
@@ -328,7 +292,7 @@ def generate():
                     data_type=2,
                     precision=1,
                     is_quant=0,
-                    source=1,   # ACC
+                    source=1,   # dest = ACC
                     is_bias=0,
                     col_num=TILE - 1,
                     row_num=TILE - 1,
@@ -339,8 +303,7 @@ def generate():
                 )
             )
 
-            # MATADD A, C, D
-            lines.append(f"# MATADD tile ({i},{j})")
+            lines.append(f"# MATADD tile ({i},{j}) -> D bank")
             lines.extend(
                 emit_matadd(
                     a_addr=ACC_BANK0,
@@ -354,15 +317,14 @@ def generate():
                 )
             )
 
-            # MVOUT D
-            lines.append(f"# MVOUT D tile ({i},{j})")
+            lines.append(f"# MVOUT D tile ({i},{j}) -> DRAM output")
             lines.extend(
                 emit_dma(
                     opcode=0x02,
                     data_type=0,
                     precision=1,
                     is_quant=0,
-                    source=0,   # SPM
+                    source=0,   # source = SPM
                     is_bias=0,
                     col_num=TILE - 1,
                     row_num=TILE - 1,

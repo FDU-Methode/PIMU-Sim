@@ -8,7 +8,7 @@
 #include "inst_queue.hpp"
 
 enum class DMATarget {
-    NONE, DMA1, DMA2, DMA3
+    NONE, DMA1, DMA2, DMA3, DMA4, DMA5, DMA6
 };
 
 struct DecodedLine {
@@ -20,12 +20,16 @@ struct DecodedLine {
 class Decoder {
 private:
     Logger& logger;
+    const Config& cfg;
 
     InstCache* inst_cache;
 
     DMAInstQueue* dma_1_inst_queue;
     DMAInstQueue* dma_2_inst_queue;
     DMAInstQueue* dma_3_inst_queue;
+    DMAInstQueue* dma_4_inst_queue;
+    DMAInstQueue* dma_5_inst_queue;
+    DMAInstQueue* dma_6_inst_queue;
     SAInstQueue*  sa_inst_queue;
     SFUInstQueue* sfu_inst_queue;
 
@@ -41,12 +45,12 @@ private:
 
     // DMA Dispatch Status
     DMATarget current_dma_target = DMATarget::NONE;
-    bool next_spm_mvin_to_dma2 = true;
-    bool next_spm_mvout_to_dma2 = true;
+    bool next_spm_read_to_dma5 = true;
 
 public:
-    Decoder(Logger& logger, InstCache* inst_cache, DMAInstQueue* dma_1_inst_queue, DMAInstQueue* dma_2_inst_queue, 
-            DMAInstQueue* dma_3_inst_queue, SAInstQueue* sa_inst_queue, SFUInstQueue* sfu_inst_queue);
+    Decoder(Logger& logger, const Config& cfg, InstCache* inst_cache, DMAInstQueue* dma_1_inst_queue, DMAInstQueue* dma_2_inst_queue, 
+            DMAInstQueue* dma_3_inst_queue, DMAInstQueue* dma_4_inst_queue, DMAInstQueue* dma_5_inst_queue, DMAInstQueue* dma_6_inst_queue, 
+            SAInstQueue* sa_inst_queue, SFUInstQueue* sfu_inst_queue);
     ~Decoder() = default;
 
     void tick();
@@ -68,9 +72,14 @@ private:
     uint8_t getOpcode(const Inst& inst);
     InstType classifyOpcode(uint8_t opcode);
     int getInstLineCount(uint8_t opcode);
+    // Helper Function
     bool isAccDma(const Inst& inst);
     int dmaQueueLoad(DMAInstQueue* queue);
- 
+    int getSpmBankId(uint32_t addr);
+    bool isABank(int bank_id);
+    bool isBBank(int bank_id);
+    bool isOutputBank(int bank_id);
+
 };
 
 

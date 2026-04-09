@@ -1,10 +1,12 @@
 #include "../../include/perf/decoder.hpp"
 #include <stdexcept>
 
-Decoder::Decoder(Logger& logger, InstCache* inst_cache, DMAInstQueue* dma_1_inst_queue, DMAInstQueue* dma_2_inst_queue, 
-                DMAInstQueue* dma_3_inst_queue, SAInstQueue* sa_inst_queue, SFUInstQueue* sfu_inst_queue)
-                : logger(logger), inst_cache(inst_cache), dma_1_inst_queue(dma_1_inst_queue), dma_2_inst_queue(dma_2_inst_queue),
-                dma_3_inst_queue(dma_3_inst_queue), sa_inst_queue(sa_inst_queue), sfu_inst_queue(sfu_inst_queue) {};
+Decoder::Decoder(Logger& logger, const Config& cfg, InstCache* inst_cache, DMAInstQueue* dma_1_inst_queue, DMAInstQueue* dma_2_inst_queue, 
+                DMAInstQueue* dma_3_inst_queue, DMAInstQueue* dma_4_inst_queue, DMAInstQueue* dma_5_inst_queue, DMAInstQueue* dma_6_inst_queue, 
+                SAInstQueue* sa_inst_queue, SFUInstQueue* sfu_inst_queue)
+                : logger(logger), cfg(cfg), inst_cache(inst_cache), dma_1_inst_queue(dma_1_inst_queue), dma_2_inst_queue(dma_2_inst_queue),
+                dma_3_inst_queue(dma_3_inst_queue), dma_4_inst_queue(dma_4_inst_queue), dma_5_inst_queue(dma_5_inst_queue), dma_6_inst_queue(dma_6_inst_queue), 
+                sa_inst_queue(sa_inst_queue), sfu_inst_queue(sfu_inst_queue) {};
 
 
 void Decoder::tick() {
@@ -121,6 +123,9 @@ bool Decoder::dispatch() {
                 case DMATarget::DMA1: target_queue = dma_1_inst_queue; break;
                 case DMATarget::DMA2: target_queue = dma_2_inst_queue; break;
                 case DMATarget::DMA3: target_queue = dma_3_inst_queue; break;
+                case DMATarget::DMA4: target_queue = dma_4_inst_queue; break;
+                case DMATarget::DMA5: target_queue = dma_5_inst_queue; break;
+                case DMATarget::DMA6: target_queue = dma_6_inst_queue; break;
                 default: throw std::runtime_error("Decoder DMA Dispatch Without Valid Target");
             }
 
@@ -168,58 +173,48 @@ bool Decoder::dispatch() {
 
 
 DMATarget Decoder::selectDMATarget(uint8_t opcode, const Inst& inst) {
-    // bool is_acc  = isAccDma(inst);
-    // if(is_acc) {
-    //     return DMATarget::DMA1;
-    // }
+    bool is_acc = isAccDma(inst);
+    uint32_t sram_addr = static_cast<uint32_t>(inst.high & 0xFFFFFFFF);
 
-    // bool dma1_full = dma_1_inst_queue->full();
-    // bool dma2_full = dma_2_inst_queue->full();
-    // bool dma3_full = dma_3_inst_queue->full();
-    // // Compute Load of Each Inst Queue
-    // int load1 = dmaQueueLoad(dma_1_inst_queue);
-    // int load2 = dmaQueueLoad(dma_2_inst_queue);
-    // int load3 = dmaQueueLoad(dma_3_inst_queue);
-
-    // if(opcode == 0x01) {  // MVIN To SPM
-    //     if(!dma2_full && !dma3_full) {
-    //         if(load2 < load3) return DMATarget::DMA2;
-    //         if(load3 < load2) return DMATarget::DMA3;
-    //         // Round - Robin
-    //         DMATarget target = next_spm_mvin_to_dma2 ? DMATarget::DMA2 : DMATarget::DMA3;
-    //         next_spm_mvin_to_dma2 = !next_spm_mvin_to_dma2;
-    //         return target;
-    //     }
-    //     if(!dma2_full) return DMATarget::DMA2;
-    //     if(!dma3_full) return DMATarget::DMA3;
-    //     if(!dma1_full) return DMATarget::DMA1;
-    //     return DMATarget::NONE;
-    // }
-
-    // if(opcode == 0x02) {  // MVOUT From SPM
-    //     if(!dma1_full && load1 == 0) {
-    //         return DMATarget::DMA1;
-    //     }
-    //     if(!dma2_full && !dma3_full) {
-    //         if(load2 < load3) return DMATarget::DMA2;
-    //         if(load3 < load2) return DMATarget::DMA3;
-    //         // Round - Robin
-    //         DMATarget target = next_spm_mvout_to_dma2 ? DMATarget::DMA2 : DMATarget::DMA3;
-    //         next_spm_mvout_to_dma2 = !next_spm_mvout_to_dma2;
-    //         return target;
-    //     }
-    //     if(!dma2_full) return DMATarget::DMA2;
-    //     if(!dma3_full) return DMATarget::DMA3;
-    //     if(!dma1_full) return DMATarget::DMA1;
-    //     return DMATarget::NONE;
-    // }
-
-    // return DMATarget::NONE;
-    bool dma1_full = dma_1_inst_queue->full();
-    if(dma1_full) {
+    if(is_acc) {
+        if(opcode == 0x01) {
+            return DMATarget::DMA3;
+        }
         return DMATarget::NONE;
     }
-    return DMATarget::DMA1;
+
+    int bank_id = getSpmBankId(sram_addr);
+
+    if(opcode == 0x01) {  // MVIN -> SPM
+        if(isABank(bank_id)) {
+            return DMATarget::DMA1;
+        }
+        if(isBBank(bank_id)) {
+            return DMATarget::DMA2;
+        }
+        if(isOutputBank(bank_id)) {
+            return DMATarget::DMA4;
+        }
+        return DMATarget::NONE;
+    }
+
+    if(opcode == 0x02) {  // MVOUT <- SPM
+        if(!isOutputBank(bank_id)) {
+            return DMATarget::NONE;
+        }
+
+        bool dma5_full = dma_5_inst_queue->full();
+        bool dma6_full = dma_6_inst_queue->full();
+        if(dma5_full && dma6_full) return DMATarget::NONE;
+        if(!dma5_full && dma6_full) return DMATarget::DMA5;
+        if(dma5_full && !dma6_full) return DMATarget::DMA6;
+        // Round - Robin
+        DMATarget target = next_spm_read_to_dma5 ? DMATarget::DMA5 : DMATarget::DMA6;
+        next_spm_read_to_dma5 = !next_spm_read_to_dma5;
+        return target;
+    }
+
+    return DMATarget::NONE;
 }
 
 
@@ -260,4 +255,24 @@ bool Decoder::isAccDma(const Inst& inst) {  // Decide Whether to Transfer Betwee
 
 int Decoder::dmaQueueLoad(DMAInstQueue* inst_queue) {
     return inst_queue->getCurrentInstNum() + (inst_queue->isBusy() ? 1 : 0) + (inst_queue->getInstCount() ? 1 : 0);
+}
+
+
+int Decoder::getSpmBankId(uint32_t addr) {
+    return static_cast<int>(addr / cfg.sram_bank_bytes);
+}
+
+
+bool Decoder::isABank(int bank_id) {
+    return bank_id == 0 || bank_id == 1;
+}
+
+
+bool Decoder::isBBank(int bank_id) {
+    return bank_id == 2 || bank_id == 3;
+}
+
+
+bool Decoder::isOutputBank(int bank_id) {
+    return bank_id >= 4 && bank_id < cfg.sram_bank_num;
 }

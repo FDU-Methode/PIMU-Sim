@@ -6,6 +6,9 @@ EventSyncUnit::EventSyncUnit(const Config& cfg, Logger& logger) : cfg(cfg), logg
     if(cfg.sram_bank_num <= 0) {
         throw std::invalid_argument("Event Sync Unit: bank_num must be greater than 0");
     }
+    if(cfg.sram_bank_num < 5) {
+        throw std::invalid_argument("Event Sync Unit: sram_bank_num must be at least 5");
+    }
     spm_bank_num = cfg.sram_bank_num;
     spm_bank_bytes = cfg.sram_bank_bytes;
     acc_bank_num = cfg.acc_bank_num;
@@ -43,6 +46,10 @@ bool EventSyncUnit::allowIssue(const DMAInstPacket& inst_packet) {
     bool is_acc = (inst0.low >> 13) & 0x1;
     bool is_bias = (inst0.low >> 14) & 0x1;
     uint32_t sram_addr = static_cast<uint32_t>(inst0.high & 0xFFFFFFFF);
+
+    if(!isLegalDmaRoute(inst_packet)) {
+        return false;
+    }
 
     if(opcode == 0x01) {  // MVIN
 
@@ -107,6 +114,17 @@ bool EventSyncUnit::allowIssue(const SAInstPacket& inst_packet) {
         bool bias_valid = false;
         bool output_valid = false;
 
+        if(!isABank(bank_a_id) || !isBBank(bank_b_id)) {
+            return false;
+        }
+
+        if(!acc_dest) {
+            int bank_output_id = getBankId(output_addr, 0);
+            if(!isOutputBank(bank_output_id)) {
+                return false;
+            }
+        }
+
         // Check Input Valid
         if(bank_busy[bank_a_id] || bank_busy[bank_b_id]) input_valid = false;
         else if((!bank_valid[bank_a_id]) || (!bank_valid[bank_b_id])) input_valid = false;
@@ -151,6 +169,10 @@ bool EventSyncUnit::allowIssue(const SAInstPacket& inst_packet) {
         bool input_valid = false;
         bool output_valid = false;
 
+        if(!isOutputBank(bank_output_id)) {
+            return false;
+        }
+
         if(bank_a_id == bank_b_id) {
             logger.log("[EventSyncUnit][ERROR] MATADD Matrix A B address conflict: addr_a=0x%08x, addr_b=0x%08x", 
                         sram_addr_a, sram_addr_b);
@@ -184,6 +206,10 @@ bool EventSyncUnit::allowIssue(const SFUInstPacket& inst_packet) {
 
     int input_bank_id = getBankId(input_addr, 0);
     int output_bank_id = getBankId(output_addr, 0);
+
+    if(!isOutputBank(input_bank_id) || !isOutputBank(output_bank_id)) {
+        return false;
+    }
 
     if(bank_busy[input_bank_id] || bank_busy[output_bank_id]) return false;
     else if((!bank_valid[input_bank_id]) || bank_valid[output_bank_id]) return false;
@@ -402,8 +428,49 @@ void EventSyncUnit::retireUpdate(const SFUInstPacket& inst_packet) {
 };
 
 
+// Helper Function
+bool EventSyncUnit::isABank(int bank_id) {
+    return bank_id == 0 || bank_id == 1;
+}
 
 
+bool EventSyncUnit::isBBank(int bank_id) {
+    return bank_id == 2 || bank_id == 3;
+}
+
+
+bool EventSyncUnit::isOutputBank(int bank_id) {
+    return bank_id >= 4 && bank_id < spm_bank_num;
+}
+
+
+bool EventSyncUnit::isLegalDmaRoute(const DMAInstPacket& inst_packet) {
+    uint8_t opcode = inst_packet.opcode;
+    Inst inst0 = inst_packet.inst0;
+
+    bool is_acc = (inst0.low >> 13) & 0x1;
+    uint32_t sram_addr = static_cast<uint32_t>(inst0.high & 0xFFFFFFFF);
+    int dma_id = inst_packet.dma_id;
+
+    if(is_acc) {
+        return (opcode == 0x01) && (dma_id == 3);  // DMA3 only writes to ACC
+    }
+
+    int bank_id = getBankId(sram_addr, false);
+
+    if(opcode == 0x01) {  // MVIN -> SPM
+        if(isABank(bank_id)) return dma_id == 1;
+        if(isBBank(bank_id)) return dma_id == 2;
+        if(isOutputBank(bank_id)) return dma_id == 4;
+        return false;
+    }
+
+    if(opcode == 0x02) {  // MVOUT <- SPM
+        return isOutputBank(bank_id) && (dma_id == 5 || dma_id == 6);
+    }
+
+    return false;
+}
 
 
 

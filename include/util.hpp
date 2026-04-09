@@ -19,7 +19,8 @@ enum class MsgType {
 };
 
 enum class UnitType {
-    DMA, DMA1, DMA2, DMA3, SPM, SystolicArray, Accumulator, AccBiasSram, AccDataSram, SFU, GEMV
+    DMA, DMA1, DMA2, DMA3, DMA4, DMA5, DMA6, 
+    SPM, SystolicArray, Accumulator, AccBiasSram, AccDataSram, SFU, GEMV
 };
 
 enum class InstType {
@@ -143,13 +144,16 @@ inline int UnitTypeToIndex(UnitType unit){
         case UnitType::DMA1:          return 1;
         case UnitType::DMA2:          return 2;
         case UnitType::DMA3:          return 3;
-        case UnitType::SPM:           return 4;
-        case UnitType::SystolicArray: return 5;
-        case UnitType::Accumulator:   return 6;
-        case UnitType::AccBiasSram:   return 7;
-        case UnitType::AccDataSram:   return 8;
-        case UnitType::SFU:           return 9;
-        case UnitType::GEMV:          return 10;
+        case UnitType::DMA4:          return 4;
+        case UnitType::DMA5:          return 5;
+        case UnitType::DMA6:          return 6;
+        case UnitType::SPM:           return 7;
+        case UnitType::SystolicArray: return 8;
+        case UnitType::Accumulator:   return 9;
+        case UnitType::AccBiasSram:   return 10;
+        case UnitType::AccDataSram:   return 11;
+        case UnitType::SFU:           return 12;
+        case UnitType::GEMV:          return 13;
         default:                      throw std::invalid_argument("Unknown UnitType");
     }
 }
@@ -160,6 +164,9 @@ inline std::string UnitTypeToStr(UnitType unit){
         case UnitType::DMA1:          return "DMA1";
         case UnitType::DMA2:          return "DMA2";
         case UnitType::DMA3:          return "DMA3";
+        case UnitType::DMA4:          return "DMA4";
+        case UnitType::DMA5:          return "DMA5";
+        case UnitType::DMA6:          return "DMA6";
         case UnitType::SPM:           return "SPM";
         case UnitType::SystolicArray: return "SystolicArray";
         case UnitType::Accumulator:   return "Accumulator";

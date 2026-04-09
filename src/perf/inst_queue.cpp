@@ -16,6 +16,7 @@ bool DMAInstQueue::in_queue(const Inst& inst, uint8_t opcode) {
         inst_packet = DMAInstPacket{};
         inst_packet.opcode = opcode;
         inst_packet.inst_id = inst_id_counter++;
+        inst_packet.dma_id = queue_id;
         inst_packet.inst0 = inst;
     } else if(inst_count == 1) {
         inst_packet.inst1 = inst;
@@ -77,18 +78,12 @@ bool DMAInstQueue::inst_issue() {
     // Start the First Functional Unit
     DMA* dma = nullptr;
     switch(queue_id) {
-        case 1: {
-            dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA1));
-            break;
-        }
-        case 2: {
-            dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA2));
-            break;
-        }
-        case 3: {
-            dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA3));
-            break;
-        }
+        case 1: dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA1)); break;
+        case 2: dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA2)); break;
+        case 3: dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA3)); break;
+        case 4: dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA4)); break;
+        case 5: dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA5)); break;
+        case 6: dma = dynamic_cast<DMA*>(core->getUnit(UnitType::DMA6)); break;
         default: throw std::runtime_error("[DMAInstQueue] No Valid Queue ID");
     }
     dma->execute(inst_packet.opcode);
