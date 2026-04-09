@@ -8,30 +8,6 @@ RegFile::RegFile(const Config& cfg) {
         }
         return it->second;
     };
-
-    mvin_rs1_reg_addr              = get_addr("mvin_rs1_reg_addr");
-    mvin_rs2_reg_addr              = get_addr("mvin_rs2_reg_addr");
-    mvout_rs1_reg_addr             = get_addr("mvout_rs1_reg_addr");
-    mvout_rs2_reg_addr             = get_addr("mvout_rs2_reg_addr");
-    config_mvin_rs1_reg_addr       = get_addr("config_mvin_rs1_reg_addr");
-    config_mvin_rs2_reg_addr       = get_addr("config_mvin_rs2_reg_addr");
-    config_mvout_rs1_reg_addr      = get_addr("config_mvout_rs1_reg_addr");
-    config_mvout_rs2_reg_addr      = get_addr("config_mvout_rs2_reg_addr");
-    config_compute_rs1_reg_addr    = get_addr("config_compute_rs1_reg_addr");
-    config_compute_rs2_reg_addr    = get_addr("config_compute_rs2_reg_addr");
-    config_sfu_rs1_reg_addr        = get_addr("config_sfu_rs1_reg_addr");
-    config_sfu_rs2_reg_addr        = get_addr("config_sfu_rs2_reg_addr");
-    config_accumulate_rs1_reg_addr = get_addr("config_accumulate_rs1_reg_addr");
-    config_accumulate_rs2_reg_addr = get_addr("config_accumulate_rs2_reg_addr");
-    compute_sa_rs1_reg_addr        = get_addr("compute_sa_rs1_reg_addr");
-    compute_sa_rs2_reg_addr        = get_addr("compute_sa_rs2_reg_addr");
-    compute_matadd_rs1_reg_addr    = get_addr("compute_matadd_rs1_reg_addr");
-    compute_matadd_rs2_reg_addr    = get_addr("compute_matadd_rs2_reg_addr");
-    compute_matvec_rs1_reg_addr    = get_addr("compute_matvec_rs1_reg_addr");
-    compute_matvec_rs2_reg_addr    = get_addr("compute_matvec_rs2_reg_addr");
-    compute_sfu_rs1_reg_addr       = get_addr("compute_sfu_rs1_reg_addr");
-    compute_sfu_rs2_reg_addr       = get_addr("compute_sfu_rs2_reg_addr");
-    start_reg_addr                 = get_addr("start_reg_addr");
     iar_reg_addr                   = get_addr("iar_reg_addr");
     mer_reg_addr                   = get_addr("mer_reg_addr");
     ier_reg_addr                   = get_addr("ier_reg_addr");

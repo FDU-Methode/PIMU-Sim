@@ -76,6 +76,17 @@ public:
 
     void addInstNum();
 
+    RegFile& getRegFile() { return reg_file; }
+    DMAInstQueue* getDMAInstQueue(int queue_id) {
+        switch(queue_id) {
+            case 1: return dma_1_inst_queue.get();
+            case 2: return dma_2_inst_queue.get();
+            case 3: return dma_3_inst_queue.get();
+            default: return nullptr;
+        }
+    }
+    SAInstQueue* getSAInstQueue() { return sa_inst_queue.get(); }
+    SFUInstQueue* getSFUInstQueue() { return sfu_inst_queue.get(); }
     PerfFunctionalUnit* getUnit(UnitType name);
     HardWareUtilizationTracker* getUtilTracker() { return util_tracker.get(); };
     Scratchpad* getSpm() { return spm.get(); }

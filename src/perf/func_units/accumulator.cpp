@@ -2,8 +2,8 @@
 #include "../../../include/perf/perf_func_unit.hpp"
 #include "../../../include/perf/perf_npu_core.hpp"
 
-Accumulator::Accumulator(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, core, logger, regfile, cfg) {
+Accumulator::Accumulator(PerfSim* sim, PerfNpuCore* core, Logger& logger, const Config& cfg) :
+    PerfFunctionalUnit(sim, core, logger, cfg) {
     UnitName = "Accumulator";
 
     acc_sram = std::make_unique<AccSram>(logger, cfg);
@@ -124,6 +124,14 @@ void Accumulator::execute(uint8_t opcode){
     assert(!isBusy() && !isFinish());
     assert(state == State::IDLE);
 
+    SAInstQueue* sa_queue = core->getSAInstQueue();
+    assert(sa_queue && "[Accumulator] SA queue is NULL");
+
+    const SAInstPacket& inst_packet = sa_queue->getInstBuffer();
+    const Inst& inst0 = inst_packet.inst0;
+    const Inst& inst1 = inst_packet.inst1;
+    const Inst& inst2 = inst_packet.inst2;
+
     state = State::BUSY;
 
     if(opcode == 0x03) current_task = SATaskType::SA;
@@ -133,25 +141,25 @@ void Accumulator::execute(uint8_t opcode){
     matadd_start = (current_task == SATaskType::MATADD);
     sa_start     = (current_task == SATaskType::SA);
 
-    optype = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 25) & 0x3);
-    is_acc = (regfile.read(regfile.config_accumulate_rs2_reg_addr) >> 48) & 0x1;
-    is_bias = (regfile.read(regfile.config_accumulate_rs2_reg_addr) >> 53) & 0x1;
-    acc_dest = (regfile.read(regfile.config_compute_rs1_reg_addr) >> 27) & 0x1;
+    optype = static_cast<uint8_t>((inst1.low >> 1) & 0x3);
+    acc_dest = (inst1.low >> 3) & 0x1;
+    is_acc = (inst1.low >> 6) & 0x1;
+    is_bias = (inst1.low >> 11) & 0x1;
 
-    biaspsum_base_addr = (regfile.read(regfile.config_accumulate_rs1_reg_addr)) & 0xFFFFFFFF;
-    sa_output_base_addr = (regfile.read(regfile.config_accumulate_rs2_reg_addr)) & 0xFFFFFFFF;
-    matadd_a_base_addr = (regfile.read(regfile.compute_matadd_rs1_reg_addr)) & 0xFFFFFFFF;
-    matadd_b_base_addr = (regfile.read(regfile.compute_matadd_rs1_reg_addr) >> 32) & 0xFFFFFFFF;
-    matadd_output_base_addr = (regfile.read(regfile.compute_matadd_rs2_reg_addr)) & 0xFFFFFFFF;
-    sa_input_b_col_num = ((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 32) & 0x1F) + 1;
-    biaspsum_stride = (regfile.read(regfile.config_accumulate_rs1_reg_addr) >> 32) & 0xFFFF;
-    sa_output_stride = (regfile.read(regfile.config_accumulate_rs2_reg_addr) >> 32) & 0xFFFF;
+    biaspsum_base_addr = static_cast<uint32_t>(inst1.high & 0xFFFFFFFF);
+    sa_output_base_addr = static_cast<uint32_t>((inst1.high >> 32) & 0xFFFFFFFF);
+    matadd_a_base_addr = static_cast<uint32_t>((inst0.low >> 32) & 0xFFFFFFFF);
+    matadd_b_base_addr = static_cast<uint32_t>(inst0.high & 0xFFFFFFFF);
+    matadd_output_base_addr = static_cast<uint32_t>((inst0.high >> 32) & 0xFFFFFFFF);
+    sa_input_b_col_num = static_cast<int>((inst2.high >> 32) & 0x1F) + 1;
+    biaspsum_stride = static_cast<int>((inst1.low >> 32) & 0xFFFF);
+    sa_output_stride = static_cast<int>((inst1.low >> 48) & 0xFFFF);
 
     tail_cycles = acc_dest ? 3 : 4;
 
     if(matadd_start) {  // MATADD
-        int row_num = (int)((regfile.read(regfile.compute_matadd_rs2_reg_addr) >> 40) & 0xFF) + 1;
-        int col_num = (int)((regfile.read(regfile.compute_matadd_rs2_reg_addr) >> 32) & 0xFF) + 1;
+        int row_num = static_cast<int>((inst0.low >> 16) & 0xFF) + 1;
+        int col_num = static_cast<int>((inst0.low >> 8) & 0xFF) + 1;
         remaining_cycles = (row_num * col_num + cfg.systolic_array_size - 1) / cfg.systolic_array_size + 5;
         total_cycles = remaining_cycles;
         logger.log("[Accumulator] Matadd Start, row_num=%d, col_num=%d, remaining = %d", row_num, col_num, remaining_cycles);
@@ -160,10 +168,10 @@ void Accumulator::execute(uint8_t opcode){
 
     if(sa_start) {
         if(optype == 0) {  // GEMM
-            int col_num_a = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 32) & 0x7FF) + 1;
-            int row_num_a = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 43) & 0x1F) + 1;
-            int col_num_b = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 32) & 0x1F) + 1;
-            int row_num_b = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 37) & 0x7FF) + 1;
+            int col_num_a = static_cast<int>((inst2.low >> 32) & 0x7FF) + 1;
+            int row_num_a = static_cast<int>((inst2.low >> 43) & 0x1F) + 1;
+            int col_num_b = static_cast<int>((inst2.high >> 32) & 0x1F) + 1;
+            int row_num_b = static_cast<int>((inst2.high >> 37) & 0x7FF) + 1;
 
             if(col_num_a != row_num_b) {
                 logger.log("[Accumulator][ERROR] GEMM Dimension Mismatch: input_a_col_num = %d, input_b_row_num = %d", col_num_a, row_num_b);
@@ -181,20 +189,20 @@ void Accumulator::execute(uint8_t opcode){
         if(optype == 1) {  // CONV
             // parameters
 
-            int pad_left = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 1) & 0x3);
-            int pad_right = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 3) & 0x3);
-            int pad_top = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 5) & 0x3);
-            int pad_bottom = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 7) & 0x3);
-            int weight_shape = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 11) & 0xF) + 1;
-            int weight_stride = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 15) & 0x3) + 1;
-            int weight_dilation = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 17) & 0x1F) + 1;
+            int pad_left = (inst0.low >> 9) & 0x3;
+            int pad_right = (inst0.low >> 12) & 0x3;
+            int pad_top = (inst0.low >> 14) & 0x3;
+            int pad_bottom = (inst0.low >> 16) & 0x3;
+            int weight_shape = ((inst0.low >> 19) & 0xF) + 1;
+            int weight_stride = ((inst0.low >> 23) & 0x3) + 1;
+            int weight_dilation = ((inst0.low >> 25) & 0x1F) + 1;
             // uint8_t is_group_conv = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 22) & 0x1);
             // uint8_t int_type = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 23) & 0x3);
 
-            int col_num_a = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 32) & 0x7FF) + 1;  // ifm_w
-            int row_num_a = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 43) & 0x1F) + 1;  // ifm_h
-            int col_num_b = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 32) & 0x1F) + 1;  // cout
-            int row_num_b = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 37) & 0x7FF) + 1;  // cin
+            int col_num_a = static_cast<int>((inst2.low >> 32) & 0x7FF) + 1;  // ifm_w
+            int row_num_a = static_cast<int>((inst2.low >> 43) & 0x1F) + 1;  // ifm_h
+            int col_num_b = static_cast<int>((inst2.high >> 32) & 0x1F) + 1;  // cout
+            int row_num_b = static_cast<int>((inst2.high >> 37) & 0x7FF) + 1;  // cin
 
             int k_eff = weight_dilation * (weight_shape - 1) + 1;
             int ofm_w = ((col_num_a + pad_left + pad_right - k_eff) / weight_stride) + 1;

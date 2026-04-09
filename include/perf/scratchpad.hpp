@@ -3,7 +3,7 @@
 
 #include "../util.hpp"
 #include "../logger.hpp"
-#include "../regfile.hpp"
+#include "../config.hpp"
 
 class Scratchpad{
 protected:

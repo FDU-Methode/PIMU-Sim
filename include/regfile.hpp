@@ -28,32 +28,6 @@ public:
     void dump() const;
 
     // --- 寄存器地址 ---
-    uint32_t mvin_rs1_reg_addr;
-    uint32_t mvin_rs2_reg_addr;
-    uint32_t mvout_rs1_reg_addr;
-    uint32_t mvout_rs2_reg_addr;
-
-    uint32_t config_mvin_rs1_reg_addr;
-    uint32_t config_mvin_rs2_reg_addr;
-    uint32_t config_mvout_rs1_reg_addr;
-    uint32_t config_mvout_rs2_reg_addr;
-    uint32_t config_compute_rs1_reg_addr;
-    uint32_t config_compute_rs2_reg_addr;
-    uint32_t config_sfu_rs1_reg_addr;
-    uint32_t config_sfu_rs2_reg_addr;
-    uint32_t config_accumulate_rs1_reg_addr;
-    uint32_t config_accumulate_rs2_reg_addr;
-
-    uint32_t compute_sa_rs1_reg_addr;
-    uint32_t compute_sa_rs2_reg_addr;
-    uint32_t compute_matadd_rs1_reg_addr;
-    uint32_t compute_matadd_rs2_reg_addr;
-    uint32_t compute_matvec_rs1_reg_addr;
-    uint32_t compute_matvec_rs2_reg_addr;
-    uint32_t compute_sfu_rs1_reg_addr;
-    uint32_t compute_sfu_rs2_reg_addr;
-
-    uint32_t start_reg_addr;
     uint32_t iar_reg_addr;
     uint32_t mer_reg_addr;
     uint32_t ier_reg_addr;

@@ -2,8 +2,8 @@
 #include "../../../include/perf/perf_func_unit.hpp"
 #include "../../../include/perf/perf_npu_core.hpp"
 
-SFU::SFU(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, core, logger, regfile, cfg) {
+SFU::SFU(PerfSim* sim, PerfNpuCore* core, Logger& logger, const Config& cfg) :
+    PerfFunctionalUnit(sim, core, logger, cfg) {
     UnitName = "SFU";
 }
 
@@ -177,16 +177,23 @@ void SFU::execute(){
     assert(!isBusy() && !isFinish());
     assert(state == State::IDLE);
 
+    SFUInstQueue* sfu_queue = core->getSFUInstQueue();
+    assert(sfu_queue && "[SFU] SFU queue is NULL");
+
+    const SFUInstPacket& inst_packet = sfu_queue->getInstBuffer();
+    const Inst& inst0 = inst_packet.inst0;
+    const Inst& inst1 = inst_packet.inst1;
+
     state = State::BUSY;
 
-    int col_num = (int)((regfile.read(regfile.compute_sfu_rs1_reg_addr) >> 32) & 0xFFFF) + 1;
-    int row_num = (int)((regfile.read(regfile.compute_sfu_rs1_reg_addr) >> 48) & 0xFFFF) + 1;
-    bool is_quant = (regfile.read(regfile.config_sfu_rs1_reg_addr) >> 8) & 0x1;
+    int col_num = static_cast<int>((inst0.low >> 32) & 0xFFFF) + 1;
+    int row_num = static_cast<int>((inst0.low >> 48) & 0xFFFF) + 1;
+    bool is_quant = (inst0.low >> 16) & 0x1;
 
     sfu_cycle = 0;
-    sfu_optype = (uint8_t)(regfile.read(regfile.config_sfu_rs1_reg_addr) & 0x3F);
-    spm_input_base_addr = (uint32_t)(regfile.read(regfile.compute_sfu_rs1_reg_addr) & 0xFFFFFFFF);
-    spm_output_base_addr = (uint32_t)(regfile.read(regfile.compute_sfu_rs2_reg_addr) & 0xFFFFFFFF);
+    sfu_optype = static_cast<uint8_t>((inst0.low >> 8) & 0x3F);
+    spm_input_base_addr = static_cast<uint32_t>(inst0.high & 0xFFFFFFFF);
+    spm_output_base_addr = static_cast<uint32_t>((inst0.high >> 32) & 0xFFFFFFFF);
     spm_expected_reads = 0;
     spm_expected_writes = 0;
     spm_issued_reads = 0;
@@ -326,10 +333,4 @@ void SFU::execute(){
 
 void SFU::completeInstruction(){
     PerfFunctionalUnit::completeInstruction();
-
-    // Update ISR Reg
-    uint64_t isr_val = regfile.read(regfile.isr_reg_addr);
-    isr_val |= (1ULL << 5);
-    regfile.write(regfile.isr_reg_addr, isr_val);
-    logger.log("[SFU] ISR Reg[5] Updated");
 }

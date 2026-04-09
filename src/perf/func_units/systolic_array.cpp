@@ -2,8 +2,8 @@
 #include "../../../include/perf/perf_func_unit.hpp"
 #include "../../../include/perf/perf_npu_core.hpp"
 
-SystolicArray::SystolicArray(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, core, logger, regfile, cfg) {
+SystolicArray::SystolicArray(PerfSim* sim, PerfNpuCore* core, Logger& logger, const Config& cfg) :
+    PerfFunctionalUnit(sim, core, logger, cfg) {
     UnitName = "SystolicArray";
 }
 
@@ -65,25 +65,35 @@ void SystolicArray::execute(){
     assert(!isBusy() && !isFinish());
     assert(state == State::IDLE);
 
+    SAInstQueue* sa_queue = core->getSAInstQueue();
+    assert(sa_queue && "[SystolicArray] SA queue is NULL");
+
+    const SAInstPacket& inst_packet = sa_queue->getInstBuffer();
+    const Inst& inst0 = inst_packet.inst0;
+    const Inst& inst1 = inst_packet.inst1;
+    const Inst& inst2 = inst_packet.inst2;
+
     state = State::BUSY;
 
     acc_started = false;
     spm_rd1_remaining = 0;
     spm_rd2_remaining = 0;
 
-    uint8_t optype = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 25) & 0x3);
-    spm_rd1_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs1_reg_addr) & 0xFFFFFFFF);  // Activation/IFM Address
-    spm_rd2_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs2_reg_addr) & 0xFFFFFFFF);  // Weight Address
+    uint8_t optype = static_cast<uint8_t>((inst1.low >> 1) & 0x3);
 
-    spm_rd1_stride_bytes = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 48) & 0xFFFF);
-    spm_rd2_stride_bytes = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 48) & 0xFFFF);
+    spm_rd1_addr = static_cast<uint32_t>(inst2.low & 0xFFFFFFFF);  // Activation/IFM Address
+    spm_rd2_addr = static_cast<uint32_t>(inst2.high & 0xFFFFFFFF);  // Weight Address
+
+    spm_rd1_stride_bytes = static_cast<int>((inst2.low >> 48) & 0xFFFF);
+    spm_rd2_stride_bytes = static_cast<int>((inst2.high >> 48) & 0xFFFF);
+
 
     if(optype == 0) {  // GEMM
 
-        int col_num_a = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 32) & 0x7FF) + 1;
-        int row_num_a = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 43) & 0x1F) + 1;
-        int col_num_b = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 32) & 0x1F) + 1;
-        int row_num_b = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 37) & 0x7FF) + 1;
+        int col_num_a = static_cast<int>((inst2.low >> 32) & 0x7FF) + 1;
+        int row_num_a = static_cast<int>((inst2.low >> 43) & 0x1F) + 1;
+        int col_num_b = static_cast<int>((inst2.high >> 32) & 0x1F) + 1;
+        int row_num_b = static_cast<int>((inst2.high >> 37) & 0x7FF) + 1;
 
         if(col_num_a != row_num_b) {
             logger.log("[SystolicArray][ERROR] GEMM Dimension Mismatch: input_a_col_num = %d, input_b_row_num = %d", col_num_a, row_num_b);
@@ -104,21 +114,21 @@ void SystolicArray::execute(){
         // parameters
 
         // uint8_t dataflow = (uint8_t)(regfile.read(regfile.config_compute_rs1_reg_addr) & 0x1);
-        int pad_left = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 1) & 0x3);
-        int pad_right = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 3) & 0x3);
-        int pad_top = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 5) & 0x3);
-        int pad_bottom = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 7) & 0x3);
-        int pad_mode = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 9) & 0x3);
-        int weight_shape = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 11) & 0xF) + 1;
-        int weight_stride = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 15) & 0x3) + 1;
-        int weight_dilation = (int)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 17) & 0x1F) + 1;
+        int pad_left = (inst0.low >> 9) & 0x3;
+        int pad_right = (inst0.low >> 12) & 0x3;
+        int pad_top = (inst0.low >> 14) & 0x3;
+        int pad_bottom = (inst0.low >> 16) & 0x3;
+        int pad_mode = (inst0.low >> 18) & 0x3;
+        int weight_shape = ((inst0.low >> 19) & 0xF) + 1;
+        int weight_stride = ((inst0.low >> 23) & 0x3) + 1;
+        int weight_dilation = ((inst0.low >> 25) & 0x1F) + 1;
         // uint8_t is_group_conv = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 22) & 0x1);
         // uint8_t int_type = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 23) & 0x3);
 
-        int col_num_a = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 32) & 0x7FF) + 1;  // ifm_w
-        int row_num_a = (int)((regfile.read(regfile.compute_sa_rs1_reg_addr) >> 43) & 0x1F) + 1;  // ifm_h
-        int col_num_b = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 32) & 0x1F) + 1;  // cout
-        int row_num_b = (int)((regfile.read(regfile.compute_sa_rs2_reg_addr) >> 37) & 0x7FF) + 1;  // cin
+        int col_num_a = static_cast<int>((inst2.low >> 32) & 0x7FF) + 1;  // ifm_w
+        int row_num_a = static_cast<int>((inst2.low >> 43) & 0x1F) + 1;  // ifm_h
+        int col_num_b = static_cast<int>((inst2.high >> 32) & 0x1F) + 1;  // cout
+        int row_num_b = static_cast<int>((inst2.high >> 37) & 0x7FF) + 1;  // cin
 
         // compute cycle
         int k_eff = weight_dilation * (weight_shape - 1) + 1;

@@ -1,8 +1,8 @@
 #include <cassert>
 #include "../../include/perf/perf_func_unit.hpp"
 
-PerfFunctionalUnit::PerfFunctionalUnit(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg) :
-    simulator(sim), core(core), cfg(cfg), logger(logger), regfile(regfile) {}
+PerfFunctionalUnit::PerfFunctionalUnit(PerfSim* sim, PerfNpuCore* core, Logger& logger, const Config& cfg) :
+    simulator(sim), core(core), cfg(cfg), logger(logger) {}
 
 void PerfFunctionalUnit::execute(){}  //need to complete
 void PerfFunctionalUnit::tick(){}  //need to complete

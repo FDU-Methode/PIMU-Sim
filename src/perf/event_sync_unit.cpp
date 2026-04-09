@@ -96,10 +96,6 @@ bool EventSyncUnit::allowIssue(const SAInstPacket& inst_packet) {
     bool is_bias = (inst1.low >> 11) & 0x1;
     bool acc_dest = (inst1.low >> 3) & 0x1;
 
-    bool a_valid = (inst1.low >> 4) & 0x1;
-    bool b_valid = (inst1.low >> 5) & 0x1;
-    bool bias_valid = (inst1.low >> 12) & 0x1;
-
     if(opcode == 0x03) {  // SA
 
         uint32_t sram_addr_a = static_cast<uint32_t>(inst2.low & 0xFFFFFFFF);
@@ -221,13 +217,8 @@ void EventSyncUnit::issueUpdate(const DMAInstPacket& inst_packet) {
 
     } else if(opcode == 0x02) {  // MVOUT
 
-        // if(is_acc) {  // MVOUT From ACC (SRAM)
-        //     int bank_id = getBankId(sram_addr, is_acc);
-        //     bank_busy[bank_id] = 1;
-        // } else {  // MVOUT FROM SPM
-        //     int bank_id = getBankId(sram_addr, is_acc);
-        //     bank_busy[bank_id] = 1;
-        // }
+        int bank_id = getBankId(sram_addr, is_acc);
+        bank_busy[bank_id] = 1;
 
     } else {
         logger.log("[EventSyncUnit][ERROR] Unsupported Opcode: opcode=0x%02x", opcode);
@@ -246,10 +237,6 @@ void EventSyncUnit::issueUpdate(const SAInstPacket& inst_packet) {
     bool is_acc = (inst1.low >> 6) & 0x1;
     bool is_bias = (inst1.low >> 11) & 0x1;
     bool acc_dest = (inst1.low >> 3) & 0x1;
-
-    bool a_valid = (inst1.low >> 4) & 0x1;
-    bool b_valid = (inst1.low >> 5) & 0x1;
-    bool bias_valid = (inst1.low >> 12) & 0x1;
 
     if(opcode == 0x03) {  // SA
 
@@ -316,15 +303,9 @@ void EventSyncUnit::retireUpdate(const DMAInstPacket& inst_packet) {
 
     } else if(opcode == 0x02) {  // MVOUT
 
-        if(is_acc) {  // MVOUT From ACC (SRAM)
-            int bank_id = getBankId(sram_addr, is_acc);
-            // bank_busy[bank_id] = 0;
-            bank_valid[bank_id] = 0;
-        } else {  // MVOUT FROM SPM
-            int bank_id = getBankId(sram_addr, is_acc);
-            // bank_busy[bank_id] = 0;
-            bank_valid[bank_id] = 0;
-        }
+        int bank_id = getBankId(sram_addr, is_acc);
+        bank_busy[bank_id] = 0;
+        bank_valid[bank_id] = 0;
 
     } else {
         logger.log("[EventSyncUnit][ERROR] Unsupported Opcode: opcode=0x%02x", opcode);

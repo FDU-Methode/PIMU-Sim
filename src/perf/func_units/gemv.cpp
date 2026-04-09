@@ -2,8 +2,8 @@
 #include "../../../include/perf/perf_func_unit.hpp"
 #include "../../../include/perf/perf_npu_core.hpp"
 
-GEMV::GEMV(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, core, logger, regfile, cfg) {
+GEMV::GEMV(PerfSim* sim, PerfNpuCore* core, Logger& logger, const Config& cfg) :
+    PerfFunctionalUnit(sim, core, logger, cfg) {
     UnitName = "GEMV";
 }
 
@@ -27,10 +27,4 @@ void GEMV::execute(){
 
 void GEMV::completeInstruction(){
     PerfFunctionalUnit::completeInstruction();
-
-    // Update ISR Reg
-    uint64_t isr_val = regfile.read(regfile.isr_reg_addr);
-    isr_val |= (1ULL << 4);
-    regfile.write(regfile.isr_reg_addr, isr_val);
-    logger.log("[GEMV] ISR Reg[4] Updated");
 }

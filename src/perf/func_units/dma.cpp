@@ -29,11 +29,7 @@ struct SizeDecode {
     int local_bytes = 1;
 };
 
-SizeDecode decode_mvin_sizes(uint64_t cfg_word) {
-    const int input_type_hi = static_cast<int>((cfg_word >> 1) & 0x1);
-    const int precision = static_cast<int>((cfg_word >> 2) & 0x3);
-    const int is_quant = static_cast<int>((cfg_word >> 4) & 0x1);
-
+SizeDecode decode_mvin_sizes(int input_type_hi, int precision, int is_quant) {
     const int key = (input_type_hi << 3) | (precision << 1) | is_quant;
     SizeDecode ret{1, 1};
 
@@ -50,10 +46,7 @@ SizeDecode decode_mvin_sizes(uint64_t cfg_word) {
     return ret;
 }
 
-SizeDecode decode_mvout_sizes(uint64_t cfg_word) {
-    const int output_type_lsb = static_cast<int>((cfg_word >> 1) & 0x1);
-    const int precision = static_cast<int>((cfg_word >> 2) & 0x3);
-
+SizeDecode decode_mvout_sizes(int output_type_lsb, int precision) {
     const int key = (output_type_lsb << 2) | precision;
     SizeDecode ret{1, 1};
 
@@ -115,8 +108,8 @@ void build_dma_plans(uint32_t dram_base_addr,
 
 }  // namespace
 
-DMA::DMA(PerfSim* sim, PerfNpuCore* core, Logger& logger, RegFile& regfile, const Config& cfg) :
-    PerfFunctionalUnit(sim, core, logger, regfile, cfg) {
+DMA::DMA(PerfSim* sim, PerfNpuCore* core, Logger& logger, const Config& cfg, int queue_id) :
+    PerfFunctionalUnit(sim, core, logger, cfg), queue_id(queue_id) {
     UnitName = "DMA";
 }
 
@@ -238,6 +231,13 @@ void DMA::execute(uint8_t opcode){
     assert(!isBusy() && !isFinish());
     assert(state == State::IDLE);
 
+    DMAInstQueue* dma_queue = core->getDMAInstQueue(queue_id);
+    assert(dma_queue && "[DMA] DMA queue is NULL");
+
+    const DMAInstPacket& inst_packet = dma_queue->getInstBuffer();
+    const Inst& inst0 = inst_packet.inst0;
+    const Inst& inst1 = inst_packet.inst1;
+
     state = State::BUSY;
 
     // Store Task Type
@@ -258,27 +258,29 @@ void DMA::execute(uint8_t opcode){
     mvout_start = (current_task == DMATaskType::MVOUT);
 
     Message req{};
-    uint64_t cfg_word = 0;
     SizeDecode sizes{};
 
     if(mvin_start && !mvout_start){
-        cfg_word = regfile.read(regfile.config_mvin_rs1_reg_addr);
-
         req.type = MsgType::LD_REQ;
-        source = ((cfg_word >> 5) & 0x1) != 0;  // cfg_mvin_dest: 0->SPM, 1->ACC
-        is_bias = ((cfg_word >> 6) & 0x1) != 0;
+        source = ((inst0.low >> 13) & 0x1) != 0;  // cfg_mvin_dest: 0->SPM, 1->ACC
+        is_bias = ((inst0.low >> 14) & 0x1) != 0;
 
-        req.row_num = (int)((regfile.read(regfile.mvin_rs1_reg_addr) >> 32) & 0xFFFF);
-        req.col_num = (int)((regfile.read(regfile.mvin_rs2_reg_addr) >> 32) & 0xFFFF);
-        req.dram_stride = (int)((cfg_word >> 48) & 0xFFFF);
-        req.sram_stride = (int)((cfg_word >> 32) & 0xFFFF);
+        req.row_num = static_cast<int>((inst0.low >> 48) & 0xFFFF);
+        req.col_num = static_cast<int>((inst0.low >> 32) & 0xFFFF);
+        req.dram_stride = static_cast<int>((inst1.low >> 16) & 0xFFFF);
+        req.sram_stride = static_cast<int>(inst1.low & 0xFFFF);
 
-        sizes = decode_mvin_sizes(cfg_word);
+        uint8_t data_type = static_cast<uint8_t>((inst0.low >> 8) & 0x3);
+        uint8_t precision = static_cast<uint8_t>((inst0.low >> 10) & 0x3);
+        uint8_t is_quant = static_cast<uint8_t>((inst0.low >> 12) & 0x1);
+        int input_type_hi = (data_type >> 1) & 0x1;
+
+        sizes = decode_mvin_sizes(input_type_hi, precision, is_quant);
+
         req.data_size = sizes.dram_bytes;
-
-        req.quant = ((cfg_word >> 4) & 0x1) != 0;
-        req.src_addr = (uint32_t)(regfile.read(regfile.mvin_rs1_reg_addr) & 0xFFFFFFFF);
-        req.dst_addr = (uint32_t)(regfile.read(regfile.mvin_rs2_reg_addr) & 0xFFFFFFFF);
+        req.quant = is_quant != 0;
+        req.src_addr = static_cast<uint32_t>((inst0.high >> 32) & 0xFFFFFFFF);
+        req.dst_addr = static_cast<uint32_t>(inst0.high & 0xFFFFFFFF);
         expectedMsgType = MsgType::LD_RESP;
 
         logger.log("[DMA] MVIN: send LD_REQ, src=0x%x dst=0x%x rows=%d cols=%d dram_stride=%d sram_stride=%d dram_bytes=%d local_bytes=%d dest=%s quant=%d",
@@ -287,23 +289,25 @@ void DMA::execute(uint8_t opcode){
                    source ? "ACC" : "SPM", req.quant ? 1 : 0);
 
     } else if(!mvin_start && mvout_start){
-        cfg_word = regfile.read(regfile.config_mvout_rs1_reg_addr);
-
         req.type = MsgType::ST_REQ;
-        source = ((cfg_word >> 5) & 0x1) != 0;  // cfg_mvout_source: 0->SPM, 1->ACC
+        source = ((inst0.low >> 13) & 0x1) != 0;  // cfg_mvout_source: 0->SPM, 1->ACC
         is_bias = false;
 
-        req.row_num = (int)((regfile.read(regfile.mvout_rs1_reg_addr) >> 32) & 0xFFFF);
-        req.col_num = (int)((regfile.read(regfile.mvout_rs2_reg_addr) >> 32) & 0xFFFF);
-        req.dram_stride = (int)((cfg_word >> 48) & 0xFFFF);
-        req.sram_stride = (int)((cfg_word >> 32) & 0xFFFF);
+        req.row_num = static_cast<int>((inst0.low >> 48) & 0xFFFF);
+        req.col_num = static_cast<int>((inst0.low >> 32) & 0xFFFF);
+        req.dram_stride = static_cast<int>((inst1.low >> 16) & 0xFFFF);
+        req.sram_stride = static_cast<int>(inst1.low & 0xFFFF);
 
-        sizes = decode_mvout_sizes(cfg_word);
+        uint8_t data_type = static_cast<uint8_t>((inst0.low >> 8) & 0x3);
+        uint8_t precision = static_cast<uint8_t>((inst0.low >> 10) & 0x3);
+        int output_type_lsb = data_type & 0x1;
+
+        sizes = decode_mvout_sizes(output_type_lsb, precision);
+
         req.data_size = sizes.dram_bytes;
-
-        req.quant = ((cfg_word >> 4) & 0x1) != 0;
-        req.src_addr = (uint32_t)(regfile.read(regfile.mvout_rs2_reg_addr) & 0xFFFFFFFF);
-        req.dst_addr = (uint32_t)(regfile.read(regfile.mvout_rs1_reg_addr) & 0xFFFFFFFF);
+        req.quant = ((inst0.low >> 12) & 0x1) != 0;
+        req.src_addr = static_cast<uint32_t>(inst0.high & 0xFFFFFFFF);
+        req.dst_addr = static_cast<uint32_t>((inst0.high >> 32) & 0xFFFFFFFF);
         expectedMsgType = MsgType::ST_RESP;
 
         logger.log("[DMA] MVOUT: send ST_REQ, src=0x%x dst=0x%x rows=%d cols=%d dram_stride=%d sram_stride=%d dram_bytes=%d local_bytes=%d source=%s quant=%d",

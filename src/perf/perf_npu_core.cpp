@@ -68,11 +68,11 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     event_sync_unit = std::make_unique<EventSyncUnit>(cfg, logger);
     logger.log("  Event Sync created!");
 
-    dma_1_inst_queue = std::make_unique<DMAInstQueue>(this, logger, reg_file, cfg, event_sync_unit.get(), 1);
-    dma_2_inst_queue = std::make_unique<DMAInstQueue>(this, logger, reg_file, cfg, event_sync_unit.get(), 2);
-    dma_3_inst_queue = std::make_unique<DMAInstQueue>(this, logger, reg_file, cfg, event_sync_unit.get(), 3);
-    sa_inst_queue    = std::make_unique<SAInstQueue>(this, logger, reg_file, cfg, event_sync_unit.get());
-    sfu_inst_queue   = std::make_unique<SFUInstQueue>(this, logger, reg_file, cfg, event_sync_unit.get());
+    dma_1_inst_queue = std::make_unique<DMAInstQueue>(this, logger, cfg, event_sync_unit.get(), 1);
+    dma_2_inst_queue = std::make_unique<DMAInstQueue>(this, logger, cfg, event_sync_unit.get(), 2);
+    dma_3_inst_queue = std::make_unique<DMAInstQueue>(this, logger, cfg, event_sync_unit.get(), 3);
+    sa_inst_queue    = std::make_unique<SAInstQueue>(this, logger, cfg, event_sync_unit.get());
+    sfu_inst_queue   = std::make_unique<SFUInstQueue>(this, logger, cfg, event_sync_unit.get());
     dma_1_inst_queue->clear();
     dma_2_inst_queue->clear();
     dma_3_inst_queue->clear();
@@ -89,19 +89,19 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     logger.log("  Decoder created!");
 
     // Create Function Unit
-    dma_1  = std::make_unique<DMA>(sim, this, logger, reg_file, cfg);
+    dma_1  = std::make_unique<DMA>(sim, this, logger, cfg, 1);
     logger.log("  DMA 1 created!");
-    dma_2  = std::make_unique<DMA>(sim, this, logger, reg_file, cfg);
+    dma_2  = std::make_unique<DMA>(sim, this, logger, cfg, 2);
     logger.log("  DMA 2 created!");
-    dma_3  = std::make_unique<DMA>(sim, this, logger, reg_file, cfg);
+    dma_3  = std::make_unique<DMA>(sim, this, logger, cfg, 3);
     logger.log("  DMA 3 created!");
-    sa     = std::make_unique<SystolicArray>(sim, this, logger, reg_file, cfg);
+    sa     = std::make_unique<SystolicArray>(sim, this, logger, cfg);
     logger.log("  SystolicArray created!");
-    acc    = std::make_unique<Accumulator>(sim, this, logger, reg_file, cfg);
+    acc    = std::make_unique<Accumulator>(sim, this, logger, cfg);
     logger.log("  Accumulator created!");
-    sfu    = std::make_unique<SFU>(sim, this, logger, reg_file, cfg);
+    sfu    = std::make_unique<SFU>(sim, this, logger, cfg);
     logger.log("  SFU created!");
-    gemv   = std::make_unique<GEMV>(sim, this, logger, reg_file, cfg);
+    gemv   = std::make_unique<GEMV>(sim, this, logger, cfg);
     logger.log("  GEMV created!");
 
     spm = std::make_unique<Scratchpad>(logger, cfg);
@@ -131,6 +131,7 @@ void PerfNpuCore::openInstFile(const std::string& inst_file) {
     inst_cache->clear();
     pc = 0;
     fetched_inst_num = 0;
+    simulated_inst_num = 0;
     inst_file_line_num = 0;
     inst_file_done = false;
 
