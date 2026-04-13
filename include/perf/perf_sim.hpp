@@ -14,6 +14,8 @@ private:
 
     int max_sim_cycle;
     int cycle;
+    uint64_t core_phase_counter = 0;
+    uint64_t ddr_phase_counter = 0;
     uint64_t base_tick_ps;
     std::vector<uint64_t> ticks_per_period;
     std::chrono::high_resolution_clock::time_point sim_start_time, sim_end_time;
@@ -23,10 +25,15 @@ public:
     ~PerfSim() noexcept = default;
 
     void run() override;
+    void stepOneCoreCycle();
+    // Compiler Interface
+    void beginExternalExecution();
+    void endExternalExecution();
 
     void print_stats();
     BaseModule* getCore() {return core.get();}
     BaseModule* getDDR() {return ddr.get();}
+    PerfNpuCore* getPerfCore() {return dynamic_cast<PerfNpuCore*>(core.get());}
 };
 
 #endif

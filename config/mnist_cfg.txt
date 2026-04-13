@@ -1,0 +1,48 @@
+simulator_type = PERFORMANCE
+max_sim_cycle = 200000
+
+systolic_array_size = 32
+npu_freq = 1.0
+
+iar_reg_addr = 32'hb8
+mer_reg_addr = 32'hc0
+ier_reg_addr = 32'hc8
+isr_reg_addr = 32'hd0
+ipr_reg_addr = 32'hd8
+
+ddr_mode = 1
+dramsim_cfg_path = ./external/DRAMsim3/configs/DDR4_8Gb_x8_3200.ini
+ddr_freq = 3.2
+ddr_bandwidth = 21.3
+tCAS = 15
+tRCD = 15
+tRP = 15
+tBURST = 4
+BL = 8
+ddr_bus_width = 64
+ddr_channel_num = 4
+ddr_request_queue_depth = 8
+
+sram_bank_num = 8
+sram_bank_bytes = 262144
+sram_data_width = 8
+
+bias_bank_num = 1
+bias_bytes = 262144
+acc_bank_num = 2
+acc_bytes = 1048576
+acc_data_width = 32
+
+inst_cache_size = 256
+inst_queue_depth = 3
+
+enable_log = 1
+log_file = ./log/mnist_sim_log.txt
+
+compiled_model_lib =
+onnx_model_file = ./npux-mlir/model_test/models/mnist/model.onnx
+onnx_mlir_bin = ./onnx_mlir_bin
+onnx_mlir_flags =
+compile_work_dir = ./build/compiler_run/mnist
+model_input_dir = ./npux-mlir/model_test/models/mnist
+model_output_dir = ./sim_output/mnist

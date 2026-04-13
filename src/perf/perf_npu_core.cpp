@@ -119,6 +119,15 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
 
 
 void PerfNpuCore::openInstFile(const std::string& inst_file) {
+    if(cfg.inst_file.empty()) {
+        fetched_inst_num = 0;
+        simulated_inst_num = 0;
+        inst_file_line_num = 0;
+        inst_file_done = true;
+        logger.log("[InstLoader] External instruction feed mode enabled, skip opening inst file.");
+        return;
+    }
+
     if(inst_ifs.is_open()) {
         inst_ifs.close();
     }
@@ -215,10 +224,21 @@ void PerfNpuCore::handleInterrupts() {
 
     reg_file.write(reg_file.ipr_reg_addr, ipr_val);
     irq = (ipr_val != 0);
+}
 
-    if(irq) {
-        reg_file.write(reg_file.iar_reg_addr, ipr_val);
-        logger.log("[Core] Detect IRQ Pending: ISR=0x%lx, IER=0x%lx, IPR=0x%lx, Write IAR=0x%lx", isr_val, ier_val, ipr_val, ipr_val);
+
+bool PerfNpuCore::isIssueBlockedByIrq(uint8_t opcode) {
+    uint64_t isr_val = reg_file.read(reg_file.isr_reg_addr);
+    uint64_t ier_val = reg_file.read(reg_file.ier_reg_addr);
+    uint64_t pending = isr_val & ier_val;
+
+    switch(opcode) {
+        case 0x01: return (pending & (1ULL << 0)) != 0; // DMA MVIN
+        case 0x02: return (pending & (1ULL << 1)) != 0; // DMA MVOUT
+        case 0x03: return (pending & (1ULL << 2)) != 0; // SA
+        case 0x04: return (pending & (1ULL << 3)) != 0; // MATADD
+        case 0x05: return (pending & (1ULL << 5)) != 0; // SFU
+        default:   return false;
     }
 }
 
@@ -301,7 +321,7 @@ void PerfNpuCore::retireInstQueues() {
 
 bool PerfNpuCore::isBusy() {
     return
-        !inst_file_done ||
+        (!external_inst_feed && !inst_file_done) ||
         !inst_cache->empty() ||
         decoder->fetchBufferValid() ||
         decoder->decodeBufferValid() ||
@@ -381,7 +401,9 @@ void PerfNpuCore::tick(){
     decoder->tick();
 
     // 8. Load Inst To Cache
-    loadInstToCache();
+    if(!external_inst_feed) {
+        loadInstToCache();
+    }
 
     // 9. Inst Retire
     retireInstQueues();
@@ -409,6 +431,22 @@ void PerfNpuCore::checkCompletion(){
 
 void PerfNpuCore::addInstNum() {
     ++simulated_inst_num;
+}
+
+
+void PerfNpuCore::enableExternalInstFeed() {
+    external_inst_feed = true;
+
+    if (inst_ifs.is_open()) {
+        inst_ifs.close();
+    }
+
+    inst_cache->clear();
+    inst_file_done = true;
+    fetched_inst_num = 0;
+    inst_file_line_num = 0;
+
+    logger.log("[InstLoader] Switched to external instruction feed mode.");
 }
 
 

@@ -17,19 +17,15 @@ static uint32_t parse_number(const std::string& val) {
         std::string clean_val = val;
         int base = 10;
 
-        // 1. 处理 Verilog 风格 (e.g., 32'hB0)
         size_t h_pos = val.find("'h");
         if (h_pos != std::string::npos) {
-            clean_val = val.substr(h_pos + 2); // 跳过 'h
+            clean_val = val.substr(h_pos + 2);
             base = 16;
-        }
-        // 2. 处理 C 风格十六进制 (e.g., 0xB0)
-        else if (val.find("0x") == 0 || val.find("0X") == 0) {
+        } else if (val.find("0x") == 0 || val.find("0X") == 0) {
             clean_val = val.substr(2);
             base = 16;
         }
 
-        // 转换为 unsigned long
         return std::stoul(clean_val, nullptr, base);
     } catch (const std::exception& e) {
         throw std::runtime_error("Invalid number format in config: " + val);
@@ -51,6 +47,7 @@ Config Config::from_file(const std::string &path){
         if (eq == std::string::npos) continue;
         std::string k = trim(line.substr(0, eq));
         std::string v = trim(line.substr(eq + 1));
+
         if (k == "simulator_type") {
             if (v == "FUNCTIONAL") c.simulator_type = SimMode::FUNCTIONAL;
             else if (v == "PERFORMANCE") c.simulator_type = SimMode::PERFORMANCE;
@@ -70,6 +67,13 @@ Config Config::from_file(const std::string &path){
         else if (k == "max_sim_cycle") c.max_sim_cycle = std::stoi(v);
         else if (k == "inst_file") c.inst_file = v;
         else if (k == "log_file") c.log_file = v;
+        else if (k == "compiled_model_lib") c.compiled_model_lib = v;
+        else if (k == "onnx_model_file") c.onnx_model_file = v;
+        else if (k == "onnx_mlir_bin") c.onnx_mlir_bin = v;
+        else if (k == "onnx_mlir_flags") c.onnx_mlir_flags = v;
+        else if (k == "compile_work_dir") c.compile_work_dir = v;
+        else if (k == "model_input_dir") c.model_input_dir = v;
+        else if (k == "model_output_dir") c.model_output_dir = v;
         else if (k == "enable_log") c.enable_log = std::stoi(v);
         else if (k == "ddr_mode") c.ddr_mode = std::stoi(v);
         else if (k == "dramsim_cfg_path") c.dramsim_cfg_path = v;
@@ -87,10 +91,7 @@ Config Config::from_file(const std::string &path){
         else if (k.length() > 9 && k.substr(k.length() - 9) == "_reg_addr") {
             uint32_t addr = parse_number(v);
             c.reg_addr_map[k] = addr;
-            // Debug
-            // std::cout << "Loaded Reg: " << k << " -> 0x" << std::hex << addr << std::dec << std::endl;
         }
-        /*Add more configuration options here*/
     }
     return c;
 }

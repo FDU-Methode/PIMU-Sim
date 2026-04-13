@@ -79,6 +79,32 @@ void PerfSim::run() {
     print_stats();
 }
 
+void PerfSim::stepOneCoreCycle() {
+    uint64_t base_ticks = ticks_per_period[0];
+    while (base_ticks--) {
+        if (core_phase_counter == 0) {
+            core->tick();
+            core_phase_counter = ticks_per_period[0];
+        }
+        if (ddr_phase_counter == 0) {
+            ddr->tick();
+            ddr_phase_counter = ticks_per_period[1];
+        }
+        core_phase_counter--;
+        ddr_phase_counter--;
+    }
+}
+
+void PerfSim::beginExternalExecution() {
+    sim_start_time = std::chrono::high_resolution_clock::now();
+}
+
+void PerfSim::endExternalExecution() {
+    sim_end_time = std::chrono::high_resolution_clock::now();
+    sim_time_us = std::chrono::duration_cast<std::chrono::microseconds>(
+        sim_end_time - sim_start_time).count();
+}
+
 void PerfSim::print_stats() {
     double sim_time_s = sim_time_us / 1000000.0;
     int sim_inst_line_num = core->getStats().inst_line_num;

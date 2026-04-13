@@ -51,6 +51,12 @@ bool DMAInstQueue::inst_issue() {
     }
 
     DMAInstPacket inst_packet = inst_queue.front();
+
+    if(core->isIssueBlockedByIrq(inst_packet.opcode)) {
+        logger.log("[DMAInstQueue] Inst Issue Blocked by pending IRQ, opcode=0x%02x", inst_packet.opcode);
+        return false;
+    }
+
     bool sync_allow_issue = event_sync_unit->allowIssue(inst_packet);
     if(!sync_allow_issue) {
         Inst inst0 = inst_packet.inst0;
@@ -174,6 +180,12 @@ bool SAInstQueue::inst_issue() {
     }
 
     SAInstPacket inst_packet = inst_queue.front();
+
+    if(core->isIssueBlockedByIrq(inst_packet.opcode)) {
+        logger.log("[SAInstQueue] Inst Issue Blocked by pending IRQ, opcode=0x%02x", inst_packet.opcode);
+        return false;
+    }
+
     bool sync_allow_issue = event_sync_unit->allowIssue(inst_packet);
     if(!sync_allow_issue) {
         Inst inst1 = inst_packet.inst1;
@@ -297,6 +309,12 @@ bool SFUInstQueue::inst_issue() {
     }
 
     SFUInstPacket inst_packet = inst_queue.front();
+
+    if(core->isIssueBlockedByIrq(inst_packet.opcode)) {
+        logger.log("[SFUInstQueue] Inst Issue Blocked by pending IRQ, opcode=0x%02x", inst_packet.opcode);
+        return false;
+    }
+
     bool sync_allow_issue = event_sync_unit->allowIssue(inst_packet);
     if(!sync_allow_issue) {
         logger.log("[SFUInstQueue] Inst Issue Blocked by Event Sync Unit");

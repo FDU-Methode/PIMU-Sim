@@ -58,6 +58,8 @@ private:
     bool inst_file_done = false;
     std::ifstream inst_ifs;
 
+    bool external_inst_feed = false;
+
 public:
     PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger);
     ~PerfNpuCore() = default;
@@ -74,9 +76,14 @@ public:
     bool isBusy();            // Check If Core is Busy
     void checkCompletion();
 
+    bool isIssueBlockedByIrq(uint8_t opcode);
+
     void addInstNum();
 
+    void enableExternalInstFeed();
+
     RegFile& getRegFile() { return reg_file; }
+    InstCache* getInstCache() { return inst_cache.get(); }
     DMAInstQueue* getDMAInstQueue(int queue_id) {
         switch(queue_id) {
             case 1: return dma_1_inst_queue.get();

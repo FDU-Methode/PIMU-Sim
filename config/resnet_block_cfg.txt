@@ -53,6 +53,13 @@ inst_queue_depth = 3
 inst_file = ./benchmarks/tb_test/tb_resnet_block.txt
 enable_log = 1                 # enable log file: 1 (enable) or 0 (disable)
 log_file   = ./log/tb_resnet_block_log.txt
+compiled_model_lib = ./npux-mlir/model_test/build/NPU_conv/model.so
+onnx_model_file = ./npux-mlir/model_test/models/conv/model.onnx
+onnx_mlir_bin = onnx-mlir
+onnx_mlir_flags =
+compile_work_dir = ./build/compiler_run/conv
+model_input_dir = ./npux-mlir/model_test/models/conv
+model_output_dir = ./sim_output/conv
 
 # ---- (Optional future extension) ----
 # core_count = 4

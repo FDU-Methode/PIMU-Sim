@@ -4,58 +4,163 @@
 
 # Compiler Config
 CXX = g++
-CXXFLAGS = -std=c++17 -O2 -Wall -Wextra -g
+CC = gcc
+CXXFLAGS = -std=c++17 -O2 -Wall -Wextra -g -DENABLE_PYRUNTIME_LIGHT
+CFLAGS = -O2 -Wall -Wextra -g
 
 # Include Directories
-INCLUDES = -I./include -I./external/DRAMsim3/src
+INCLUDES = -I./include -I./external/DRAMsim3/src -I./npux-mlir -I./npux-mlir/include -I./npux-mlir/src/Runtime -I./npux-mlir/model_test/runtime
 
 # Library Paths & Linked Libraries
-# LIBS = -L./external/DRAMsim3 -ldramsim3 -lpthread
-LIBS = -L./external/DRAMsim3 -Wl,-rpath,'$$ORIGIN/../external/DRAMsim3' -ldramsim3 -lpthread
+LIBS = -L./external/DRAMsim3 -Wl,-rpath,'$$ORIGIN/../external/DRAMsim3' -Wl,--export-dynamic -ldramsim3 -lpthread -ldl
 
 # Source & Build Directories
 SRC_DIR = src
 BUILD_DIR = build
 
-# Top Selection
-TOP = resnet_block
+# Simulator config template selection
+TOP = mnist
 TOP_CFG := ./config/$(TOP)_cfg.txt
 
-# Source Files & Object Files
-SRCS = $(shell find $(SRC_DIR) -name "*.cpp")
-OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
+# ------------------------------------------------------
+# ONNX -> .so -> simulator run
+# ------------------------------------------------------
+MODEL_ONNX ?=
+MODEL_INPUT_DIR ?=
+MODEL_OUTPUT_DIR ?= ./sim_output/$(TOP)
+ONNX_MLIR_BIN ?= onnx-mlir
+ONNX_MLIR_FLAGS ?=
+COMPILER_WORK_DIR ?= ./build/compiler_run/$(TOP)
 
-# Final Excutable
+MODEL_BASENAME := $(basename $(notdir $(MODEL_ONNX)))
+COMPILED_MODEL_BASE := $(COMPILER_WORK_DIR)/$(MODEL_BASENAME)
+COMPILED_MODEL_LIB := $(COMPILED_MODEL_BASE).so
+GENERATED_CFG := $(BUILD_DIR)/generated/$(TOP)_run_cfg.txt
+
+# Extra runtime/compiler sources needed by simulator main
+EXTRA_SRCS = \
+	npux-mlir/model_test/runtime/npu_runtime.cpp \
+	npux-mlir/src/Runtime/ExecutionSession.cpp \
+	npux-mlir/src/Runtime/OMExternalConstant.cpp \
+	npux-mlir/src/Runtime/OMIndexLookup.cpp \
+	npux-mlir/src/Runtime/OMInstrument.cpp \
+	npux-mlir/src/Runtime/OMRandomNormal.cpp \
+	npux-mlir/src/Runtime/OMRandomUniform.cpp \
+	npux-mlir/src/Runtime/OMResize.cpp \
+	npux-mlir/src/Runtime/OMTensor.cpp \
+	npux-mlir/src/Runtime/OMTensorList.cpp \
+	npux-mlir/src/Runtime/OMUnique.cpp \
+	npux-mlir/src/Runtime/OnnxDataType.cpp \
+	npux-mlir/src/Support/SmallFPConversion.c
+
+# Source Files & Object Files
+SRCS = $(shell find $(SRC_DIR) -name "*.cpp") $(EXTRA_SRCS)
+
+CPP_SRCS = $(filter %.cpp,$(SRCS))
+C_SRCS = $(filter %.c,$(SRCS))
+
+CPP_OBJS = $(patsubst %.cpp,$(BUILD_DIR)/%.o,$(CPP_SRCS))
+C_OBJS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(C_SRCS))
+
+OBJS = $(CPP_OBJS) $(C_OBJS)
+
+# Final Executable
 TARGET = $(BUILD_DIR)/npu_sim
 
 ########################################################
 # Build Rules
 ########################################################
 
-# Default Target: Build & Run
 all: build run
 
-# Build Only
 build: $(TARGET)
 	@echo "Build complete! Generated npu simulator: $(TARGET)"
 	@echo "Run example programs with 'make run'"
 	@echo "Or run with './$(TARGET) <config_file>'"
+	@echo "For ONNX-driven simulation:"
+	@echo "  make run_onnx TOP=$(TOP) MODEL_ONNX=/path/model.onnx MODEL_INPUT_DIR=/path/input_dir ONNX_MLIR_BIN=/path/onnx-mlir"
 
-# Compile Rules
 $(TARGET): $(OBJS) $(DRAMSIM3_LIB)
 	@mkdir -p $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
 
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+$(BUILD_DIR)/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
 
-# Run Only (Requires Build First)
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
+# ------------------------------------------------------
+# Legacy run: use cfg directly
+# ------------------------------------------------------
 run: $(TARGET)
 	@echo "Running NPU Simulator... (TOP=$(TOP), CFG=$(TOP_CFG))"
 	./$(TARGET) $(TOP_CFG)
 
-# Clean Build
+# ------------------------------------------------------
+# ONNX-driven run
+# ------------------------------------------------------
+.PHONY: check_onnx_args run_onnx clean_onnx
+
+check_onnx_args:
+	@if [ -z "$(MODEL_ONNX)" ]; then \
+		echo "[error] MODEL_ONNX is empty"; \
+		echo "        Example: make run_onnx TOP=bert_base_sim MODEL_ONNX=./npux-mlir/model_test/models/bert_base/model.onnx MODEL_INPUT_DIR=./npux-mlir/model_test/models/bert_base ONNX_MLIR_BIN=/abs/path/onnx-mlir"; \
+		exit 2; \
+	fi
+	@if [ -z "$(MODEL_INPUT_DIR)" ]; then \
+		echo "[error] MODEL_INPUT_DIR is empty"; \
+		exit 2; \
+	fi
+	@if [ ! -f "$(MODEL_ONNX)" ]; then \
+		echo "[error] MODEL_ONNX not found: $(MODEL_ONNX)"; \
+		exit 2; \
+	fi
+	@if [ ! -d "$(MODEL_INPUT_DIR)" ]; then \
+		echo "[error] MODEL_INPUT_DIR not found: $(MODEL_INPUT_DIR)"; \
+		exit 2; \
+	fi
+	@if ! command -v "$(ONNX_MLIR_BIN)" >/dev/null 2>&1 && [ ! -x "$(ONNX_MLIR_BIN)" ]; then \
+		echo "[error] ONNX_MLIR_BIN not executable/found: $(ONNX_MLIR_BIN)"; \
+		exit 2; \
+	fi
+
+$(COMPILER_WORK_DIR):
+	@mkdir -p $@
+
+$(COMPILED_MODEL_LIB): check_onnx_args | $(COMPILER_WORK_DIR)
+	@echo "Compiling ONNX -> shared library"
+	@echo "  ONNX: $(MODEL_ONNX)"
+	@echo "  OUT : $(COMPILED_MODEL_LIB)"
+	"$(ONNX_MLIR_BIN)" "$(MODEL_ONNX)" -o "$(COMPILED_MODEL_BASE)" $(ONNX_MLIR_FLAGS)
+
+$(GENERATED_CFG): $(TOP_CFG) $(COMPILED_MODEL_LIB)
+	@mkdir -p $(dir $@)
+	@cp "$(TOP_CFG)" "$@"
+	@printf "\n# ---- Auto-generated by Makefile ----\n" >> "$@"
+	@printf "compiled_model_lib = %s\n" "$(abspath $(COMPILED_MODEL_LIB))" >> "$@"
+	@printf "onnx_model_file =\n" >> "$@"
+	@printf "onnx_mlir_bin =\n" >> "$@"
+	@printf "onnx_mlir_flags =\n" >> "$@"
+	@printf "compile_work_dir = %s\n" "$(abspath $(COMPILER_WORK_DIR))" >> "$@"
+	@printf "model_input_dir = %s\n" "$(abspath $(MODEL_INPUT_DIR))" >> "$@"
+	@printf "model_output_dir = %s\n" "$(abspath $(MODEL_OUTPUT_DIR))" >> "$@"
+	@printf "inst_file =\n" >> "$@"
+
+run_onnx: $(TARGET) $(GENERATED_CFG)
+	@echo "Running ONNX-driven NPU Simulation..."
+	@echo "  CFG  : $(GENERATED_CFG)"
+	@echo "  ONNX : $(MODEL_ONNX)"
+	@echo "  SO   : $(COMPILED_MODEL_LIB)"
+	@echo "  IN   : $(MODEL_INPUT_DIR)"
+	@echo "  OUT  : $(MODEL_OUTPUT_DIR)"
+	./$(TARGET) "$(GENERATED_CFG)"
+
+clean_onnx:
+	rm -rf "$(COMPILER_WORK_DIR)" "$(GENERATED_CFG)"
+
 clean:
 	rm -rf $(BUILD_DIR)
 
