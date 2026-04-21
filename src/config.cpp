@@ -5,6 +5,7 @@
 #include <cctype>
 #include <filesystem>
 #include <iostream>
+#include <optional>
 
 static std::string trim(std::string s) {
     while (!s.empty() && isspace((unsigned char)s.front())) s.erase(s.begin());
@@ -33,6 +34,97 @@ static uint32_t parse_number(const std::string& val) {
         return std::stoul(clean_val, nullptr, base);
     } catch (const std::exception& e) {
         throw std::runtime_error("Invalid number format in config: " + val);
+    }
+}
+
+static bool parse_bool(const std::string& val) {
+    std::string s = trim(val);
+    for (char& ch : s) ch = static_cast<char>(std::tolower(static_cast<unsigned char>(ch)));
+
+    if (s == "1" || s == "true" || s == "yes" || s == "on") return true;
+    if (s == "0" || s == "false" || s == "no" || s == "off") return false;
+    throw std::runtime_error("Invalid boolean format in config: " + val);
+}
+
+static std::optional<double> extract_last_double(const std::string& line) {
+    std::istringstream iss(line);
+    std::string token;
+    std::optional<double> last_val;
+
+    while (iss >> token) {
+        try {
+            size_t idx = 0;
+            double v = std::stod(token, &idx);
+            if (idx == token.size()) last_val = v;
+        } catch (...) {
+        }
+    }
+    return last_val;
+}
+
+static void assign_power_value(Config& c,
+                               const std::string& unit,
+                               const std::string& mode,
+                               double total_power_mw) {
+    if (unit == "dma") {
+        if (mode == "idle") c.dma_idle_power_mw = total_power_mw;
+        else if (mode == "busy_mvin") c.dma_busy_mvin_power_mw = total_power_mw;
+        else if (mode == "busy_mvout") c.dma_busy_mvout_power_mw = total_power_mw;
+    } else if (unit == "acc") {
+        if (mode == "idle") c.acc_idle_power_mw = total_power_mw;
+        else if (mode == "busy_accadd") c.acc_busy_accadd_power_mw = total_power_mw;
+        else if (mode == "busy_bias_load") c.acc_busy_bias_load_power_mw = total_power_mw;
+        else if (mode == "busy_dma_rd") c.acc_busy_dma_rd_power_mw = total_power_mw;
+        else if (mode == "busy_dma_wr") c.acc_busy_dma_wr_power_mw = total_power_mw;
+        else if (mode == "busy_matadd") c.acc_busy_matadd_power_mw = total_power_mw;
+    } else if (unit == "sfu") {
+        if (mode == "idle") c.sfu_idle_power_mw = total_power_mw;
+        else if (mode == "busy_softmax") c.sfu_busy_softmax_power_mw = total_power_mw;
+        else if (mode == "busy_layernorm") c.sfu_busy_layernorm_power_mw = total_power_mw;
+        else if (mode == "busy_gelu") c.sfu_busy_gelu_power_mw = total_power_mw;
+        else if (mode == "busy_transpose") c.sfu_busy_transpose_power_mw = total_power_mw;
+        else if (mode == "busy_poolmax") c.sfu_busy_poolmax_power_mw = total_power_mw;
+        else if (mode == "busy_resample") c.sfu_busy_resample_power_mw = total_power_mw;
+    } else if (unit == "sa") {
+        if (mode == "idle") c.sa_idle_power_mw = total_power_mw;
+        else if (mode == "busy_gemm") c.sa_busy_gemm_power_mw = total_power_mw;
+        else if (mode == "busy_conv") c.sa_busy_conv_power_mw = total_power_mw;
+    }
+}
+
+static void load_power_report(Config& c, const std::filesystem::path& power_path) {
+    std::ifstream ifs(power_path);
+    if (!ifs) {
+        throw std::runtime_error("Cannot open power file: " + power_path.string());
+    }
+
+    std::string current_unit;
+    std::string current_mode;
+    std::string line;
+
+    while (std::getline(ifs, line)) {
+        line = trim(line);
+        if (line.empty()) continue;
+
+        if (line[0] == '#') {
+            std::string body = trim(line.substr(1));
+            if (body == "dma" || body == "acc" || body == "sfu" || body == "sa") {
+                current_unit = body;
+            }
+            continue;
+        }
+
+        if (!line.empty() && line.back() == ':') {
+            current_mode = trim(line.substr(0, line.size() - 1));
+            continue;
+        }
+
+        if (line.rfind("Total", 0) == 0 && !current_unit.empty() && !current_mode.empty()) {
+            auto total_power = extract_last_double(line);
+            if (total_power.has_value()) {
+                assign_power_value(c, current_unit, current_mode, *total_power);
+            }
+        }
     }
 }
 
@@ -84,6 +176,8 @@ Config Config::from_file(const std::string &path){
         else if (k == "acc_data_width") c.acc_data_width = std::stoi(v);
         else if (k == "inst_cache_size") c.inst_cache_size = std::stoi(v);
         else if (k == "inst_queue_depth") c.inst_queue_depth = std::stoi(v);
+        else if (k == "enable_power") c.enable_power = parse_bool(v);
+        else if (k == "power_file") c.power_file = v;
         else if (k.length() > 9 && k.substr(k.length() - 9) == "_reg_addr") {
             uint32_t addr = parse_number(v);
             c.reg_addr_map[k] = addr;
@@ -92,5 +186,14 @@ Config Config::from_file(const std::string &path){
         }
         /*Add more configuration options here*/
     }
+
+    if(c.enable_power) {
+        std::filesystem::path power_path(c.power_file);
+        if(!power_path.is_absolute() && !std::filesystem::exists(power_path)) {
+            power_path = std::filesystem::path(path).parent_path() / power_path;
+        }
+        load_power_report(c, power_path);
+    }
+
     return c;
 }

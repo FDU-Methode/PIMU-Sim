@@ -8,6 +8,7 @@
 #include "perf_func_unit.hpp"
 #include "scratchpad.hpp"
 #include "hw_utilization.hpp"
+#include "power_analyzer.hpp"
 #include "inst_cache.hpp"
 #include "inst_queue.hpp"
 #include "decoder.hpp"
@@ -46,6 +47,9 @@ private:
 
     // Utilization
     std::unique_ptr<HardWareUtilizationTracker> util_tracker;
+
+    // Power
+    std::unique_ptr<PowerAnalyzer> power_analyzer;
 
     bool irq;
     uint64_t opcode;
@@ -89,6 +93,7 @@ public:
     SFUInstQueue* getSFUInstQueue() { return sfu_inst_queue.get(); }
     PerfFunctionalUnit* getUnit(UnitType name);
     HardWareUtilizationTracker* getUtilTracker() { return util_tracker.get(); };
+    PowerAnalyzer* getPowerAnalyzer() { return power_analyzer.get(); }
     Scratchpad* getSpm() { return spm.get(); }
     AccSram* getAccSram() { return acc->getScratchpad(); }
 

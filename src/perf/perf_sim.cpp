@@ -113,6 +113,11 @@ void PerfSim::print_stats() {
         if(HardWareUtilizationTracker* util_tracker = perf_core->getUtilTracker()) {
             util_tracker->report();
         }
+        if (cfg_.enable_power) {
+            if (PowerAnalyzer* power_analyzer = perf_core->getPowerAnalyzer()) {
+                power_analyzer->report();
+            }
+        }
     }
 
     // TODO

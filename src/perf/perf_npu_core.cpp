@@ -112,6 +112,10 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     util_tracker->reset();
     logger.log("  HardWare Utilization Tracker created!");
 
+    // Create Power Analyzer
+    power_analyzer = std::make_unique<PowerAnalyzer>(logger, cfg);
+    logger.log("  Power Analyzer created!");
+
     logger.log("Opening instructions from file: %s", cfg.inst_file.c_str());
     openInstFile(cfg.inst_file);
     logger.log("----------------------------------------------------");
@@ -359,7 +363,7 @@ void PerfNpuCore::tick(){
         outbox_.pop();
     }
 
-    // 5. Sample Util Tracker
+    // 5. Sample Util Tracker and Power Analyzer
     HardWareUtilizationTracker::ModuleState state{};
     state.dma1      = dma_1->isBusy();
     state.dma2      = dma_2->isBusy();
@@ -373,6 +377,89 @@ void PerfNpuCore::tick(){
     state.gemv       = gemv->isBusy();
 
     util_tracker->sample(state);
+
+    if (power_analyzer && power_analyzer->enabled()) {
+        auto dma_mode_of = [](const DMA* dma) -> DmaPowerMode {
+            if (dma == nullptr || !dma->isBusy()) return DmaPowerMode::Idle;
+
+            switch (dma->getCurrentTask()) {
+                case DMATaskType::MVIN:  return DmaPowerMode::BusyMvin;
+                case DMATaskType::MVOUT: return DmaPowerMode::BusyMvout;
+                default:                 return DmaPowerMode::Idle;
+            }
+        };
+
+        auto sfu_mode_of = [this]() -> SfuPowerMode {
+            if (!sfu->isBusy()) return SfuPowerMode::Idle;
+
+            switch (sfu->getOpType()) {
+                case 0:  return SfuPowerMode::BusySoftmax;
+                case 2:  return SfuPowerMode::BusyLayernorm;
+                case 1:  return SfuPowerMode::BusyGelu;
+                case 8:  return SfuPowerMode::BusyTranspose;
+                case 6:  return SfuPowerMode::BusyPoolmax;
+                default: return SfuPowerMode::BusyResample;
+            }
+        };
+
+        auto sa_mode_of = [this]() -> SaPowerMode {
+            if (!sa->isBusy()) return SaPowerMode::Idle;
+
+            switch (sa->getCurrentOpType()) {
+                case 0:  return SaPowerMode::BusyGemm;
+                case 1:  return SaPowerMode::BusyConv;
+                default: return SaPowerMode::Idle;
+            }
+        };
+
+        auto acc_mode_of = [this, acc_sram]() -> AccPowerMode {
+            if (acc->isBusy()) {
+                switch (acc->getCurrentTask()) {
+                    case SATaskType::MATADD: return AccPowerMode::BusyMatadd;
+                    case SATaskType::SA:     return AccPowerMode::BusyAccadd;
+                    default:                 break;
+                }
+            }
+
+            auto dma_acc_mode = [](const DMA* dma, AccPowerMode& out_mode) -> bool {
+                if (dma == nullptr || !dma->isBusy() || !dma->usesAcc()) return false;
+
+                switch (dma->getCurrentTask()) {
+                    case DMATaskType::MVIN:
+                        out_mode = dma->usesBiasPath()
+                                 ? AccPowerMode::BusyBiasLoad
+                                 : AccPowerMode::BusyDmaWr;
+                        return true;
+                    case DMATaskType::MVOUT:
+                        out_mode = AccPowerMode::BusyDmaRd;
+                        return true;
+                    default:
+                        return false;
+                }
+            };
+
+            AccPowerMode mode = AccPowerMode::Idle;
+            if (dma_acc_mode(dma_1.get(), mode)) return mode;
+            if (dma_acc_mode(dma_2.get(), mode)) return mode;
+            if (dma_acc_mode(dma_3.get(), mode)) return mode;
+
+            if (acc_sram != nullptr) {
+                if (acc_sram->isBiasBusy()) return AccPowerMode::BusyBiasLoad;
+                if (acc_sram->isDataBusy()) return AccPowerMode::BusyDmaWr;
+            }
+
+            return AccPowerMode::Idle;
+        };
+
+        power_analyzer->sample(
+            dma_mode_of(dma_1.get()),
+            dma_mode_of(dma_2.get()),
+            dma_mode_of(dma_3.get()),
+            acc_mode_of(),
+            sfu_mode_of(),
+            sa_mode_of()
+        );
+    }
 
     // 6. Issue Inst Queue
     issueInstQueues();

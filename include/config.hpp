@@ -62,6 +62,33 @@ struct Config{
     int inst_cache_size = 256;
     int inst_queue_depth = 8;
 
+    // Power Estimation
+    bool enable_power = false;
+    std::string power_file = "./config/power.txt";
+
+    double dma_idle_power_mw = 0.0;
+    double dma_busy_mvin_power_mw = 0.0;
+    double dma_busy_mvout_power_mw = 0.0;
+
+    double acc_idle_power_mw = 0.0;
+    double acc_busy_accadd_power_mw = 0.0;
+    double acc_busy_bias_load_power_mw = 0.0;
+    double acc_busy_dma_rd_power_mw = 0.0;
+    double acc_busy_dma_wr_power_mw = 0.0;
+    double acc_busy_matadd_power_mw = 0.0;
+
+    double sfu_idle_power_mw = 0.0;
+    double sfu_busy_softmax_power_mw = 0.0;
+    double sfu_busy_layernorm_power_mw = 0.0;
+    double sfu_busy_gelu_power_mw = 0.0;
+    double sfu_busy_transpose_power_mw = 0.0;
+    double sfu_busy_poolmax_power_mw = 0.0;
+    double sfu_busy_resample_power_mw = 0.0;
+
+    double sa_idle_power_mw = 0.0;
+    double sa_busy_gemm_power_mw = 0.0;
+    double sa_busy_conv_power_mw = 0.0;
+
     /*Add more configuration options here*/
 
     static Config from_file(const std::string &path);
