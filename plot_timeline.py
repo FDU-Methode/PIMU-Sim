@@ -1,9 +1,5 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
 from __future__ import annotations
 
-import math
 import re
 from collections import defaultdict, deque
 from dataclasses import dataclass
@@ -11,6 +7,7 @@ from pathlib import Path
 from typing import Deque, Dict, List, Optional, Tuple
 
 import plotly.graph_objects as go
+import plotly.io as pio
 
 
 # ==========================================================
@@ -22,16 +19,19 @@ BASE_DIR = Path(__file__).resolve().parent
 CONFIG = {
     "log": BASE_DIR / "log/tb_resnet_block_log.txt",
     "out_html": BASE_DIR / "log/tb_resnet_block_timeline.html",
-    "out_png": None,  # 例如：BASE_DIR / "log/tb_resnet_block_timeline.png"
+    "out_png": None,  # 例如: BASE_DIR / "log/tb_resnet_block_timeline.png"
     "title": "PIMU-Sim Execution Timeline",
     "start_cycle": 0,
-    "end_cycle": 5000,   # None 表示直到日志结束
+    "end_cycle": 2000,           # None 表示一直到日志结束
     "lanes": ["DMA1", "DMA2", "DMA3", "SA", "ACC", "SFU", "DDR"],
     "show_markers": True,
     "show_predictions": True,
     "show_waits": True,
+    "show_dependencies": True,
+    "show_dependency_labels": True,
     "only_active_lanes": True,
     "html_include_plotlyjs": "cdn",  # "cdn" / True
+    "max_dependency_per_target": 2,  # 每个目标操作最多画几条依赖箭头
 }
 
 
@@ -45,7 +45,7 @@ class Interval:
     end: int
     label: str
     color: str
-    kind: str = "exec"     # exec / wait
+    kind: str = "exec"   # exec / wait
     note: str = ""
 
 
@@ -54,7 +54,7 @@ class Marker:
     lane: str
     cycle: int
     label: str
-    kind: str              # start / finish / issue / retire
+    kind: str            # start / finish / issue / retire
     color: str
 
 
@@ -67,28 +67,82 @@ class Prediction:
     color: str
 
 
+@dataclass
+class Dependency:
+    src_lane: str
+    src_cycle: int
+    src_label: str
+    dst_lane: str
+    dst_cycle: int
+    dst_label: str
+    label: str
+    color: str
+
+
 COLOR_MAP = {
-    "MVIN": "#4C78A8",
-    "MVOUT": "#F58518",
-    "GEMM": "#54A24B",
-    "CONV": "#E45756",
-    "Matadd": "#B279A2",
-    "Softmax": "#72B7B2",
-    "Layernorm": "#9C755F",
-    "Gelu": "#FF9DA6",
-    "Transpose": "#BAB0AC",
-    "Pool_max": "#EECA3B",
-    "Resample": "#8E6CFF",
-    "LD_REQ": "#4C78A8",
-    "ST_REQ": "#F58518",
-    "DDR": "#9D9DA1",
-    "WAIT": "#CFCFCF",
-    "PRED": "#444444",
+    "MVIN": "#6F96C4",
+    "MVOUT": "#E9A062",
+    "GEMM": "#7CB874",
+    "CONV": "#D77C71",
+    "Matadd": "#C08EBB",
+    "Softmax": "#7CBDB8",
+    "Layernorm": "#AD9078",
+    "Gelu": "#E9A1B0",
+    "Transpose": "#B9C2D0",
+    "Pool_max": "#D8C46A",
+    "Resample": "#9C8EE4",
+    "LD_REQ": "#87A9D1",
+    "ST_REQ": "#EDB07B",
+    "EventSyncWait": "#D8D3CB",
+    "DDR": "#A9B4C2",
+    "PRED": "#6B7280",
+    "DEP": "#C62828",
 }
 
 
 def pick_color(label: str, default: str = "#999999") -> str:
     return COLOR_MAP.get(label, default)
+
+
+def hex_to_rgba(hex_color: str, alpha: float) -> str:
+    hex_color = hex_color.lstrip("#")
+    if len(hex_color) != 6:
+        return f"rgba(153,153,153,{alpha})"
+    r = int(hex_color[0:2], 16)
+    g = int(hex_color[2:4], 16)
+    b = int(hex_color[4:6], 16)
+    return f"rgba({r},{g},{b},{alpha})"
+
+
+def lane_band_color(index: int) -> str:
+    return "rgba(116, 136, 160, 0.035)" if index % 2 == 0 else "rgba(116, 136, 160, 0.015)"
+
+
+def quadratic_bezier_point(
+    start: Tuple[float, float],
+    ctrl: Tuple[float, float],
+    end: Tuple[float, float],
+    t: float,
+) -> Tuple[float, float]:
+    one_minus_t = 1.0 - t
+    x = one_minus_t * one_minus_t * start[0] + 2 * one_minus_t * t * ctrl[0] + t * t * end[0]
+    y = one_minus_t * one_minus_t * start[1] + 2 * one_minus_t * t * ctrl[1] + t * t * end[1]
+    return (x, y)
+
+
+def dependency_curve_geometry(
+    dep: Dependency,
+    y_pos: Dict[str, int],
+    route_index: int,
+) -> Tuple[Tuple[float, float], Tuple[float, float], Tuple[float, float], Tuple[float, float], Tuple[float, float]]:
+    start = (float(dep.src_cycle), float(y_pos[dep.src_lane]))
+    end = (float(dep.dst_cycle), float(y_pos[dep.dst_lane]))
+    lane_gap = abs(start[1] - end[1])
+    curve_lift = 0.92 + 0.30 * lane_gap + 0.22 * (route_index % 3)
+    ctrl = ((start[0] + end[0]) / 2.0, max(start[1], end[1]) + curve_lift)
+    label_pt = quadratic_bezier_point(start, ctrl, end, 0.52)
+    arrow_tail = quadratic_bezier_point(start, ctrl, end, 0.90)
+    return start, ctrl, end, label_pt, arrow_tail
 
 
 # ==========================================================
@@ -115,7 +169,6 @@ class TimelineParser:
     ddr_finish_re = re.compile(r"\[DDR\]\s+finish request, send\s+(\w+)")
     ddr_finish_legacy_re = re.compile(r"\[DDR\]\s+finish processing current request")
 
-    # Event Sync blocked
     event_sync_block_re = re.compile(
         r"\[(SAInstQueue|SFUInstQueue)\]\s+Inst Issue Blocked by Event Sync Unit"
     )
@@ -166,12 +219,11 @@ class TimelineParser:
         self.markers.append(Marker(lane=lane, cycle=cycle, label=label, kind=kind, color=color))
 
     def _add_prediction(self, lane: str, start: int, remaining: int, label: str, color: str) -> None:
-        pred_end = start + remaining
         self.predictions.append(
             Prediction(
                 lane=lane,
                 start=start,
-                predicted_end=pred_end,
+                predicted_end=start + remaining,
                 label=label,
                 color=color,
             )
@@ -189,7 +241,7 @@ class TimelineParser:
                 start=start,
                 end=self.current_cycle,
                 label="EventSyncWait",
-                color=pick_color("WAIT"),
+                color=pick_color("EventSyncWait"),
                 kind="wait",
                 note="Blocked by Event Sync Unit",
             )
@@ -207,7 +259,7 @@ class TimelineParser:
 
                 self.last_cycle = max(self.last_cycle, self.current_cycle)
 
-                # -------- Event Sync blocked --------
+                # ---------- Event Sync wait ----------
                 m = self.event_sync_block_re.search(line)
                 if m:
                     queue_name = m.group(1)
@@ -217,7 +269,7 @@ class TimelineParser:
                         self._open_wait("SFU")
                     continue
 
-                # -------- DMA --------
+                # ---------- DMA ----------
                 m = self.dma_op_re.search(line)
                 if m:
                     self.pending_dma_ops.append(m.group(1))
@@ -228,9 +280,11 @@ class TimelineParser:
                     dma_id = m.group(1)
                     lane = f"DMA{dma_id}"
                     label = self.pending_dma_ops.popleft() if self.pending_dma_ops else "DMA"
+
                     if lane in self.open_dma:
                         old_start, old_label = self.open_dma.pop(lane)
                         self._close_interval(lane, old_start, old_label, self.current_cycle)
+
                     self.open_dma[lane] = (self.current_cycle, label)
                     self._add_marker(lane, self.current_cycle, label, "issue", pick_color(label))
                     continue
@@ -245,15 +299,18 @@ class TimelineParser:
                         self._add_marker(lane, self.current_cycle, label, "retire", pick_color(label))
                     continue
 
-                # -------- SA --------
+                # ---------- SA ----------
                 m = self.sa_start_re.search(line)
                 if m:
                     label = m.group(1)
                     remaining = int(m.group(2))
+
                     self._close_wait("SA")
+
                     if self.open_sa is not None:
                         start, old_label, _ = self.open_sa
                         self._close_interval("SA", start, old_label, self.current_cycle)
+
                     self.open_sa = (self.current_cycle, label, remaining)
                     color = pick_color(label)
                     self._add_marker("SA", self.current_cycle, label, "start", color)
@@ -274,14 +331,16 @@ class TimelineParser:
                         self.open_sa = None
                     continue
 
-                # -------- ACC --------
+                # ---------- ACC ----------
                 m = self.acc_start_re.search(line)
                 if m:
                     label = m.group(1)
                     remaining = int(m.group(2))
+
                     if self.open_acc is not None:
                         start, old_label, _ = self.open_acc
                         self._close_interval("ACC", start, old_label, self.current_cycle)
+
                     self.open_acc = (self.current_cycle, label, remaining)
                     color = pick_color(label)
                     self._add_marker("ACC", self.current_cycle, label, "start", color)
@@ -297,15 +356,18 @@ class TimelineParser:
                         self.open_acc = None
                     continue
 
-                # -------- SFU --------
+                # ---------- SFU ----------
                 m = self.sfu_start_re.search(line)
                 if m:
                     label = m.group(1)
                     remaining = int(m.group(2))
+
                     self._close_wait("SFU")
+
                     if self.open_sfu is not None:
                         start, old_label, _ = self.open_sfu
                         self._close_interval("SFU", start, old_label, self.current_cycle)
+
                     self.open_sfu = (self.current_cycle, label, remaining)
                     color = pick_color(label)
                     self._add_marker("SFU", self.current_cycle, label, "start", color)
@@ -326,13 +388,15 @@ class TimelineParser:
                         self.open_sfu = None
                     continue
 
-                # -------- DDR --------
+                # ---------- DDR ----------
                 m = self.ddr_start_re.search(line)
                 if m:
                     label = m.group(1)
+
                     if self.open_ddr is not None:
                         start, old_label = self.open_ddr
                         self._close_interval("DDR", start, old_label, self.current_cycle)
+
                     self.open_ddr = (self.current_cycle, label)
                     self._add_marker("DDR", self.current_cycle, label, "start", pick_color(label))
                     continue
@@ -382,7 +446,7 @@ class TimelineParser:
                 start=start,
                 end=end_cycle,
                 label="EventSyncWait",
-                color=pick_color("WAIT"),
+                color=pick_color("EventSyncWait"),
                 kind="wait",
                 note="Blocked by Event Sync Unit",
             )
@@ -391,10 +455,10 @@ class TimelineParser:
 
 
 # ==========================================================
-# Filter
+# Post-process
 # ==========================================================
 def filter_intervals(intervals: List[Interval], start_cycle: int, end_cycle: int) -> List[Interval]:
-    filtered: List[Interval] = []
+    filtered = []
     for iv in intervals:
         s = max(iv.start, start_cycle)
         e = min(iv.end, end_cycle)
@@ -417,9 +481,9 @@ def filter_markers(markers: List[Marker], start_cycle: int, end_cycle: int) -> L
     return [m for m in markers if start_cycle <= m.cycle <= end_cycle]
 
 
-def filter_predictions(preds: List[Prediction], start_cycle: int, end_cycle: int) -> List[Prediction]:
+def filter_predictions(predictions: List[Prediction], start_cycle: int, end_cycle: int) -> List[Prediction]:
     result = []
-    for p in preds:
+    for p in predictions:
         if p.predicted_end < start_cycle:
             continue
         if p.start > end_cycle:
@@ -428,221 +492,403 @@ def filter_predictions(preds: List[Prediction], start_cycle: int, end_cycle: int
     return result
 
 
+def derive_dependencies(intervals: List[Interval], max_per_target: int = 3) -> List[Dependency]:
+    exec_intervals = [iv for iv in intervals if iv.kind == "exec"]
+    waits_by_lane: Dict[str, List[Interval]] = defaultdict(list)
+    exec_by_lane: Dict[str, List[Interval]] = defaultdict(list)
+    dependency_lanes = {"DMA1", "DMA2", "DMA3", "SA", "SFU"}
+
+    for iv in intervals:
+        if iv.kind == "wait":
+            waits_by_lane[iv.lane].append(iv)
+        else:
+            exec_by_lane[iv.lane].append(iv)
+
+    for lane in waits_by_lane:
+        waits_by_lane[lane].sort(key=lambda x: (x.start, x.end))
+    for lane in exec_by_lane:
+        exec_by_lane[lane].sort(key=lambda x: (x.start, x.end))
+
+    deps: List[Dependency] = []
+
+    def find_preceding_wait(lane: str, start_cycle: int) -> Optional[Interval]:
+        candidates = waits_by_lane.get(lane, [])
+        best = None
+        for iv in candidates:
+            if iv.end <= start_cycle and start_cycle - iv.end <= 1:
+                best = iv
+        return best
+
+    # SA / SFU: wait window => dependency from intervals ending during that wait window
+    for lane in ["SA", "SFU"]:
+        for target in exec_by_lane.get(lane, []):
+            wait = find_preceding_wait(lane, target.start)
+            if wait is None:
+                continue
+
+            latest_by_lane: Dict[str, Interval] = {}
+            for src in exec_intervals:
+                if src.lane == lane:
+                    continue
+                if src.lane not in dependency_lanes:
+                    continue
+                if wait.start <= src.end <= target.start:
+                    latest_by_lane[src.lane] = src
+
+            picked = sorted(latest_by_lane.values(), key=lambda x: x.end, reverse=True)[:max_per_target]
+            picked = list(reversed(picked))
+
+            for src in picked:
+                deps.append(
+                    Dependency(
+                        src_lane=src.lane,
+                        src_cycle=src.end,
+                        src_label=src.label,
+                        dst_lane=target.lane,
+                        dst_cycle=target.start,
+                        dst_label=target.label,
+                        label=f"{src.lane}:{src.label}",
+                        color=pick_color("DEP"),
+                    )
+                )
+
+    return deps
+
+
 # ==========================================================
-# Plotly Plot
+# Plot
 # ==========================================================
 def build_plotly_figure(
     intervals: List[Interval],
     markers: List[Marker],
     predictions: List[Prediction],
+    dependencies: List[Dependency],
     title: str,
     lanes: List[str],
     show_markers: bool,
     show_predictions: bool,
     show_waits: bool,
+    show_dependencies: bool,
+    show_dependency_labels: bool,
     only_active_lanes: bool,
 ) -> go.Figure:
     lane_to_intervals: Dict[str, List[Interval]] = defaultdict(list)
     lane_to_markers: Dict[str, List[Marker]] = defaultdict(list)
-    lane_to_predictions: Dict[str, List[Prediction]] = defaultdict(list)
 
     for iv in intervals:
         lane_to_intervals[iv.lane].append(iv)
     for mk in markers:
         lane_to_markers[mk.lane].append(mk)
-    for pr in predictions:
-        lane_to_predictions[pr.lane].append(pr)
 
     if only_active_lanes:
-        active_lanes = [
-            lane for lane in lanes
-            if lane_to_intervals.get(lane) or lane_to_markers.get(lane) or lane_to_predictions.get(lane)
-        ]
+        active_lanes = [lane for lane in lanes if lane_to_intervals.get(lane) or lane_to_markers.get(lane)]
     else:
         active_lanes = lanes[:]
 
     if not active_lanes:
-        raise RuntimeError("No timeline events found in the selected range.")
+        raise RuntimeError("No timeline events found in the selected cycle range.")
 
-    xmin = min(iv.start for iv in intervals) if intervals else 0
-    xmax = max(iv.end for iv in intervals) if intervals else xmin + 1
+    y_pos = {lane: len(active_lanes) - 1 - i for i, lane in enumerate(active_lanes)}
 
-    y_pos = {lane: len(active_lanes) - 1 - idx for idx, lane in enumerate(active_lanes)}
-    bar_h = 0.58
+    visible_intervals = []
+    for iv in intervals:
+        if iv.lane not in y_pos:
+            continue
+        if iv.kind == "wait" and not show_waits:
+            continue
+        visible_intervals.append(iv)
+
+    xmin = min(iv.start for iv in visible_intervals) if visible_intervals else 0
+    xmax = max(iv.end for iv in visible_intervals) if visible_intervals else 1
 
     fig = go.Figure()
+    bar_h = 0.50
+    label_thresholds = {"exec": 18, "wait": 24}
+    label_pattern = ((1, 1), (-1, 1), (1, 2), (-1, 2))
+    lane_label_counts: Dict[str, int] = defaultdict(int)
 
-    # baseline
-    for lane in active_lanes:
+    # lane bands + baseline
+    for lane_index, lane in enumerate(active_lanes):
         y = y_pos[lane]
+        fig.add_shape(
+            type="rect",
+            x0=xmin,
+            x1=xmax,
+            y0=y - 0.56,
+            y1=y + 0.56,
+            line=dict(width=0),
+            fillcolor=lane_band_color(lane_index),
+            layer="below",
+        )
         fig.add_shape(
             type="line",
             x0=xmin,
             x1=xmax,
             y0=y,
             y1=y,
-            line=dict(color="#D9D9D9", width=1),
+            line=dict(color="#CBD5E1", width=2.8),
             layer="below",
         )
 
-    # group intervals by (kind, label, color)
-    grouped: Dict[Tuple[str, str, str], List[Interval]] = defaultdict(list)
-    for iv in intervals:
-        if iv.kind == "wait" and not show_waits:
-            continue
-        grouped[(iv.kind, iv.label, iv.color)].append(iv)
+    # one trace per interval => hover时可以单独加粗边框
+    for iv in visible_intervals:
+        y = y_pos[iv.lane]
+        if iv.kind == "wait":
+            fillcolor = "rgba(216,211,203,0.38)"
+            line_color = "#A8A29E"
+            pattern_shape = "/"
+        else:
+            fillcolor = hex_to_rgba(iv.color, 0.72)
+            line_color = iv.color
+            pattern_shape = ""
 
-    for (kind, label, color), items in grouped.items():
-        x = [iv.end - iv.start for iv in items]
-        base = [iv.start for iv in items]
-        y = [y_pos[iv.lane] for iv in items]
-        text = []
-        for iv in items:
-            note = f"<br>{iv.note}" if iv.note else ""
-            text.append(
-                f"lane={iv.lane}<br>"
-                f"label={iv.label}<br>"
-                f"start={iv.start}<br>"
-                f"end={iv.end}<br>"
-                f"duration={iv.end - iv.start}{note}"
-            )
-
-        marker = dict(
-            color=color,
-            line=dict(color=color, width=1.2),
+        width = iv.end - iv.start
+        hover_text = (
+            f"lane={iv.lane}<br>"
+            f"label={iv.label}<br>"
+            f"start={iv.start}<br>"
+            f"end={iv.end}<br>"
+            f"duration={width}"
         )
-
-        opacity = 0.82
-        name = label
-
-        if kind == "wait":
-            marker["pattern"] = dict(shape="/", fgcolor="#888888", solidity=0.18)
-            marker["line"] = dict(color="#999999", width=1.0)
-            opacity = 0.40
-            name = "EventSyncWait"
+        if iv.note:
+            hover_text += f"<br>note={iv.note}"
 
         fig.add_trace(
             go.Bar(
-                x=x,
-                y=y,
-                base=base,
+                x=[width],
+                y=[y],
+                base=[iv.start],
                 orientation="h",
                 width=bar_h,
-                marker=marker,
-                opacity=opacity,
-                name=name,
-                hovertemplate="%{customdata}<extra></extra>",
-                customdata=text,
-                showlegend=True if label == name else True,
+                marker=dict(
+                    color=fillcolor,
+                    line=dict(color=line_color, width=1.5),
+                    pattern=dict(shape=pattern_shape, solidity=0.16 if iv.kind == "wait" else 0.0),
+                ),
+                hovertemplate=hover_text + "<extra></extra>",
+                name=iv.label,
+                showlegend=False,
+                meta={
+                    "kind": "interval",
+                    "base_width": 1.5,
+                    "hover_width": 3.2,
+                    "interval_kind": iv.kind,
+                },
             )
         )
 
+        if width >= label_thresholds[iv.kind]:
+            label_index = lane_label_counts[iv.lane]
+            lane_label_counts[iv.lane] += 1
+            label_sign, label_level = label_pattern[label_index % len(label_pattern)]
+            anchor_y = y + label_sign * (bar_h / 2.0)
+            label_y = y + label_sign * (0.50 + 0.18 * label_level)
+            label_x = (iv.start + iv.end) / 2.0
+
+            fig.add_shape(
+                type="line",
+                x0=label_x,
+                x1=label_x,
+                y0=anchor_y + label_sign * 0.02,
+                y1=label_y - label_sign * 0.08,
+                line=dict(color=hex_to_rgba(line_color, 0.55), width=1.0),
+                layer="above",
+            )
+            fig.add_annotation(
+                x=label_x,
+                y=label_y,
+                text=iv.label,
+                showarrow=False,
+                font=dict(size=10, color="#1F2937"),
+                bgcolor="rgba(255,255,255,0.80)",
+                bordercolor=hex_to_rgba(line_color, 0.65),
+                borderwidth=0.8,
+                borderpad=2,
+            )
+
     # markers
     if show_markers:
-        marker_symbol = {
+        symbol_map = {
             "start": "triangle-up",
             "finish": "triangle-down",
             "issue": "circle",
             "retire": "square",
         }
 
-        grouped_markers: Dict[Tuple[str, str], List[Marker]] = defaultdict(list)
+        grouped: Dict[str, List[Marker]] = defaultdict(list)
         for mk in markers:
-            grouped_markers[(mk.kind, mk.color)].append(mk)
+            if mk.lane in y_pos:
+                grouped[mk.kind].append(mk)
 
-        for (kind, color), items in grouped_markers.items():
+        for kind, items in grouped.items():
             fig.add_trace(
                 go.Scatter(
                     x=[m.cycle for m in items],
                     y=[y_pos[m.lane] for m in items],
                     mode="markers",
                     marker=dict(
-                        symbol=marker_symbol.get(kind, "circle"),
+                        symbol=symbol_map.get(kind, "circle"),
                         size=9,
-                        color=color,
+                        color=[m.color for m in items],
                         line=dict(color="black", width=0.8),
                     ),
+                    text=[f"{m.lane} | {m.label} | {kind}" for m in items],
+                    hovertemplate="marker=%{text}<br>cycle=%{x}<extra></extra>",
                     name=f"marker:{kind}",
-                    hovertemplate=(
-                        "lane=%{text}<br>"
-                        f"kind={kind}<br>"
-                        "cycle=%{x}<extra></extra>"
-                    ),
-                    text=[f"{m.lane} | {m.label}" for m in items],
                     showlegend=False,
                 )
             )
 
-    # predictions
+    # prediction lines
     if show_predictions:
-        pred_x = []
-        pred_y = []
-        pred_text = []
-
         for pr in predictions:
             if pr.lane not in y_pos:
                 continue
             y = y_pos[pr.lane]
 
-            # vertical dashed line
             fig.add_shape(
                 type="line",
                 x0=pr.predicted_end,
                 x1=pr.predicted_end,
-                y0=y - bar_h / 2.0 - 0.12,
-                y1=y + bar_h / 2.0 + 0.12,
+                y0=y - 0.42,
+                y1=y + 0.42,
                 line=dict(color=pr.color, width=1.3, dash="dash"),
                 opacity=0.95,
             )
 
-            # top dashed guide
             fig.add_shape(
                 type="line",
                 x0=pr.start,
                 x1=pr.predicted_end,
-                y0=y + bar_h / 2.0 + 0.08,
-                y1=y + bar_h / 2.0 + 0.08,
+                y0=y + 0.39,
+                y1=y + 0.39,
                 line=dict(color=pr.color, width=1.0, dash="dot"),
-                opacity=0.85,
+                opacity=0.75,
             )
 
-            pred_x.append(pr.predicted_end)
-            pred_y.append(y + bar_h / 2.0 + 0.08)
-            pred_text.append(
-                f"lane={pr.lane}<br>"
-                f"label={pr.label}<br>"
-                f"predicted_end={pr.predicted_end}<br>"
-                f"remaining={pr.predicted_end - pr.start}"
+    # dependencies
+    if show_dependencies:
+        route_counts: Dict[Tuple[str, str], int] = defaultdict(int)
+        for dep in dependencies:
+            if dep.src_lane not in y_pos or dep.dst_lane not in y_pos:
+                continue
+
+            route_key = (dep.src_lane, dep.dst_lane)
+            route_index = route_counts[route_key]
+            route_counts[route_key] += 1
+            start, ctrl, end, label_pt, arrow_tail = dependency_curve_geometry(dep, y_pos, route_index)
+            dep_color = hex_to_rgba(dep.color, 0.70)
+
+            fig.add_shape(
+                type="path",
+                path=(
+                    f"M {start[0]},{start[1]} "
+                    f"Q {ctrl[0]},{ctrl[1]} {end[0]},{end[1]}"
+                ),
+                line=dict(color=dep_color, width=1.5),
+                layer="above",
             )
 
-        if pred_x:
-            fig.add_trace(
-                go.Scatter(
-                    x=pred_x,
-                    y=pred_y,
-                    mode="markers",
-                    marker=dict(
-                        symbol="line-ns-open",
-                        size=18,
-                        color="#333333",
-                        line=dict(color="#333333", width=1.0),
-                    ),
-                    name="predicted_end",
-                    hovertemplate="%{text}<extra></extra>",
-                    text=pred_text,
-                    showlegend=False,
+            # 只在终点附近保留短箭头，避免整条依赖线压在矩形区域上
+            fig.add_annotation(
+                x=end[0],
+                y=end[1],
+                ax=arrow_tail[0],
+                ay=arrow_tail[1],
+                xref="x",
+                yref="y",
+                axref="x",
+                ayref="y",
+                text="",
+                showarrow=True,
+                arrowhead=3,
+                arrowsize=0.9,
+                arrowwidth=1.5,
+                arrowcolor=dep_color,
+            )
+
+            if show_dependency_labels:
+                fig.add_annotation(
+                    x=label_pt[0],
+                    y=label_pt[1] + 0.08,
+                    text=dep.label,
+                    showarrow=False,
+                    font=dict(size=9, color=dep.color),
+                    bgcolor="rgba(255,255,255,0.84)",
+                    bordercolor=hex_to_rgba(dep.color, 0.55),
+                    borderwidth=0.6,
+                    borderpad=2,
                 )
+
+    # custom legend
+    legend_labels = []
+    for iv in visible_intervals:
+        if iv.kind == "wait":
+            continue
+        if iv.label not in legend_labels:
+            legend_labels.append(iv.label)
+
+    for label in legend_labels:
+        fig.add_trace(
+            go.Scatter(
+                x=[None],
+                y=[None],
+                mode="lines",
+                line=dict(color=pick_color(label), width=8),
+                name=label,
+                showlegend=True,
+                hoverinfo="skip",
             )
+        )
+
+    if show_waits:
+        fig.add_trace(
+            go.Scatter(
+                x=[None],
+                y=[None],
+                mode="lines",
+                line=dict(color=pick_color("EventSyncWait"), width=8, dash="dot"),
+                name="EventSyncWait",
+                showlegend=True,
+                hoverinfo="skip",
+            )
+        )
+
+    if show_predictions:
+        fig.add_trace(
+            go.Scatter(
+                x=[None],
+                y=[None],
+                mode="lines",
+                line=dict(color=pick_color("PRED"), width=2, dash="dash"),
+                name="Predicted End",
+                showlegend=True,
+                hoverinfo="skip",
+            )
+        )
+
+    if show_dependencies:
+        fig.add_trace(
+            go.Scatter(
+                x=[None],
+                y=[None],
+                mode="lines",
+                line=dict(color=pick_color("DEP"), width=2),
+                name="Dependency",
+                showlegend=True,
+                hoverinfo="skip",
+            )
+        )
 
     fig.update_layout(
         title=dict(text=title, x=0.5),
+        plot_bgcolor="#FBF8F2",
+        paper_bgcolor="#FFFDF8",
         barmode="overlay",
-        plot_bgcolor="#FAFAFA",
-        paper_bgcolor="white",
         xaxis=dict(
             title="Cycle",
             showgrid=True,
-            gridcolor="#EAEAEA",
+            gridcolor="#E7E2D8",
             zeroline=False,
         ),
         yaxis=dict(
@@ -650,6 +896,7 @@ def build_plotly_figure(
             tickmode="array",
             tickvals=[y_pos[l] for l in active_lanes],
             ticktext=active_lanes,
+            range=[-1.15, len(active_lanes) - 0.15 + 1.65],
             showgrid=False,
             zeroline=False,
         ),
@@ -660,12 +907,101 @@ def build_plotly_figure(
             xanchor="center",
             x=0.5,
         ),
-        margin=dict(l=80, r=40, t=70, b=110),
-        height=max(420, 120 * len(active_lanes)),
+        margin=dict(l=80, r=50, t=90, b=120),
+        height=max(460, 128 * len(active_lanes)),
         hovermode="closest",
+        font=dict(family="Helvetica, Arial, sans-serif", color="#334155"),
     )
 
     return fig
+
+
+# ==========================================================
+# HTML Hover Enhancement
+# ==========================================================
+def save_html_with_hover_highlight(fig: go.Figure, out_html: Path, include_plotlyjs="cdn") -> None:
+    html = pio.to_html(fig, full_html=True, include_plotlyjs=include_plotlyjs)
+
+    extra_js = r"""
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const gd = document.querySelector('.plotly-graph-div');
+    if (!gd) return;
+
+    let hoveredTrace = null;
+
+    function roundedRectPath(x, y, w, h, r) {
+        return [
+            `M ${x + r} ${y}`,
+            `H ${x + w - r}`,
+            `Q ${x + w} ${y} ${x + w} ${y + r}`,
+            `V ${y + h - r}`,
+            `Q ${x + w} ${y + h} ${x + w - r} ${y + h}`,
+            `H ${x + r}`,
+            `Q ${x} ${y + h} ${x} ${y + h - r}`,
+            `V ${y + r}`,
+            `Q ${x} ${y} ${x + r} ${y}`,
+            'Z'
+        ].join(' ');
+    }
+
+    function applyRoundedBars() {
+        const paths = gd.querySelectorAll('.barlayer .trace path');
+        paths.forEach(function (p) {
+            const bb = p.getBBox();
+            if (!bb || bb.width <= 0 || bb.height <= 0) return;
+            const r = Math.min(11, bb.height / 2.0, bb.width / 6.0);
+            p.setAttribute('d', roundedRectPath(bb.x, bb.y, bb.width, bb.height, r));
+            p.style.strokeLinejoin = 'round';
+            p.style.strokeLinecap = 'round';
+        });
+    }
+
+    function restoreTrace(idx) {
+        if (idx === null || idx === undefined) return;
+        const tr = gd.data[idx];
+        if (!tr || !tr.meta || tr.meta.kind !== 'interval') return;
+        const baseWidth = (tr.meta.base_width !== undefined) ? tr.meta.base_width : 1.4;
+        Plotly.restyle(gd, {'marker.line.width': baseWidth}, [idx]).then(() => {
+            requestAnimationFrame(applyRoundedBars);
+        });
+    }
+
+    gd.on('plotly_hover', function (ev) {
+        if (!ev || !ev.points || !ev.points.length) return;
+
+        const idx = ev.points[0].curveNumber;
+        const tr = gd.data[idx];
+        if (!tr || !tr.meta || tr.meta.kind !== 'interval') return;
+
+        if (hoveredTrace !== null && hoveredTrace !== idx) {
+            restoreTrace(hoveredTrace);
+        }
+
+        const hoverWidth = (tr.meta.hover_width !== undefined) ? tr.meta.hover_width : 3.2;
+        Plotly.restyle(gd, {'marker.line.width': hoverWidth}, [idx]).then(() => {
+            requestAnimationFrame(applyRoundedBars);
+        });
+        hoveredTrace = idx;
+    });
+
+    gd.on('plotly_unhover', function () {
+        restoreTrace(hoveredTrace);
+        hoveredTrace = null;
+    });
+
+    gd.on('plotly_afterplot', function () {
+        requestAnimationFrame(applyRoundedBars);
+    });
+
+    requestAnimationFrame(applyRoundedBars);
+});
+</script>
+"""
+
+    html = html.replace("</body>", extra_js + "\n</body>")
+    out_html.parent.mkdir(parents=True, exist_ok=True)
+    out_html.write_text(html, encoding="utf-8")
 
 
 # ==========================================================
@@ -676,14 +1012,13 @@ def main() -> None:
     out_html = Path(CONFIG["out_html"])
     out_png = Path(CONFIG["out_png"]) if CONFIG["out_png"] else None
 
-    lanes = list(CONFIG["lanes"])
-    start_cycle = int(CONFIG["start_cycle"])
-    end_cycle_cfg = CONFIG["end_cycle"]
-
     parser = TimelineParser()
     intervals, markers, predictions, last_cycle = parser.parse(log_path)
 
+    start_cycle = int(CONFIG["start_cycle"])
+    end_cycle_cfg = CONFIG["end_cycle"]
     end_cycle = last_cycle if end_cycle_cfg is None else int(end_cycle_cfg)
+
     if end_cycle <= start_cycle:
         raise ValueError("CONFIG['end_cycle'] must be greater than CONFIG['start_cycle'].")
 
@@ -691,22 +1026,31 @@ def main() -> None:
     markers = filter_markers(markers, start_cycle, end_cycle)
     predictions = filter_predictions(predictions, start_cycle, end_cycle)
 
-    title = CONFIG["title"] or f"{log_path.name} [{start_cycle}, {end_cycle})"
+    dependencies = derive_dependencies(
+        intervals,
+        max_per_target=int(CONFIG["max_dependency_per_target"]),
+    )
 
     fig = build_plotly_figure(
         intervals=intervals,
         markers=markers,
         predictions=predictions,
-        title=title,
-        lanes=lanes,
+        dependencies=dependencies,
+        title=CONFIG["title"],
+        lanes=list(CONFIG["lanes"]),
         show_markers=bool(CONFIG["show_markers"]),
         show_predictions=bool(CONFIG["show_predictions"]),
         show_waits=bool(CONFIG["show_waits"]),
+        show_dependencies=bool(CONFIG["show_dependencies"]),
+        show_dependency_labels=bool(CONFIG["show_dependency_labels"]),
         only_active_lanes=bool(CONFIG["only_active_lanes"]),
     )
 
-    out_html.parent.mkdir(parents=True, exist_ok=True)
-    fig.write_html(out_html, include_plotlyjs=CONFIG["html_include_plotlyjs"])
+    save_html_with_hover_highlight(
+        fig,
+        out_html=out_html,
+        include_plotlyjs=CONFIG["html_include_plotlyjs"],
+    )
     print(f"[OK] Saved interactive HTML: {out_html}")
 
     if out_png is not None:
