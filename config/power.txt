@@ -1,0 +1,72 @@
+# Power Report
+Freqency: 1 GHz
+
+Internal Power  |  Switching Power  |  Leakage Power  |  Total Power
+
+# dma
+idle:
+Total             86.8260 mW        10.6010 mW     1.5765e+08 pW        97.5828 mW
+
+busy_mvin:
+Total            165.9457 mW        39.9787 mW     2.1567e+08 pW       206.1383 mW
+
+busy_mvout:
+Total            169.1462 mW        36.2631 mW     2.1621e+08 pW       205.6237 mW
+
+
+
+# acc
+idle:
+Total             66.1409 mW        98.1935 mW     7.4074e+08 pW       165.1064 mW
+
+busy_accadd:
+Total            116.8732 mW       122.5857 mW     7.4288e+08 pW       240.1828 mW
+
+busy_bias_load:
+Total            116.3361 mW       122.3104 mW     7.4288e+08 pW       239.3706 mW
+
+busy_dma_rd:
+Total            116.7310 mW       122.5158 mW     7.4288e+08 pW       239.9707 mW
+
+busy_dma_wr:
+Total            116.7673 mW       122.5158 mW     7.4288e+08 pW       240.0068 mW
+
+busy_matadd:
+Total            116.3533 mW       122.3592 mW     7.4288e+08 pW       239.4438 mW
+
+
+
+# sfu
+idle:
+Total            130.1130 mW        12.1528 mW     2.0585e+09 pW       144.3082 mW
+
+busy_softmax:
+Total            160.1240 mW        21.8137 mW     2.0483e+09 pW       183.9874 mW
+
+busy_layernorm:
+Total            156.2108 mW        20.7040 mW     2.0483e+09 pW       178.9346 mW
+
+busy_gelu:
+Total            158.6086 mW        21.1717 mW     2.0483e+09 pW       181.8500 mW
+
+busy_transpose:
+Total            156.1611 mW        20.6496 mW     2.0483e+09 pW       178.8412 mW
+
+busy_poolmax:
+Total            156.2551 mW        20.6444 mW     2.0483e+09 pW       178.9587 mW
+
+busy_resample:
+Total            153.0944 mW        19.7543 mW     2.0483e+09 pW       174.8767 mW
+
+
+
+
+# sa
+idle:
+Total            139.4387 mW         7.1826 mW     2.2553e+09 pW       148.8808 mW
+
+busy_gemm:
+Total            173.3596 mW        21.7971 mW     2.2792e+09 pW       197.4478 mW
+
+busy_conv:
+Total            135.8010 mW         4.6667 mW     2.2667e+09 pW       142.7278 mW

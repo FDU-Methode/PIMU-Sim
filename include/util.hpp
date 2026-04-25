@@ -21,6 +21,14 @@ enum class UnitType {
     DMA, SPM, SystolicArray, Accumulator, AccSram, SFU, GEMV
 };
 
+enum class DMATaskType {
+    NONE, MVIN, MVOUT
+};
+
+enum class SATaskType {
+    NONE, SA, MATADD
+};
+
 struct Message {
     MsgType type;
     int row_num = 0;

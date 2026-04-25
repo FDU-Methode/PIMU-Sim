@@ -72,6 +72,7 @@ void SystolicArray::execute(){
     spm_rd2_remaining = 0;
 
     uint8_t optype = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 25) & 0x3);
+    current_optype = optype;
     spm_rd1_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs1_reg_addr) & 0xFFFFFFFF);  // Activation/IFM Address
     spm_rd2_addr = (uint32_t)(regfile.read(regfile.compute_sa_rs2_reg_addr) & 0xFFFFFFFF);  // Weight Address
 
@@ -161,4 +162,5 @@ void SystolicArray::completeInstruction(){
     remaining_start_acc_cycles = -1;
     spm_rd1_remaining = 0;
     spm_rd2_remaining = 0;
+    current_optype = 0xFF;
 }

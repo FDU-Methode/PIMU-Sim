@@ -121,6 +121,7 @@ void Accumulator::execute(){
 
     matadd_start = (regfile.read(regfile.start_reg_addr) >> 3) & 0x1;
     sa_start     = (regfile.read(regfile.start_reg_addr) >> 2) & 0x1;
+    current_task = matadd_start ? SATaskType::MATADD : (sa_start ? SATaskType::SA : SATaskType::NONE);
 
     optype = (uint8_t)((regfile.read(regfile.config_compute_rs1_reg_addr) >> 25) & 0x3);
     is_acc = (regfile.read(regfile.config_accumulate_rs2_reg_addr) >> 48) & 0x1;
@@ -231,4 +232,5 @@ void Accumulator::completeInstruction(){
 
     is_acc = false;
     is_bias = false;
+    current_task = SATaskType::NONE;
 }

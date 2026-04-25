@@ -8,6 +8,7 @@
 #include "pipeline_controller.hpp"
 #include "scratchpad.hpp"
 #include "hw_utilization.hpp"
+#include "power_analyzer.hpp"
 #include "../inst.hpp"
 #include "../regfile.hpp"
 
@@ -20,6 +21,7 @@ private:
     std::unique_ptr<PipelineController> pipeline_controller;
     std::unique_ptr<Scratchpad> spm;
     std::unique_ptr<HardWareUtilizationTracker> util_tracker;
+    std::unique_ptr<PowerAnalyzer> power_analyzer;
 
     bool irq;
     uint64_t opcode;
@@ -46,6 +48,7 @@ public:
     void UpdataRegStage();
 
     HardWareUtilizationTracker* getUtilTracker();
+    PowerAnalyzer* getPowerAnalyzer() { return power_analyzer.get(); }
 
 //Add DMA Connect To DDR
 private:

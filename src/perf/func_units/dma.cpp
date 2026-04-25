@@ -245,6 +245,7 @@ void DMA::execute(){
     SizeDecode sizes{};
 
     if(mvin_start && !mvout_start){
+        current_task = DMATaskType::MVIN;
         cfg_word = regfile.read(regfile.config_mvin_rs1_reg_addr);
 
         req.type = MsgType::LD_REQ;
@@ -270,6 +271,7 @@ void DMA::execute(){
                    source ? "ACC" : "SPM", req.quant ? 1 : 0);
 
     } else if(!mvin_start && mvout_start){
+        current_task = DMATaskType::MVOUT;
         cfg_word = regfile.read(regfile.config_mvout_rs1_reg_addr);
 
         req.type = MsgType::ST_REQ;
@@ -359,4 +361,6 @@ void DMA::completeInstruction(){
         logger.log("[DMA] ISR Reg[1] Updated");
         mvout_start = false;
     }
+
+    current_task = DMATaskType::NONE;
 }

@@ -16,6 +16,9 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     util_tracker->reset();
     logger.log("  HardWare Utilization Tracker created!");
 
+    power_analyzer = std::make_unique<PowerAnalyzer>(logger, cfg);
+    logger.log("  Power Analyzer created!");
+
     spm = std::make_unique<Scratchpad>(logger, cfg);
     logger.log("  Scratchpad created!");
 
@@ -221,6 +224,75 @@ void PerfNpuCore::tick(){
     ExecuteStage();
     UpdataRegStage();
     WriteRegStage();
+
+    if (power_analyzer && power_analyzer->enabled()) {
+        auto* dma = dynamic_cast<DMA*>(pipeline_controller->getUnit(UnitType::DMA));
+        auto* sa = dynamic_cast<SystolicArray*>(pipeline_controller->getUnit(UnitType::SystolicArray));
+        auto* acc = dynamic_cast<Accumulator*>(pipeline_controller->getUnit(UnitType::Accumulator));
+        auto* sfu = dynamic_cast<SFU*>(pipeline_controller->getUnit(UnitType::SFU));
+
+        auto dma_mode_of = [](const DMA* u) -> DmaPowerMode {
+            if (u == nullptr || !u->isBusy()) return DmaPowerMode::Idle;
+            switch (u->getCurrentTask()) {
+                case DMATaskType::MVIN:  return DmaPowerMode::BusyMvin;
+                case DMATaskType::MVOUT: return DmaPowerMode::BusyMvout;
+                default:                 return DmaPowerMode::Idle;
+            }
+        };
+
+        auto sa_mode_of = [](const SystolicArray* u) -> SaPowerMode {
+            if (u == nullptr || !u->isBusy()) return SaPowerMode::Idle;
+            switch (u->getCurrentOpType()) {
+                case 0:  return SaPowerMode::BusyGemm;
+                case 1:  return SaPowerMode::BusyConv;
+                default: return SaPowerMode::Idle;
+            }
+        };
+
+        auto sfu_mode_of = [](const SFU* u) -> SfuPowerMode {
+            if (u == nullptr || !u->isBusy()) return SfuPowerMode::Idle;
+            switch (u->getOpType()) {
+                case 0:  return SfuPowerMode::BusySoftmax;
+                case 2:  return SfuPowerMode::BusyLayernorm;
+                case 1:  return SfuPowerMode::BusyGelu;
+                case 8:  return SfuPowerMode::BusyTranspose;
+                case 6:  return SfuPowerMode::BusyPoolmax;
+                default: return SfuPowerMode::BusyResample;
+            }
+        };
+
+        auto acc_mode_of = [](const DMA* dma_u, const Accumulator* acc_u) -> AccPowerMode {
+            if (acc_u != nullptr && acc_u->isBusy()) {
+                switch (acc_u->getCurrentTask()) {
+                    case SATaskType::MATADD: return AccPowerMode::BusyMatadd;
+                    case SATaskType::SA:     return AccPowerMode::BusyAccadd;
+                    default:                 break;
+                }
+            }
+
+            if (dma_u != nullptr && dma_u->isBusy() && dma_u->usesAcc()) {
+                switch (dma_u->getCurrentTask()) {
+                    case DMATaskType::MVIN:
+                        return dma_u->usesBiasPath()
+                            ? AccPowerMode::BusyBiasLoad
+                            : AccPowerMode::BusyDmaWr;
+                    case DMATaskType::MVOUT:
+                        return AccPowerMode::BusyDmaRd;
+                    default:
+                        break;
+                }
+            }
+
+            return AccPowerMode::Idle;
+        };
+
+        power_analyzer->sample(
+            dma_mode_of(dma),
+            acc_mode_of(dma, acc),
+            sfu_mode_of(sfu),
+            sa_mode_of(sa)
+        );
+    }
 
     _cycle++;
 
