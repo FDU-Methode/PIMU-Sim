@@ -216,11 +216,12 @@ class TimelineParser:
         self.pending_dma_ops: Deque[Tuple[str, Tuple[str, ...], Tuple[str, ...]]] = deque()
         self.pending_sa_words: List[Tuple[int, int]] = []
         self.pending_sa_resources_queue: Deque[Tuple[Tuple[str, ...], Tuple[str, ...]]] = deque()
+        self.pending_acc_resources_queue: Deque[Tuple[Tuple[str, ...], Tuple[str, ...]]] = deque()
         self.blocked_sa_resources: Optional[Tuple[Tuple[str, ...], Tuple[str, ...]]] = None
 
         self.open_dma: Dict[str, Tuple[int, str, Tuple[str, ...], Tuple[str, ...]]] = {}
         self.open_sa: Optional[Tuple[int, str, int, Tuple[str, ...], Tuple[str, ...]]] = None
-        self.open_acc: Optional[Tuple[int, str, int]] = None
+        self.open_acc: Optional[Tuple[int, str, int, Tuple[str, ...], Tuple[str, ...]]] = None
         self.open_sfu: Optional[Tuple[int, str, int]] = None
         self.open_ddr: Optional[Tuple[int, str]] = None
 
@@ -282,6 +283,31 @@ class TimelineParser:
             biaspsum_addr=inst1_high & 0xFFFFFFFF,
             output_addr=(inst1_high >> 32) & 0xFFFFFFFF,
         )
+
+    def _decode_matadd_resources_from_words(
+        self,
+        words: List[Tuple[int, int]],
+    ) -> Optional[Tuple[Tuple[str, ...], Tuple[str, ...]]]:
+        if len(words) != 3:
+            return None
+
+        inst0_high, inst0_low = words[0]
+        opcode = inst0_low & 0xFF
+        if opcode != 0x04:
+            return None
+
+        a_addr = (inst0_low >> 32) & 0xFFFFFFFF
+        b_addr = inst0_high & 0xFFFFFFFF
+        output_addr = (inst0_high >> 32) & 0xFFFFFFFF
+
+        reads = ordered_unique_resources(
+            [
+                make_resource("ACC", a_addr),
+                make_resource("ACC", b_addr),
+            ]
+        )
+        writes = ordered_unique_resources([make_resource("SPM", output_addr)])
+        return reads, writes
 
     def _close_interval(
         self,
@@ -434,9 +460,14 @@ class TimelineParser:
                         self.pending_sa_words.append(word)
 
                     if inst_count == inst_count_upper:
-                        decoded = self._decode_sa_resources_from_words(self.pending_sa_words)
-                        if decoded is not None:
-                            self.pending_sa_resources_queue.append(decoded)
+                        sa_decoded = self._decode_sa_resources_from_words(self.pending_sa_words)
+                        if sa_decoded is not None:
+                            self.pending_sa_resources_queue.append(sa_decoded)
+
+                        acc_decoded = self._decode_matadd_resources_from_words(self.pending_sa_words)
+                        if acc_decoded is not None:
+                            self.pending_acc_resources_queue.append(acc_decoded)
+
                         self.pending_sa_words = []
                     continue
 
@@ -522,10 +553,15 @@ class TimelineParser:
                     remaining = int(m.group(2))
 
                     if self.open_acc is not None:
-                        start, old_label, _ = self.open_acc
-                        self._close_interval("ACC", start, old_label, self.current_cycle)
+                        start, old_label, _, old_reads, old_writes = self.open_acc
+                        self._close_interval("ACC", start, old_label, self.current_cycle, reads=old_reads, writes=old_writes)
 
-                    self.open_acc = (self.current_cycle, label, remaining)
+                    if label == "Matadd" and self.pending_acc_resources_queue:
+                        reads, writes = self.pending_acc_resources_queue.popleft()
+                    else:
+                        reads, writes = (), ()
+
+                    self.open_acc = (self.current_cycle, label, remaining, reads, writes)
                     color = pick_color(label)
                     self._add_marker("ACC", self.current_cycle, label, "start", color)
                     self._add_prediction("ACC", self.current_cycle, remaining, label, color)
@@ -534,8 +570,8 @@ class TimelineParser:
                 m = self.sa_retire_re.search(line)
                 if m:
                     if self.open_acc is not None:
-                        start, label, _ = self.open_acc
-                        self._close_interval("ACC", start, label, self.current_cycle + 1)
+                        start, label, _, reads, writes = self.open_acc
+                        self._close_interval("ACC", start, label, self.current_cycle + 1, reads=reads, writes=writes)
                         self._add_marker("ACC", self.current_cycle, label, "retire", pick_color(label))
                         self.open_acc = None
                     continue
@@ -613,8 +649,8 @@ class TimelineParser:
             self._close_interval("SA", start, label, max(end_cycle, start + remaining), reads=reads, writes=writes)
 
         if self.open_acc is not None:
-            start, label, remaining = self.open_acc
-            self._close_interval("ACC", start, label, max(end_cycle, start + remaining))
+            start, label, remaining, reads, writes = self.open_acc
+            self._close_interval("ACC", start, label, max(end_cycle, start + remaining), reads=reads, writes=writes)
 
         if self.open_sfu is not None:
             start, label, remaining = self.open_sfu
@@ -763,6 +799,29 @@ def derive_dependencies(intervals: List[Interval], max_per_target: int = 3) -> L
                         color=pick_color("DEP"),
                     )
                 )
+
+    # ACC: only Matadd needs dependency arrows
+    for target in exec_by_lane.get("ACC", []):
+        if target.label != "Matadd":
+            continue
+
+        picked = find_address_matched_sources(target)
+        if max_per_target > 0 and len(picked) > max_per_target:
+            picked = picked[-max_per_target:]
+
+        for src in picked:
+            deps.append(
+                Dependency(
+                    src_lane=src.lane,
+                    src_cycle=src.end,
+                    src_label=src.label,
+                    dst_lane=target.lane,
+                    dst_cycle=target.start,
+                    dst_label=target.label,
+                    label=f"{src.lane}:{src.label}",
+                    color=pick_color("DEP"),
+                )
+            )
 
     return deps
 
