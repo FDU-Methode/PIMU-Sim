@@ -20,6 +20,7 @@ BUILD_DIR = build
 # Top Selection
 TOP = resnet_block
 TOP_CFG := ./config/$(TOP)_cfg.txt
+LOG_FILE := ./log/tb_$(TOP)_log.txt
 
 # Source Files & Object Files
 SRCS = $(shell find $(SRC_DIR) -name "*.cpp")
@@ -58,5 +59,8 @@ run: $(TARGET)
 # Clean Build
 clean:
 	rm -rf $(BUILD_DIR)
+	@if [ -f "$(LOG_FILE)" ]; then \
+		: > "$(LOG_FILE)"; \
+	fi
 
 .PHONY: all build run clean

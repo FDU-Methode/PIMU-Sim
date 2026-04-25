@@ -57,6 +57,11 @@ public:
     void execute(uint8_t opcode);
     void tick() override;
 
+    // Power Mode
+    DMATaskType getCurrentTask() const { return current_task; }
+    bool usesAcc() const { return source; }
+    bool usesBiasPath() const { return is_bias; }
+
 protected:
     int queue_id = 0;
     DMATaskType current_task = DMATaskType::NONE;
@@ -109,6 +114,11 @@ public:
     void execute() override;
     void tick() override;
 
+    // Power Mode
+    uint8_t getCurrentOpType() const { return current_optype; }
+
+    uint8_t current_optype = 0xFF;
+
 protected:
     bool acc_started = false;
     int remaining_start_acc_cycles = -1;
@@ -137,6 +147,10 @@ public:
     void tick() override;
 
     AccSram* getScratchpad() { return acc_sram.get(); }
+
+    // Power Mode
+    SATaskType getCurrentTask() const { return current_task; }
+    bool isBiasMode() const { return is_bias; }
 
 protected:
     // ACC SRAM
@@ -176,6 +190,9 @@ public:
 
     void execute() override;
     void tick() override;
+
+    // Power Mode
+    uint8_t getOpType() const { return sfu_optype; }
 
 protected:
     int sfu_cycle = 0;

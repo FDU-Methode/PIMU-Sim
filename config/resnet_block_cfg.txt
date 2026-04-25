@@ -49,6 +49,10 @@ acc_data_width = 32
 inst_cache_size = 256
 inst_queue_depth = 8
 
+# ---- Power Configuration ----
+enable_power = 1
+power_file = ./config/power.txt
+
 # ---- File paths ----
 inst_file = ./benchmarks/tb_test/tb_resnet_block.txt
 enable_log = 1                 # enable log file: 1 (enable) or 0 (disable)

@@ -80,6 +80,7 @@ void SystolicArray::execute(){
     spm_rd2_remaining = 0;
 
     uint8_t optype = static_cast<uint8_t>((inst1.low >> 1) & 0x3);
+    current_optype = optype;
 
     spm_rd1_addr = static_cast<uint32_t>(inst2.low & 0xFFFFFFFF);  // Activation/IFM Address
     spm_rd2_addr = static_cast<uint32_t>(inst2.high & 0xFFFFFFFF);  // Weight Address
@@ -171,4 +172,5 @@ void SystolicArray::completeInstruction(){
     remaining_start_acc_cycles = -1;
     spm_rd1_remaining = 0;
     spm_rd2_remaining = 0;
+    current_optype = 0xFF;
 }
