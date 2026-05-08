@@ -1,0 +1,289 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="3288" height="338" viewBox="0 0 3288 338">
+<defs><marker id="arrow-blue" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#0B63B6"/></marker><marker id="arrow-purple" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#7B1FA2"/></marker><marker id="arrow-orange" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#C46A1A"/></marker></defs>
+<style>
+text{font-family:Arial,Helvetica,sans-serif;fill:#111827}.title{font-size:20px;font-weight:700}.lane{font-size:16px;font-weight:700}.cell{font-size:15px;font-weight:700}.small{font-size:11px;fill:#374151}.phase{font-size:16px;font-style:italic;font-weight:700}
+</style>
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="126" y="32" class="title">PIMU-Sim Multi-DMA Dispatch Matrix</text>
+<text x="126" y="54" class="small">Each column is one DMA instruction from the workload; highlighted cell shows selected DMA queue.</text>
+<text x="126" y="70" class="small">Policy shown here: ACC MVIN/MVOUT fixed to DMA1; SPM MVIN balanced across DMA2/3; SPM MVOUT may borrow DMA1.</text>
+<line x1="126" y1="64" x2="1062" y2="64" stroke="#111827" stroke-width="2"/>
+<line x1="126" y1="55" x2="126" y2="73" stroke="#111827" stroke-width="2"/>
+<line x1="1062" y1="55" x2="1062" y2="73" stroke="#111827" stroke-width="2"/>
+<text x="594.0" y="54" text-anchor="middle" class="phase" fill="#7B1FA2">MVIN prefetch</text>
+<line x1="1062" y1="64" x2="1166" y2="64" stroke="#111827" stroke-width="2"/>
+<line x1="1062" y1="55" x2="1062" y2="73" stroke="#111827" stroke-width="2"/>
+<line x1="1166" y1="55" x2="1166" y2="73" stroke="#111827" stroke-width="2"/>
+<text x="1114.0" y="54" text-anchor="middle" class="phase" fill="#1565C0">MVOUT writeback</text>
+<line x1="1166" y1="64" x2="1478" y2="64" stroke="#111827" stroke-width="2"/>
+<line x1="1166" y1="55" x2="1166" y2="73" stroke="#111827" stroke-width="2"/>
+<line x1="1478" y1="55" x2="1478" y2="73" stroke="#111827" stroke-width="2"/>
+<text x="1322.0" y="54" text-anchor="middle" class="phase" fill="#7B1FA2">MVIN prefetch</text>
+<line x1="1478" y1="64" x2="1582" y2="64" stroke="#111827" stroke-width="2"/>
+<line x1="1478" y1="55" x2="1478" y2="73" stroke="#111827" stroke-width="2"/>
+<line x1="1582" y1="55" x2="1582" y2="73" stroke="#111827" stroke-width="2"/>
+<text x="1530.0" y="54" text-anchor="middle" class="phase" fill="#1565C0">MVOUT writeback</text>
+<line x1="1582" y1="64" x2="3038" y2="64" stroke="#111827" stroke-width="2"/>
+<line x1="1582" y1="55" x2="1582" y2="73" stroke="#111827" stroke-width="2"/>
+<line x1="3038" y1="55" x2="3038" y2="73" stroke="#111827" stroke-width="2"/>
+<text x="2310.0" y="54" text-anchor="middle" class="phase" fill="#7B1FA2">MVIN prefetch</text>
+<line x1="3038" y1="64" x2="3142" y2="64" stroke="#111827" stroke-width="2"/>
+<line x1="3038" y1="55" x2="3038" y2="73" stroke="#111827" stroke-width="2"/>
+<line x1="3142" y1="55" x2="3142" y2="73" stroke="#111827" stroke-width="2"/>
+<text x="3090.0" y="54" text-anchor="middle" class="phase" fill="#1565C0">MVOUT writeback</text>
+<line x1="3142" y1="64" x2="3246" y2="64" stroke="#111827" stroke-width="2"/>
+<line x1="3142" y1="55" x2="3142" y2="73" stroke="#111827" stroke-width="2"/>
+<line x1="3246" y1="55" x2="3246" y2="73" stroke="#111827" stroke-width="2"/>
+<text x="3194.0" y="54" text-anchor="middle" class="phase" fill="#7B1FA2">MVIN prefetch</text>
+<text x="108" y="148.0" text-anchor="end" class="lane">DMA1</text>
+<text x="108" y="208.0" text-anchor="end" class="lane">DMA2</text>
+<text x="108" y="268.0" text-anchor="end" class="lane">DMA3</text>
+<text x="178.0" y="94" text-anchor="middle" class="small">req 30</text>
+<rect x="126" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="126" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="126" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 30 -&gt; DMA3\nMVIN SPM\ncycle 2178-2243, duration 65\nsrc 0x2008020, dst 0x80000, rows 32, cols 32</title>
+<text x="178.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="178.0" y="275" text-anchor="middle" class="small">SPM  2178-2243</text>
+</g>
+<text x="282.0" y="94" text-anchor="middle" class="small">req 31</text>
+<rect x="230" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="230" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 31 -&gt; DMA2\nMVIN SPM\ncycle 2279-2344, duration 65\nsrc 0x10000a0, dst 0x40000, rows 32, cols 32</title>
+<text x="282.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="282.0" y="215" text-anchor="middle" class="small">SPM  2279-2344</text>
+</g>
+<rect x="230" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="386.0" y="94" text-anchor="middle" class="small">req 32</text>
+<rect x="334" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="334" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 32 -&gt; DMA2\nMVIN SPM\ncycle 2344-2409, duration 65\nsrc 0x200a020, dst 0xc0000, rows 32, cols 32</title>
+<text x="386.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="386.0" y="215" text-anchor="middle" class="small">SPM  2344-2409</text>
+</g>
+<rect x="334" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="490.0" y="94" text-anchor="middle" class="small">req 33</text>
+<rect x="438" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="438" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="438" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 33 -&gt; DMA3\nMVIN SPM\ncycle 2380-2472, duration 92\nsrc 0x10000c0, dst 0x0, rows 32, cols 32</title>
+<text x="490.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="490.0" y="275" text-anchor="middle" class="small">SPM  2380-2472</text>
+</g>
+<text x="594.0" y="94" text-anchor="middle" class="small">req 34</text>
+<rect x="542" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="542" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="542" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 34 -&gt; DMA3\nMVIN SPM\ncycle 2472-2600, duration 128\nsrc 0x200c020, dst 0x80000, rows 32, cols 32</title>
+<text x="594.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="594.0" y="275" text-anchor="middle" class="small">SPM  2472-2600</text>
+</g>
+<text x="698.0" y="94" text-anchor="middle" class="small">req 35</text>
+<rect x="646" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="646" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 35 -&gt; DMA2\nMVIN SPM\ncycle 2510-2543, duration 33\nsrc 0x10000e0, dst 0x40000, rows 32, cols 32</title>
+<text x="698.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="698.0" y="215" text-anchor="middle" class="small">SPM  2510-2543</text>
+</g>
+<rect x="646" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="802.0" y="94" text-anchor="middle" class="small">req 36</text>
+<rect x="750" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="750" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="750" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 36 -&gt; DMA3\nMVIN SPM\ncycle 2600-2665, duration 65\nsrc 0x200e020, dst 0xc0000, rows 32, cols 32</title>
+<text x="802.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="802.0" y="275" text-anchor="middle" class="small">SPM  2600-2665</text>
+</g>
+<text x="906.0" y="94" text-anchor="middle" class="small">req 37</text>
+<rect x="854" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="854" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 37 -&gt; DMA2\nMVIN SPM\ncycle 2701-2766, duration 65\nsrc 0x1000000, dst 0x0, rows 32, cols 32</title>
+<text x="906.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="906.0" y="215" text-anchor="middle" class="small">SPM  2701-2766</text>
+</g>
+<rect x="854" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="1010.0" y="94" text-anchor="middle" class="small">req 38</text>
+<rect x="958" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="958" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 38 -&gt; DMA2\nMVIN SPM\ncycle 2766-2831, duration 65\nsrc 0x2000040, dst 0x80000, rows 32, cols 32</title>
+<text x="1010.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="1010.0" y="215" text-anchor="middle" class="small">SPM  2766-2831</text>
+</g>
+<rect x="958" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="1114.0" y="94" text-anchor="middle" class="small">req 39</text>
+<rect x="1062" y="112" width="104" height="60" fill="#F7D7B5" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 39 -&gt; DMA1\nMVOUT SPM\ncycle 2803-2894, duration 91\nsrc 0x140000, dst 0x3001000, rows 32, cols 32</title>
+<text x="1114.0" y="136" text-anchor="middle" class="cell">MVOUT</text>
+<text x="1114.0" y="155" text-anchor="middle" class="small">SPM  2803-2894</text>
+</g>
+<rect x="1062" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1062" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="1218.0" y="94" text-anchor="middle" class="small">req 40</text>
+<rect x="1166" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1166" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 40 -&gt; DMA2\nMVIN SPM\ncycle 2831-3143, duration 312\nsrc 0x2002040, dst 0xc0000, rows 32, cols 32</title>
+<text x="1218.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="1218.0" y="215" text-anchor="middle" class="small">SPM  2831-3143</text>
+</g>
+<rect x="1166" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="1322.0" y="94" text-anchor="middle" class="small">req 41</text>
+<rect x="1270" y="112" width="104" height="60" fill="#C9BFE5" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 41 -&gt; DMA1\nMVIN ACC\ncycle 2894-3023, duration 129\nsrc 0x1000020, dst 0x0, rows 32, cols 32</title>
+<text x="1322.0" y="136" text-anchor="middle" class="cell">MVIN</text>
+<text x="1322.0" y="155" text-anchor="middle" class="small">ACC  2894-3023</text>
+</g>
+<rect x="1270" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1270" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="1426.0" y="94" text-anchor="middle" class="small">req 42</text>
+<rect x="1374" y="112" width="104" height="60" fill="#C9BFE5" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 42 -&gt; DMA1\nMVIN ACC\ncycle 3023-3152, duration 129\nsrc 0x3001000, dst 0x80000, rows 32, cols 32</title>
+<text x="1426.0" y="136" text-anchor="middle" class="cell">MVIN</text>
+<text x="1426.0" y="155" text-anchor="middle" class="small">ACC  3023-3152</text>
+</g>
+<rect x="1374" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1374" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="1530.0" y="94" text-anchor="middle" class="small">req 43</text>
+<rect x="1478" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1478" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1478" y="232" width="104" height="60" fill="#F7D7B5" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 43 -&gt; DMA3\nMVOUT SPM\ncycle 3190-3256, duration 66\nsrc 0x1c0000, dst 0x4000020, rows 32, cols 32</title>
+<text x="1530.0" y="256" text-anchor="middle" class="cell">MVOUT</text>
+<text x="1530.0" y="275" text-anchor="middle" class="small">SPM  3190-3256</text>
+</g>
+<text x="1634.0" y="94" text-anchor="middle" class="small">req 44</text>
+<rect x="1582" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1582" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1582" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 44 -&gt; DMA3\nMVIN SPM\ncycle 3256-3384, duration 128\nsrc 0x1000020, dst 0x40000, rows 32, cols 32</title>
+<text x="1634.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="1634.0" y="275" text-anchor="middle" class="small">SPM  3256-3384</text>
+</g>
+<text x="1738.0" y="94" text-anchor="middle" class="small">req 45</text>
+<rect x="1686" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1686" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 45 -&gt; DMA2\nMVIN SPM\ncycle 3291-3324, duration 33\nsrc 0x2004040, dst 0x80000, rows 32, cols 32</title>
+<text x="1738.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="1738.0" y="215" text-anchor="middle" class="small">SPM  3291-3324</text>
+</g>
+<rect x="1686" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="1842.0" y="94" text-anchor="middle" class="small">req 46</text>
+<rect x="1790" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1790" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1790" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 46 -&gt; DMA3\nMVIN SPM\ncycle 3384-3449, duration 65\nsrc 0x1000040, dst 0x0, rows 32, cols 32</title>
+<text x="1842.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="1842.0" y="275" text-anchor="middle" class="small">SPM  3384-3449</text>
+</g>
+<text x="1946.0" y="94" text-anchor="middle" class="small">req 47</text>
+<rect x="1894" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1894" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 47 -&gt; DMA2\nMVIN SPM\ncycle 3485-3550, duration 65\nsrc 0x1000060, dst 0x40000, rows 32, cols 32</title>
+<text x="1946.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="1946.0" y="215" text-anchor="middle" class="small">SPM  3485-3550</text>
+</g>
+<rect x="1894" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="2050.0" y="94" text-anchor="middle" class="small">req 48</text>
+<rect x="1998" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="1998" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 48 -&gt; DMA2\nMVIN SPM\ncycle 3550-3615, duration 65\nsrc 0x2006040, dst 0xc0000, rows 32, cols 32</title>
+<text x="2050.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="2050.0" y="215" text-anchor="middle" class="small">SPM  3550-3615</text>
+</g>
+<rect x="1998" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="2154.0" y="94" text-anchor="middle" class="small">req 49</text>
+<rect x="2102" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2102" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2102" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 49 -&gt; DMA3\nMVIN SPM\ncycle 3586-3678, duration 92\nsrc 0x1000080, dst 0x0, rows 32, cols 32</title>
+<text x="2154.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="2154.0" y="275" text-anchor="middle" class="small">SPM  3586-3678</text>
+</g>
+<text x="2258.0" y="94" text-anchor="middle" class="small">req 50</text>
+<rect x="2206" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2206" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2206" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 50 -&gt; DMA3\nMVIN SPM\ncycle 3678-3806, duration 128\nsrc 0x2008040, dst 0x80000, rows 32, cols 32</title>
+<text x="2258.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="2258.0" y="275" text-anchor="middle" class="small">SPM  3678-3806</text>
+</g>
+<text x="2362.0" y="94" text-anchor="middle" class="small">req 51</text>
+<rect x="2310" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2310" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 51 -&gt; DMA2\nMVIN SPM\ncycle 3716-3749, duration 33\nsrc 0x10000a0, dst 0x40000, rows 32, cols 32</title>
+<text x="2362.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="2362.0" y="215" text-anchor="middle" class="small">SPM  3716-3749</text>
+</g>
+<rect x="2310" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="2466.0" y="94" text-anchor="middle" class="small">req 52</text>
+<rect x="2414" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2414" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2414" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 52 -&gt; DMA3\nMVIN SPM\ncycle 3806-3871, duration 65\nsrc 0x200a040, dst 0xc0000, rows 32, cols 32</title>
+<text x="2466.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="2466.0" y="275" text-anchor="middle" class="small">SPM  3806-3871</text>
+</g>
+<text x="2570.0" y="94" text-anchor="middle" class="small">req 53</text>
+<rect x="2518" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2518" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 53 -&gt; DMA2\nMVIN SPM\ncycle 3907-3972, duration 65\nsrc 0x10000c0, dst 0x0, rows 32, cols 32</title>
+<text x="2570.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="2570.0" y="215" text-anchor="middle" class="small">SPM  3907-3972</text>
+</g>
+<rect x="2518" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="2674.0" y="94" text-anchor="middle" class="small">req 54</text>
+<rect x="2622" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2622" y="172" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 54 -&gt; DMA2\nMVIN SPM\ncycle 3972-4037, duration 65\nsrc 0x200c040, dst 0x80000, rows 32, cols 32</title>
+<text x="2674.0" y="196" text-anchor="middle" class="cell">MVIN</text>
+<text x="2674.0" y="215" text-anchor="middle" class="small">SPM  3972-4037</text>
+</g>
+<rect x="2622" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="2778.0" y="94" text-anchor="middle" class="small">req 55</text>
+<rect x="2726" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2726" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2726" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 55 -&gt; DMA3\nMVIN SPM\ncycle 4008-4100, duration 92\nsrc 0x10000e0, dst 0x40000, rows 32, cols 32</title>
+<text x="2778.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="2778.0" y="275" text-anchor="middle" class="small">SPM  4008-4100</text>
+</g>
+<text x="2882.0" y="94" text-anchor="middle" class="small">req 56</text>
+<rect x="2830" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2830" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2830" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 56 -&gt; DMA3\nMVIN SPM\ncycle 4100-4165, duration 65\nsrc 0x200e040, dst 0xc0000, rows 32, cols 32</title>
+<text x="2882.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="2882.0" y="275" text-anchor="middle" class="small">SPM  4100-4165</text>
+</g>
+<text x="2986.0" y="94" text-anchor="middle" class="small">req 57</text>
+<rect x="2934" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2934" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="2934" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 57 -&gt; DMA3\nMVIN SPM\ncycle 4165-4230, duration 65\nsrc 0x2000060, dst 0x80000, rows 32, cols 32</title>
+<text x="2986.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="2986.0" y="275" text-anchor="middle" class="small">SPM  4165-4230</text>
+</g>
+<text x="3090.0" y="94" text-anchor="middle" class="small">req 58</text>
+<rect x="3038" y="112" width="104" height="60" fill="#F7D7B5" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 58 -&gt; DMA1\nMVOUT SPM\ncycle 4267-4333, duration 66\nsrc 0x100000, dst 0x3002000, rows 32, cols 32</title>
+<text x="3090.0" y="136" text-anchor="middle" class="cell">MVOUT</text>
+<text x="3090.0" y="155" text-anchor="middle" class="small">SPM  4267-4333</text>
+</g>
+<rect x="3038" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="3038" y="232" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<text x="3194.0" y="94" text-anchor="middle" class="small">req 59</text>
+<rect x="3142" y="112" width="104" height="60" fill="#ECE9F7" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="3142" y="172" width="104" height="60" fill="#E6F0FF" stroke="#5A5B7A" stroke-width="1.1"/>
+<rect x="3142" y="232" width="104" height="60" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="1.1"/>
+<g><title>req 59 -&gt; DMA3\nMVIN SPM\ncycle 4267-4581, duration 314\nsrc 0x2002060, dst 0xc0000, rows 32, cols 32</title>
+<text x="3194.0" y="256" text-anchor="middle" class="cell">MVIN</text>
+<text x="3194.0" y="275" text-anchor="middle" class="small">SPM  4267-4581</text>
+</g>
+<text x="3181.0" y="114" fill="#0B63B6" font-size="12" font-weight="700">MVIN RR</text>
+<line x1="3174.0" y1="106" x2="3174.0" y2="254.0" stroke="#0B63B6" stroke-width="2.2" marker-end="url(#arrow-blue)"/>
+<rect x="126" y="304" width="20" height="12" fill="#CFE1F9" stroke="#5A5B7A" stroke-width="0.8"/>
+<text x="154" y="314" class="small">MVIN to SPM</text>
+<rect x="268" y="304" width="20" height="12" fill="#C9BFE5" stroke="#5A5B7A" stroke-width="0.8"/>
+<text x="296" y="314" class="small">MVIN to ACC</text>
+<rect x="410" y="304" width="20" height="12" fill="#F7D7B5" stroke="#5A5B7A" stroke-width="0.8"/>
+<text x="438" y="314" class="small">MVOUT</text>
+</svg>

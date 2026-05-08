@@ -168,53 +168,106 @@ bool Decoder::dispatch() {
 
 
 DMATarget Decoder::selectDMATarget(uint8_t opcode, const Inst& inst) {
-    bool is_acc  = isAccDma(inst);
+    if(opcode != 0x01 && opcode != 0x02) {
+        return DMATarget::NONE;
+    }
+
+    const bool is_acc = isAccDma(inst);
+
+    // ACC-related traffic must go through DMA1
     if(is_acc) {
+        return dma_1_inst_queue->full() ? DMATarget::NONE : DMATarget::DMA1;
+    }
+
+    auto choose_rr_between_dma2_dma3 = [&](int& rr_idx) -> DMATarget {
+        constexpr DMATarget kOrder[2] = {
+            DMATarget::DMA2,
+            DMATarget::DMA3
+        };
+
+        DMAInstQueue* queues[2] = {
+            dma_2_inst_queue,
+            dma_3_inst_queue
+        };
+
+        for(int step = 0; step < 2; ++step) {
+            int idx = (rr_idx + step) % 2;
+            if(!queues[idx]->full()) {
+                rr_idx = (idx + 1) % 2;
+                return kOrder[idx];
+            }
+        }
+
+        return DMATarget::NONE;
+    };
+
+    if(opcode == 0x01) {
+        // MVIN -> SPM:
+        // keep this path stable, only use DMA2/3
+        return choose_rr_between_dma2_dma3(next_spm_mvin_rr_idx);
+    }
+
+    // opcode == 0x02, MVOUT -> SPM:
+    // allow DMA1 to help only when it is completely idle
+    if(dmaQueueLoad(dma_1_inst_queue) == 0) {
         return DMATarget::DMA1;
     }
 
-    bool dma1_full = dma_1_inst_queue->full();
-    bool dma2_full = dma_2_inst_queue->full();
-    bool dma3_full = dma_3_inst_queue->full();
-    // Compute Load of Each Inst Queue
-    int load1 = dmaQueueLoad(dma_1_inst_queue);
-    int load2 = dmaQueueLoad(dma_2_inst_queue);
-    int load3 = dmaQueueLoad(dma_3_inst_queue);
+    return choose_rr_between_dma2_dma3(next_spm_mvout_rr_idx);
 
-    if(opcode == 0x01) {  // MVIN To SPM
-        if(!dma2_full && !dma3_full) {
-            if(load2 < load3) return DMATarget::DMA2;
-            if(load3 < load2) return DMATarget::DMA3;
-            // Round - Robin
-            DMATarget target = next_spm_mvin_to_dma2 ? DMATarget::DMA2 : DMATarget::DMA3;
-            next_spm_mvin_to_dma2 = !next_spm_mvin_to_dma2;
-            return target;
-        }
-        if(!dma2_full) return DMATarget::DMA2;
-        if(!dma3_full) return DMATarget::DMA3;
-        if(!dma1_full) return DMATarget::DMA1;
-        return DMATarget::NONE;
-    }
 
-    if(opcode == 0x02) {  // MVOUT From SPM
-        if(!dma1_full && load1 == 0) {
-            return DMATarget::DMA1;
-        }
-        if(!dma2_full && !dma3_full) {
-            if(load2 < load3) return DMATarget::DMA2;
-            if(load3 < load2) return DMATarget::DMA3;
-            // Round - Robin
-            DMATarget target = next_spm_mvout_to_dma2 ? DMATarget::DMA2 : DMATarget::DMA3;
-            next_spm_mvout_to_dma2 = !next_spm_mvout_to_dma2;
-            return target;
-        }
-        if(!dma2_full) return DMATarget::DMA2;
-        if(!dma3_full) return DMATarget::DMA3;
-        if(!dma1_full) return DMATarget::DMA1;
-        return DMATarget::NONE;
-    }
+    // bool is_acc  = isAccDma(inst);
+    // if(is_acc) {
+    //     return DMATarget::DMA1;
+    // }
 
-    return DMATarget::NONE;
+    // bool dma1_full = dma_1_inst_queue->full();
+    // bool dma2_full = dma_2_inst_queue->full();
+    // bool dma3_full = dma_3_inst_queue->full();
+    // // Compute Load of Each Inst Queue
+    // int load1 = dmaQueueLoad(dma_1_inst_queue);
+    // int load2 = dmaQueueLoad(dma_2_inst_queue);
+    // int load3 = dmaQueueLoad(dma_3_inst_queue);
+
+    // if(opcode == 0x01) {  // MVIN To SPM
+    //     if(!dma2_full && !dma3_full) {
+    //         if(load2 < load3) return DMATarget::DMA2;
+    //         if(load3 < load2) return DMATarget::DMA3;
+    //         // Round - Robin
+    //         DMATarget target = next_spm_mvin_to_dma2 ? DMATarget::DMA2 : DMATarget::DMA3;
+    //         next_spm_mvin_to_dma2 = !next_spm_mvin_to_dma2;
+    //         return target;
+    //     }
+    //     if(!dma2_full) return DMATarget::DMA2;
+    //     if(!dma3_full) return DMATarget::DMA3;
+    //     if(!dma1_full) return DMATarget::DMA1;
+    //     return DMATarget::NONE;
+    // }
+
+    // if(opcode == 0x02) {  // MVOUT From SPM
+    //     if(!dma1_full && load1 == 0) {
+    //         return DMATarget::DMA1;
+    //     }
+    //     if(!dma2_full && !dma3_full) {
+    //         if(load2 < load3) return DMATarget::DMA2;
+    //         if(load3 < load2) return DMATarget::DMA3;
+    //         // Round - Robin
+    //         DMATarget target = next_spm_mvout_to_dma2 ? DMATarget::DMA2 : DMATarget::DMA3;
+    //         next_spm_mvout_to_dma2 = !next_spm_mvout_to_dma2;
+    //         return target;
+    //     }
+    //     if(!dma2_full) return DMATarget::DMA2;
+    //     if(!dma3_full) return DMATarget::DMA3;
+    //     if(!dma1_full) return DMATarget::DMA1;
+    //     return DMATarget::NONE;
+    // }
+
+    // return DMATarget::NONE;
+
+
+
+
+
     // bool dma1_full = dma_1_inst_queue->full();
     // if(dma1_full) {
     //     return DMATarget::NONE;

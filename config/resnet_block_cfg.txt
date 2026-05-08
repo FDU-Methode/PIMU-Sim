@@ -1,5 +1,5 @@
 # ==========================================================
-#  Example NPU Simulator Configuration File
+#  ResNet Benchmark Configuration
 # ==========================================================
 
 # ---- "Simulator Configuration" ----

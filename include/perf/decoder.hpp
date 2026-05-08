@@ -41,8 +41,10 @@ private:
 
     // DMA Dispatch Status
     DMATarget current_dma_target = DMATarget::NONE;
-    bool next_spm_mvin_to_dma2 = true;
-    bool next_spm_mvout_to_dma2 = true;
+    // bool next_spm_mvin_to_dma2 = true;
+    // bool next_spm_mvout_to_dma2 = true;
+    int next_spm_mvin_rr_idx = 0;   // RR for MVIN  : DMA2 -> DMA3 -> DMA1
+    int next_spm_mvout_rr_idx = 0;  // RR for MVOUT : DMA2 -> DMA3 -> DMA1
 
 public:
     Decoder(Logger& logger, InstCache* inst_cache, DMAInstQueue* dma_1_inst_queue, DMAInstQueue* dma_2_inst_queue, 
