@@ -242,7 +242,7 @@ void SFU::execute(){
             spm_setup_delay = setup_delay;
             spm_expected_reads = batch_num;
             spm_expected_writes = batch_num;
-            spm_gelu_vector_period = slow_gelu_delay * (cfg.systolic_array_size / gelu_num);
+            spm_gelu_vector_period = slow_gelu_delay;
             spm_gelu_group_stride_bytes = gelu_num * spm_elem_bytes;
 
             logger.log("[SFU] Gelu Start, col_num=%d, row_num=%d, remaining = %d", col_num, row_num, remaining_cycles);
