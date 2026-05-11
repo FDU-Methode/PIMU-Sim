@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import re
+import shutil
+import subprocess
+import tempfile
 from collections import defaultdict, deque
 from dataclasses import dataclass
 from pathlib import Path
@@ -20,9 +23,14 @@ CONFIG = {
     "log": BASE_DIR / "log/tb_resnet_block_log.txt",
     "out_html": BASE_DIR / "log/tb_resnet_block_timeline.html",
     "out_png": None,  # 例如: BASE_DIR / "log/tb_resnet_block_timeline.png"
+    "png_theme": "paper",       # "paper" / "interactive"
+    "png_engine": "chrome",     # "chrome" / "plotly" / "auto"
+    "png_width": 1400,          # 导出时的逻辑宽度（像素）
+    "png_scale": 2,             # 浏览器截图的 device scale factor
+    "png_wait_ms": 2500,        # 等待 Plotly/JS 完成渲染
     "title": "PIMU-Sim Execution Timeline",
     "start_cycle": 0,
-    "end_cycle": 2000,           # None 表示一直到日志结束
+    "end_cycle": 500,           # None 表示一直到日志结束
     "lanes": ["DMA1", "DMA2", "DMA3", "SA", "ACC", "SFU", "DDR"],
     "show_markers": True,
     "show_predictions": True,
@@ -1165,12 +1173,9 @@ def build_plotly_figure(
 
 
 # ==========================================================
-# HTML Hover Enhancement
+# Export Helpers
 # ==========================================================
-def save_html_with_hover_highlight(fig: go.Figure, out_html: Path, include_plotlyjs="cdn") -> None:
-    html = pio.to_html(fig, full_html=True, include_plotlyjs=include_plotlyjs)
-
-    extra_js = r"""
+HOVER_HIGHLIGHT_JS = r"""
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const gd = document.querySelector('.plotly-graph-div');
@@ -1247,7 +1252,241 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 """
 
-    html = html.replace("</body>", extra_js + "\n</body>")
+
+def enrich_html(
+    html: str,
+    *,
+    zero_margin: bool = False,
+    hide_modebar: bool = False,
+) -> str:
+    css_rules = []
+    if zero_margin:
+        css_rules.extend(
+            [
+                "html, body { margin: 0; padding: 0; background: #FFFFFF; overflow: hidden; }",
+                "body > div { margin: 0 !important; }",
+            ]
+        )
+    if hide_modebar:
+        css_rules.append(".modebar { display: none !important; }")
+
+    if css_rules:
+        style_block = "<style>\n" + "\n".join(css_rules) + "\n</style>\n"
+        html = html.replace("</head>", style_block + "</head>")
+
+    return html.replace("</body>", HOVER_HIGHLIGHT_JS + "\n</body>")
+
+
+def build_publication_figure(fig: go.Figure, *, width_px: int) -> go.Figure:
+    pub_fig = go.Figure(fig)
+    ticktext = list(pub_fig.layout.yaxis.ticktext) if pub_fig.layout.yaxis.ticktext else []
+    lane_count = max(1, len(ticktext))
+    height_px = max(560, int(width_px * 0.48), 104 * lane_count + 80)
+
+    pub_fig.update_layout(
+        width=width_px,
+        height=height_px,
+        title=dict(
+            text=pub_fig.layout.title.text,
+            x=0.5,
+            font=dict(size=19, family="Helvetica, Arial, sans-serif", color="#111827"),
+        ),
+        plot_bgcolor="#FFFFFF",
+        paper_bgcolor="#FFFFFF",
+        margin=dict(l=70, r=28, t=56, b=82),
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=-0.19,
+            xanchor="center",
+            x=0.5,
+            font=dict(size=10),
+            bgcolor="rgba(255,255,255,0)",
+            borderwidth=0,
+        ),
+        font=dict(family="Helvetica, Arial, sans-serif", size=12, color="#1F2937"),
+    )
+
+    pub_fig.update_xaxes(
+        title_font=dict(size=13),
+        tickfont=dict(size=10),
+        showline=True,
+        linewidth=1.0,
+        linecolor="#94A3B8",
+        ticks="outside",
+        ticklen=4,
+        tickcolor="#94A3B8",
+        gridcolor="#E5E7EB",
+        gridwidth=1.0,
+    )
+    pub_fig.update_yaxes(
+        title_font=dict(size=13),
+        tickfont=dict(size=10),
+        showline=False,
+    )
+    pub_fig.update_annotations(font=dict(size=8))
+
+    shapes = []
+    for shape in pub_fig.layout.shapes:
+        shape_dict = shape.to_plotly_json()
+        line = shape_dict.get("line", {})
+        if shape_dict.get("type") == "rect" and line.get("width", 0) == 0:
+            fill = shape_dict.get("fillcolor", "")
+            if fill.endswith("0.035)"):
+                shape_dict["fillcolor"] = "rgba(148, 163, 184, 0.055)"
+            elif fill.endswith("0.015)"):
+                shape_dict["fillcolor"] = "rgba(148, 163, 184, 0.028)"
+        elif shape_dict.get("type") == "line" and line.get("width") == 2.8:
+            shape_dict["line"]["color"] = "#D6DEE8"
+            shape_dict["line"]["width"] = 2.2
+        shapes.append(shape_dict)
+    if shapes:
+        pub_fig.update_layout(shapes=shapes)
+
+    for trace in pub_fig.data:
+        if getattr(trace, "type", None) == "bar":
+            trace.textfont = dict(size=9, color="#111827")
+            line_width = getattr(getattr(trace.marker, "line", None), "width", 1.5) or 1.5
+            trace.marker.line.width = max(1.4, line_width)
+        elif getattr(trace, "type", None) == "scatter" and getattr(trace, "mode", None) == "markers":
+            trace.marker.size = max(8, trace.marker.size or 0)
+
+    return pub_fig
+
+
+def save_png_with_plotly(fig: go.Figure, out_png: Path, *, scale: float) -> None:
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    fig.write_image(out_png, scale=scale)
+
+
+def save_png_with_chrome(
+    fig: go.Figure,
+    out_png: Path,
+    *,
+    scale: float,
+    wait_ms: int,
+) -> None:
+    chrome_bin = (
+        shutil.which("google-chrome")
+        or shutil.which("google-chrome-stable")
+        or shutil.which("chromium")
+        or shutil.which("chromium-browser")
+    )
+    if chrome_bin is None:
+        raise RuntimeError("No Chrome/Chromium executable found for headless PNG export.")
+
+    width_px = int(fig.layout.width) if fig.layout.width else 1800
+    height_px = int(fig.layout.height) if fig.layout.height else 900
+    window_height = max(720, height_px + 40)
+
+    html = pio.to_html(
+        fig,
+        full_html=True,
+        include_plotlyjs=True,
+        config={"displayModeBar": False, "responsive": False},
+    )
+    html = enrich_html(html, zero_margin=True, hide_modebar=True)
+
+    out_png.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="timeline_png_") as tmpdir:
+        temp_html = Path(tmpdir) / "timeline_export.html"
+        temp_html.write_text(html, encoding="utf-8")
+
+        cmd = [
+            chrome_bin,
+            "--headless",
+            "--disable-gpu",
+            "--disable-dev-shm-usage",
+            "--no-sandbox",
+            "--hide-scrollbars",
+            "--allow-file-access-from-files",
+            "--run-all-compositor-stages-before-draw",
+            f"--force-device-scale-factor={scale}",
+            f"--window-size={width_px},{window_height}",
+            f"--virtual-time-budget={wait_ms}",
+            f"--screenshot={out_png}",
+            temp_html.resolve().as_uri(),
+        ]
+        completed = subprocess.run(cmd, capture_output=True, text=True, check=False)
+        if completed.returncode != 0:
+            details = completed.stderr.strip() or completed.stdout.strip()
+            raise RuntimeError(f"Chrome PNG export failed: {details}")
+
+    if not out_png.exists():
+        raise RuntimeError("Chrome reported success but the PNG file was not created.")
+
+    trim_png_whitespace(out_png, padding=18)
+
+
+def trim_png_whitespace(out_png: Path, *, padding: int = 12) -> None:
+    try:
+        from PIL import Image
+    except Exception:
+        return
+
+    img = Image.open(out_png).convert("RGBA")
+    pixels = img.load()
+    w, h = img.size
+    xmin, ymin, xmax, ymax = w, h, -1, -1
+
+    for y in range(h):
+        for x in range(w):
+            r, g, b, a = pixels[x, y]
+            if a == 0:
+                continue
+            if r > 248 and g > 248 and b > 248:
+                continue
+            if x < xmin:
+                xmin = x
+            if y < ymin:
+                ymin = y
+            if x > xmax:
+                xmax = x
+            if y > ymax:
+                ymax = y
+
+    if xmax < xmin or ymax < ymin:
+        return
+
+    xmin = max(0, xmin - padding)
+    ymin = max(0, ymin - padding)
+    xmax = min(w - 1, xmax + padding)
+    ymax = min(h - 1, ymax + padding)
+    cropped = img.crop((xmin, ymin, xmax + 1, ymax + 1))
+    cropped.save(out_png)
+
+
+def save_png(
+    fig: go.Figure,
+    out_png: Path,
+    *,
+    engine: str,
+    scale: float,
+    wait_ms: int,
+) -> None:
+    normalized_engine = engine.lower()
+    if normalized_engine == "plotly":
+        save_png_with_plotly(fig, out_png, scale=scale)
+        return
+    if normalized_engine == "chrome":
+        save_png_with_chrome(fig, out_png, scale=scale, wait_ms=wait_ms)
+        return
+    if normalized_engine == "auto":
+        try:
+            save_png_with_plotly(fig, out_png, scale=scale)
+            return
+        except Exception:
+            save_png_with_chrome(fig, out_png, scale=scale, wait_ms=wait_ms)
+            return
+    raise ValueError(f"Unsupported CONFIG['png_engine']: {engine}")
+
+
+# ==========================================================
+# HTML Hover Enhancement
+# ==========================================================
+def save_html_with_hover_highlight(fig: go.Figure, out_html: Path, include_plotlyjs="cdn") -> None:
+    html = pio.to_html(fig, full_html=True, include_plotlyjs=include_plotlyjs)
+    html = enrich_html(html)
     out_html.parent.mkdir(parents=True, exist_ok=True)
     out_html.write_text(html, encoding="utf-8")
 
@@ -1303,12 +1542,24 @@ def main() -> None:
 
     if out_png is not None:
         try:
-            out_png.parent.mkdir(parents=True, exist_ok=True)
-            fig.write_image(out_png, scale=2)
+            png_width = int(CONFIG.get("png_width", 2400))
+            png_scale = float(CONFIG.get("png_scale", 2))
+            png_wait_ms = int(CONFIG.get("png_wait_ms", 2500))
+            png_engine = str(CONFIG.get("png_engine", "chrome"))
+            png_theme = str(CONFIG.get("png_theme", "paper")).lower()
+
+            export_fig = build_publication_figure(fig, width_px=png_width) if png_theme == "paper" else go.Figure(fig)
+            save_png(
+                export_fig,
+                out_png,
+                engine=png_engine,
+                scale=png_scale,
+                wait_ms=png_wait_ms,
+            )
             print(f"[OK] Saved PNG: {out_png}")
         except Exception as e:
             print(f"[WARN] PNG export skipped: {e}")
-            print("[WARN] If you need PNG, install kaleido: pip install kaleido")
+            print("[WARN] You can switch CONFIG['png_engine'] to 'chrome' or install kaleido for Plotly export.")
 
 
 if __name__ == "__main__":
