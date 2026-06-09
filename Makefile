@@ -18,7 +18,7 @@ SRC_DIR = src
 BUILD_DIR = build
 
 # Top Selection
-TOP = resnet_block
+TOP = smolvlm2_decode
 TOP_CFG := ./config/$(TOP)_cfg.txt
 LOG_FILE := ./log/tb_$(TOP)_log.txt
 

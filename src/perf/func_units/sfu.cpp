@@ -286,6 +286,8 @@ void SFU::execute(){
             remaining_cycles = setup_delay + row_num * batch_num + done_delay + is_quant;
 
             spm_setup_delay = setup_delay;
+            spm_batch_num = batch_num;
+            spm_row_num = row_num;
             spm_done_delay = done_delay;
             spm_expected_reads = row_num * batch_num;
             spm_expected_writes = row_num * batch_num;

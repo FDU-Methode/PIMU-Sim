@@ -1,12 +1,13 @@
 MER 32'hC0 64'h01
 IER 32'hC8 64'h3F
 
-config_compute 32'h40 64'h00000000_020010aa
+# CONV: ifm_w=28, ifm_h=28, k=5, stride=2, pad=2, cin=24, cout=24
+config_compute 32'h40 64'h00000000_0200a154
 config_compute 32'h48 64'h00000001_00000000
-config_accumulate 32'h60 64'h0408002e_00000000
+config_accumulate 32'h60 64'h0e0e002e_00000000
 config_accumulate 32'h68 64'h00000040_00001000
-compute_sa 32'h70 64'h00601807_00000000
-compute_sa 32'h78 64'h002003ff_00004000
+compute_sa 32'h70 64'h0060d81b_00000000
+compute_sa 32'h78 64'h002002f7_00004000
 
 ENR 32'hB0 64'h00000000_00000004
 # IAR 32'hB8 64'h04
