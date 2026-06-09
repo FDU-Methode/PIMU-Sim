@@ -1,168 +1,211 @@
 # PIMU-Sim
 
-PIMU-Sim 是一个面向 NPU ISA 的仿真器项目，支持两类运行模式：
+PIMU-Sim 是一个面向 NPU ISA 与编译器运行时的仿真器项目。当前分支为 `dev_compiler`，主线是**由 ONNX / onnx-mlir 编译产物驱动的性能仿真**：运行编译后的模型共享库，通过 `npux-mlir` runtime 向仿真器外部喂入 NPU 指令，并按周期推进 NPU Core、DMA、片上存储和 DDR 模型。
 
-- 功能仿真：用于验证指令语义与执行流程
-- 性能仿真：用于周期级建模、模块并行、带宽与利用率统计
-
-当前项目为性能仿真路径，已经具备较完整的前端流水、功能单元、存储系统和统计模块，可用于单算子测试、卷积/矩阵计算测试以及残差块等组合指令流验证。
+代码中保留了 `FUNCTIONAL` / `PERFORMANCE` 两种模式选择，但当前 `FuncSim::run()` 仍为空实现；实际可用和持续维护的是 `PERFORMANCE` 路径。
 
 ---
 
-## 项目特性
+## 当前能力
 
-### 1. 支持的主要指令类型
+### 编译器运行时路径
 
-当前性能模型支持以下指令类型：
+`src/main.cpp` 在 `PERFORMANCE` 模式下采用当前分支的默认执行路径：
 
-- `MVIN`
-- `MVOUT`
-- `SA`
-- `MATADD`
-- `SFU`
+```text
+ONNX model 或 compiled .so
+    -> onnx-mlir ExecutionSession
+    -> npux-mlir npu_runtime
+    -> PerfSim / PerfNpuCore external instruction feed
+    -> output_*.bin + output_*.meta.txt
+```
 
-其中：
+主要流程：
 
-- `SA` 支持 GEMM / CONV 路径
-- `SFU` 已覆盖 GELU、SOFTMAX、LAYERNORM、POOLMAX、TRANSPOSE
-- `MATADD` 支持从 ACC SRAM 读取两个输入矩阵并输出到 SPM
-- `DMA` 支持 DRAM / SPM / ACC 之间的数据搬运
+- 创建 `PerfSim`。
+- 通过 `npu_bind_simulator_backend(perf_sim)` 绑定 runtime 后端。
+- 调用 `npu_init()` 初始化 NPU runtime。
+- 调用 `PerfNpuCore::enableExternalInstFeed()`，切换为外部指令喂入模式。
+- 如果 `compiled_model_lib` 非空，直接加载已有模型共享库。
+- 如果 `compiled_model_lib` 为空，则使用 `onnx_model_file`、`onnx_mlir_bin`、`onnx_mlir_flags` 在 `compile_work_dir` 下编译生成 `.so`。
+- 从 `model_input_dir` 读取输入张量二进制文件。
+- 将输出写入 `model_output_dir`。
 
-### 2. 周期级前端流水
+注意：当前 `src/main.cpp` 会在 `PERFORMANCE` 模式启动时清空 `inst_file`，因此默认可执行路径不是原始指令文件驱动。`PerfNpuCore` 中仍保留了指令文件读取能力，但它不是当前 main 的默认运行方式。
 
-性能模型采用如下前端组织：
+### 指令类型
 
-- `InstFile -> InstCache -> Decoder -> InstQueue -> Functional Units`
+性能模型当前由 `Decoder` 识别以下 opcode：
 
-其中：
+| Opcode | 指令 | 指令行数 | 目标队列 |
+| --- | --- | ---: | --- |
+| `0x01` | `MVIN` | 2 | `DMAInstQueue` |
+| `0x02` | `MVOUT` | 2 | `DMAInstQueue` |
+| `0x03` | `SA` | 3 | `SAInstQueue` |
+| `0x04` | `MATADD` | 3 | `SAInstQueue` |
+| `0x05` | `SFU` | 2 | `SFUInstQueue` |
 
-- `InstCache`：每周期从指令文件按行读取指令
-- `Decoder`：执行 `fetch / decode / dispatch`
-- `InstQueue`：按完整指令组包并排队
-- `EventSyncUnit`：负责基于 valid / busy 的同步控制
-- `PerfNpuCore`：统一推进整个核心各阶段
+已建模的主要语义包括：
 
-### 3. 功能单元建模
+- `MVIN` / `MVOUT`：DRAM 与 SPM/ACC 之间的数据搬运。
+- `SA`：脉动阵列路径，支持 GEMM / CONV 建模，并可配合 ACC 做累加。
+- `MATADD`：从 ACC Data SRAM 读取两个矩阵，输出到 SPM。
+- `SFU`：支持 softmax、gelu、layernorm、pool_max、transpose。
 
-当前主要功能单元包括：
+### 前端与 DMA 分发
 
-- `DMA1 / DMA2 / DMA3`
+性能仿真核心仍使用周期级前端：
+
+```text
+InstCache -> Decoder(fetch/decode/dispatch)
+          -> DMA/SA/SFU InstQueue -> Functional Units
+```
+
+在当前分支中，指令通常由 runtime 外部写入仿真器，而不是由 `InstFile` 加载。`Decoder` 会识别 opcode、聚合多行指令，并分发到对应队列。
+
+当前 DMA 分发策略：
+
+- ACC 相关 DMA 指令固定走 `DMA1`。
+- SPM `MVIN` 根据队列负载在 `DMA2` / `DMA3` 间选择；负载相同则 round-robin，必要时回退到 `DMA1`。
+- SPM `MVOUT` 在 `DMA1` 空闲且无负载时可借用 `DMA1`，否则在 `DMA2` / `DMA3` 间按负载和 round-robin 分发。
+- `EventSyncUnit` 基于资源 valid/busy 状态阻止存在数据相关风险的指令提前发射。
+
+### 功能单元与存储
+
+当前性能核心会创建并采样以下模块：
+
+- `DMA1` / `DMA2` / `DMA3`
 - `SystolicArray`
 - `Accumulator`
 - `SFU`
 - `GEMV`
-
-当前代码中，**DMA 调度策略仍在持续迭代**；项目已经支持多 DMA 结构，但为了避免复杂乱序死锁，当前DMA数量设置为1。
-
-### 4. 片上存储建模
-
-项目已实现两类片上存储：
-
 - `SPM`
-  - 多 bank 建模
-  - bank 数量与每个 bank 容量由配置文件决定
-  - 当前模型按 bank 做 valid / busy 管理
-- `ACC SRAM`
-  - 分为 `bias` 区和 `data` 区
-  - `bias` 和 `data` 分开建模
-  - 支持分别统计利用率与带宽
+- `ACC Bias SRAM`
+- `ACC Data SRAM`
 
-### 5. DDR 建模
+片上存储：
+
+- `SPM`：按 bank 建模，bank 数和容量由 `sram_bank_num`、`sram_bank_bytes` 配置。
+- `ACC SRAM`：分为 bias 区和 data 区，由 `bias_bytes`、`acc_bytes` 配置，并分别统计访问与利用率。
+
+`GEMV` 单元目前已实例化并纳入利用率统计，但当前 opcode 分发主路径仍由 DMA、SA、MATADD 和 SFU 覆盖。
+
+### DDR 模型
 
 支持两种 DDR 模式：
 
-- `AnalyticalDDR`
-  - 用解析模型估算访存延迟与带宽
-  - 适合快速测试
-- `DetailDDR`
-  - 接入 `DRAMSim3`
-  - 适合更细粒度的外存时序分析
+- `AnalyticalDDR`：解析模型，按 AXI beat、burst、基础时序参数和请求队列估算访问延迟。
+- `DetailDDR`：接入 `DRAMSim3`，用于更细粒度 DDR 时序实验；当前事务拆分仍较简化。
 
-### 6. 统计与分析
+仿真器会根据 `npu_freq` 与 `ddr_freq` 计算统一 base tick，使 NPU Core 和 DDR 可按各自频率推进。
 
-仿真结束后会输出：
+### 统计与输出
 
-- 总周期数
-- 指令行数
-- 完整指令数
-- 每个模块的 busy cycle 和利用率
-- DDR / SPM / ACC Bias / ACC Data 的带宽统计
+仿真结束后会在标准输出打印，并在 `enable_log = 1` 时写入日志文件：
+
+- 总周期数、最大周期限制、仿真耗时
+- 已读取指令行数、已模拟完整指令数、模拟 IPS
+- `DMA1/2/3`、`SPM`、`SystolicArray`、`Accumulator`、`ACC Bias/Data SRAM`、`SFU`、`GEMV` 的 busy cycle 与利用率
+- DDR、SPM、ACC Bias、ACC Data 的读写字节数、平均带宽、峰值 B/cycle
+
+当前分支不包含功耗分析模块。
 
 ---
 
-## 项目结构
+## 目录结构
 
 ```text
 PIMU-Sim/
-├── include/                  # 公共头文件
+├── include/
 │   ├── config.hpp
+│   ├── func_sim.hpp
 │   ├── logger.hpp
 │   ├── regfile.hpp
 │   ├── sim_base.hpp
+│   ├── util.hpp
 │   └── perf/
-│       ├── perf_sim.hpp
-│       ├── perf_npu_core.hpp
+│       ├── acc_sram.hpp
+│       ├── analytical_ddr.hpp
+│       ├── base_module.hpp
 │       ├── decoder.hpp
+│       ├── detail_ddr.hpp
+│       ├── event_sync_unit.hpp
+│       ├── hw_utilization.hpp
 │       ├── inst_cache.hpp
 │       ├── inst_queue.hpp
-│       ├── event_sync_unit.hpp
-│       ├── scratchpad.hpp
-│       ├── acc_sram.hpp
-│       ├── hw_utilization.hpp
-│       └── perf_func_unit.hpp
+│       ├── perf_func_unit.hpp
+│       ├── perf_npu_core.hpp
+│       ├── perf_sim.hpp
+│       └── scratchpad.hpp
 ├── src/
 │   ├── main.cpp
 │   ├── config.cpp
+│   ├── func_sim.cpp
 │   ├── logger.cpp
 │   ├── regfile.cpp
-│   ├── func_sim.cpp
 │   └── perf/
-│       ├── perf_sim.cpp
-│       ├── perf_npu_core.cpp
-│       ├── decoder.cpp
-│       ├── inst_cache.cpp
-│       ├── inst_queue.cpp
-│       ├── event_sync_unit.cpp
-│       ├── scratchpad.cpp
 │       ├── acc_sram.cpp
 │       ├── analytical_ddr.cpp
+│       ├── decoder.cpp
 │       ├── detail_ddr.cpp
+│       ├── event_sync_unit.cpp
+│       ├── hw_utilization.cpp
+│       ├── inst_cache.cpp
+│       ├── inst_queue.cpp
+│       ├── perf_func_unit.cpp
+│       ├── perf_npu_core.cpp
+│       ├── perf_sim.cpp
+│       ├── scratchpad.cpp
 │       └── func_units/
-│           ├── dma.cpp
-│           ├── systolic_array.cpp
 │           ├── accumulator.cpp
+│           ├── dma.cpp
+│           ├── gemv.cpp
 │           ├── sfu.cpp
-│           └── gemv.cpp
-├── config/                   # 仿真配置文件
-├── benchmarks/tb_test/       # 指令测试文件与生成脚本
-├── log/                      # 仿真输出日志
-├── external/DRAMsim3/        # DRAMSim3 依赖
+│           └── systolic_array.cpp
+├── config/
+│   ├── mnist_cfg.txt
+│   └── resnet_block_cfg.txt
+├── benchmarks/tb_test/
+│   ├── gen_resnet_block.py
+│   └── tb_resnet_block.txt
+├── external/DRAMsim3/
+├── npux-mlir/                 # 当前分支预期的 runtime / model 接入目录
+├── log/
 ├── Makefile
 ├── Env.cfg
-├── README.md
-└── Simulator.md              # 开发记录与设计说明
+├── Simulator.md
+└── README.md
 ```
+
+`Makefile` 会编译 `npux-mlir/model_test/runtime/`、`npux-mlir/src/Runtime/` 和 `npux-mlir/src/Support/` 下的运行时源文件。若当前工作区中的 `npux-mlir/` 为空或缺少这些路径，需要先补齐对应工程内容，否则 `make build` 会找不到 runtime 源文件。
 
 ---
 
 ## 环境依赖
 
-推荐环境：
+推荐在 Linux、WSL 或 MSYS2 这类 POSIX shell 环境下使用。当前 `Makefile` 和 `Env.cfg` 使用了 `find`、`mkdir -p`、`rm -rf`、`source`、`LD_LIBRARY_PATH` 等 POSIX 习惯；原生 Windows PowerShell 下通常需要额外适配。
 
-- `g++`  with C++ 17
+基础依赖：
+
+- `g++`，支持 C++17
+- `gcc`
 - `make`
-- Linux
-- 项目内已包括`DRAMSim3`
+- `bash`
+- `pthread`
+- `dl`
+- `external/DRAMsim3/libdramsim3.so`
 
-如需详细DDR仿真，需要能够正常加载：
+编译器运行时路径还需要：
 
-- `external/DRAMSim3/libdramsim3.so`
+- `npux-mlir` / `onnx-mlir` 运行时源文件，放在 `npux-mlir/` 目录下。
+- 可执行的 `onnx-mlir`，用于从 ONNX 编译 `.so`。
+- 对应模型目录，包含 ONNX 文件和输入张量二进制文件。
 
 ---
 
-## 构建方法
+## 构建
 
-首次进入新终端后建议先加载环境：
+进入仓库后建议先加载环境变量：
 
 ```bash
 source Env.cfg
@@ -174,184 +217,239 @@ source Env.cfg
 make build
 ```
 
-生成可执行文件：
+生成的可执行文件：
 
 ```bash
 ./build/npu_sim
 ```
 
----
+如果构建时报 `npux-mlir/.../npu_runtime.cpp`、`ExecutionSession.cpp` 或 `OMTensor.cpp` 等文件不存在，说明当前分支依赖的 `npux-mlir/` 内容尚未补齐。
 
-## 运行方法
-
-直接使用`Makefile`运行默认测试：
-
-```bash
-make run
-```
-
-默认运行的配置由`Makafile`中的`TOP`决定，例如：
-
-```makefile
-TOP = resnet_block
-```
-
-对应运行：
-
-```bash
-./build/npu_sim ./config/resnet_block_cfg.txt
-```
-
-清理构建文件：
+清理构建目录：
 
 ```bash
 make clean
 ```
 
----
+清理 `run_onnx` 生成的编译工作目录和临时配置：
 
-## 配置文件说明
-
-配置文件位于`./config`，当前主要字段包括：
-
-仿真模式
-
-- simulator_type
-    - FUNCTIONAL
-    - PERFORMANCE
-
-核心配置
-
-- max_sim_cycle
-- core_mode
-- systolic_array_size
-- npu_freq
-
-DDR 配置
-
-- ddr_mode
-- dramsim_cfg_path
-- ddr_freq
-- ddr_bandwidth
-- tCAS / tRCD / tRP / tBURST
-- BL
-- ddr_bus_width
-- ddr_channel_num
-- ddr_request_queue_depth
-
-SPM 配置
-
-- sram_bank_num
-- sram_bank_bytes
-- sram_ports
-- sram_data_width
-
-ACC 配置
-
-- acc_bank_num
-- bias_bank_num
-- acc_bytes
-- acc_ports
-- acc_data_width
-
-指令系统配置
-
-- inst_cache_size
-- inst_queue_depth
-
-文件路径
-
-- inst_file
-- log_file
-- enable_log
+```bash
+make clean_onnx
+```
 
 ---
 
-## 测试
+## 运行
 
-当前`benchmarks/tb_test`与`config`中已经包含多类测试：
+`Makefile` 当前默认目标为：
 
-算子测试：
+```makefile
+TOP = mnist
+```
 
-- dma
-- gemm
-- conv
-- matadd
-- gelu
-- softmax
-- layernorm
-- poolmax
-- transpose
+因此默认运行：
 
-模型测试：
+```bash
+make run
+```
 
-- cnn_raw
-- resnet_block
+等价于：
 
-模型生成python脚本：
+```bash
+./build/npu_sim ./config/mnist_cfg.txt
+```
 
-- gen_resnet_block.py
+`config/mnist_cfg.txt` 默认使用：
 
-其中：
+```text
+onnx_model_file = ./npux-mlir/model_test/models/mnist/model.onnx
+onnx_mlir_bin = ./onnx_mlir_bin
+model_input_dir = ./npux-mlir/model_test/models/mnist
+model_output_dir = ./sim_output/mnist
+```
 
-- tb_xxx.txt：原始指令文件
-- xxx_cfg.txt：对应配置文件
-- tb_xxx_log.txt：运行日志
+如果 `./onnx_mlir_bin` 不存在或不可执行，需要修改配置中的 `onnx_mlir_bin`，或使用 `make run_onnx` 显式传入编译器路径。
+
+### ONNX 驱动运行
+
+`run_onnx` 会先调用 `onnx-mlir` 编译模型，再生成临时配置并运行仿真：
+
+```bash
+make run_onnx \
+  TOP=mnist \
+  MODEL_ONNX=./npux-mlir/model_test/models/mnist/model.onnx \
+  MODEL_INPUT_DIR=./npux-mlir/model_test/models/mnist \
+  ONNX_MLIR_BIN=/path/to/onnx-mlir
+```
+
+可选参数：
+
+- `MODEL_OUTPUT_DIR`：默认 `./sim_output/$(TOP)`
+- `ONNX_MLIR_FLAGS`：传给 `onnx-mlir` 的额外参数
+- `COMPILER_WORK_DIR`：默认 `./build/compiler_run/$(TOP)`
+
+`run_onnx` 生成的临时配置位于：
+
+```text
+build/generated/<TOP>_run_cfg.txt
+```
+
+### 使用已有共享库
+
+如果配置文件中设置了 `compiled_model_lib`，仿真器会直接加载该 `.so`，不再调用 `onnx-mlir` 编译。例如 `config/resnet_block_cfg.txt` 当前设置了：
+
+```text
+compiled_model_lib = ./npux-mlir/model_test/build/NPU_conv/model.so
+```
+
+注意：该配置文件中仍保留了 `inst_file = ./benchmarks/tb_test/tb_resnet_block.txt`，但当前 `src/main.cpp` 会清空 `inst_file` 并启用外部指令喂入，因此运行时仍以编译模型路径为主。
+
+### 输入与输出文件
+
+输入张量从 `model_input_dir` 读取，支持的候选文件名包括：
+
+- `input_<index>.bin`
+- 单输入模型的 `input.bin`
+- `<input_name>.bin`
+- `<model_dir_name>_<input_name>.bin`
+- 单输入模型的 `<model_dir_name>_input.bin`
+
+输出写入 `model_output_dir`：
+
+```text
+output_0.bin
+output_0.meta.txt
+output_1.bin
+output_1.meta.txt
+...
+```
+
+`.meta.txt` 中包含 `dtype`、`rank`、`shape` 和 `buffer_size`。
 
 ---
 
-## 当前性能模型执行流程
+## 配置文件
 
-在性能模型下，`PerfSim`会推进两个主要模块：
+配置文件采用简单的 `key = value` 格式，支持 `#` 注释。当前 `Config::from_file()` 实际解析的主要字段如下。
 
-- `PerfNpuCore`
-- `DDR`
+仿真、日志与运行时：
 
-`PerfNpuCore`每周期主要执行：
+- `simulator_type`：`PERFORMANCE` / `FUNCTIONAL`，当前建议使用 `PERFORMANCE`
+- `max_sim_cycle`
+- `inst_file`
+- `log_file`
+- `enable_log`
+- `compiled_model_lib`
+- `onnx_model_file`
+- `onnx_mlir_bin`
+- `onnx_mlir_flags`
+- `compile_work_dir`
+- `model_input_dir`
+- `model_output_dir`
 
-- 1.中断处理
-- 2.清空 SPM / ACC SRAM 端口状态
-- 3.推进各功能单元
-- 4.处理 DMA 与 DDR 的消息收发
-- 5.采样硬件利用率
-- 6.发射 InstQueue
-- 7.推进 Decoder
-- 8.从指令文件继续加载指令
-- 9.执行 retire 和完成判断
+核心与接口：
 
-以上执行顺序根据硬件执行时序进行调整
+- `systolic_array_size`
+- `npu_freq`
+- `axi_data_width`
+- `*_reg_addr`：如 `iar_reg_addr`、`mer_reg_addr`、`ier_reg_addr`、`isr_reg_addr`、`ipr_reg_addr`
+
+DDR：
+
+- `ddr_mode`：`1` 为 `AnalyticalDDR`，`0` 为 `DetailDDR`
+- `dramsim_cfg_path`
+- `ddr_freq`
+- `ddr_bandwidth`
+- `tCAS`
+- `tRCD`
+- `tRP`
+- `tBURST`
+- `BL`
+- `ddr_bus_width`
+- `ddr_channel_num`
+- `ddr_request_queue_depth`
+
+SPM：
+
+- `sram_bank_num`
+- `sram_bank_bytes`
+- `sram_data_width`
+
+ACC：
+
+- `bias_bank_num`
+- `bias_bytes`
+- `acc_bank_num`
+- `acc_bytes`
+- `acc_data_width`
+
+指令系统：
+
+- `inst_cache_size`
+- `inst_queue_depth`
+
+当前配置文件中还保留了 `core_mode`、`sram_ports`、`acc_ports` 等字段，但当前解析器没有消费这些字段；修改它们不会影响现有仿真行为。
+
+---
+
+## 模型与 benchmark
+
+当前分支保留的配置和 benchmark：
+
+| 名称 | 配置文件 | 当前用途 |
+| --- | --- | --- |
+| `mnist` | `config/mnist_cfg.txt` | 默认 ONNX 编译运行示例 |
+| `resnet_block` | `config/resnet_block_cfg.txt` | 保留旧指令文件字段，同时指向 conv 模型 `.so` / ONNX 路径 |
+| `tb_resnet_block` | `benchmarks/tb_test/tb_resnet_block.txt` | 旧式原始指令流测试数据 |
+
+`benchmarks/tb_test/gen_resnet_block.py` 可生成旧式 ResNet-like block 指令流。该路径仍可作为低层指令格式和功能单元调试参考，但不是当前 `src/main.cpp` 的默认性能仿真入口。
 
 ---
 
 ## 当前项目状态
 
-当前项目已经完成：
+已经完成或当前可用：
 
-- ISA 指令文件驱动
-- 周期级前端流水
-- 多功能单元并行推进
-- PM / ACC SRAM 建模
-- EventSyncUnit 同步控制
-- Analytical DDR / DRAMSim3 DDR 双模式
-- 模块利用率与带宽统计
-- 基础算子和组合测试用例
+- `PERFORMANCE` 性能仿真主路径。
+- ONNX / compiled `.so` 驱动的模型执行入口。
+- `npux-mlir` runtime 到 `PerfSim` 的后端绑定。
+- 外部指令喂入模式。
+- 三路 DMA、SA、ACC、SFU、SPM、ACC SRAM、DDR 的周期级建模。
+- `AnalyticalDDR` 与 `DetailDDR` 双模式。
+- 输出张量 dump 到 `sim_output/`。
+- 模块利用率与带宽统计。
 
-当前仍在持续优化的部分包括：
+仍需继续完善：
 
-- 多 DMA 分发策略
-- 更复杂组合 workload 下的队列死锁规避
-- 指令流生成与调度策略
-- 更系统的回归测试
+- `FUNCTIONAL` 模式目前为空实现。
+- 当前 main 默认不走原始指令文件路径；如果要恢复该路径，需要调整入口逻辑。
+- 当前工作区需要补齐 `npux-mlir/` 运行时和模型内容后才能完整构建运行。
+- `DetailDDR` 的事务拆分和时序细节仍较简化。
+- `GEMV` 尚未接入当前 opcode 分发主路径。
+- 当前分支不包含功耗分析模块。
+- 缺少自动化回归测试入口。
 
 ---
 
-## 开发说明
+## 开发入口
 
-如需继续扩展项目，建议优先查看：
+建议优先阅读以下文件：
 
-- `Simulator.md`：开发记录
-- `src/perf/perf_npu_core.cpp`：核心调度入口
-- `src/perf/decoder.cpp`：前端流水
-- `src/perf/inst_queue.cpp`：完整指令组包与发射
-- `src/perf/event_sync_unit.cpp`：valid / busy 同步控制
-- `src/perf/func_units/`：各功能单元建模
+- `Simulator.md`：开发记录与设计说明
+- `Makefile`：构建规则、runtime 源文件、`run_onnx` 临时配置生成
+- `src/main.cpp`：程序入口、ONNX 编译、ExecutionSession 执行、输入输出 dump
+- `src/config.cpp`：配置解析
+- `src/perf/perf_sim.cpp`：性能仿真顶层、base tick、外部执行计时
+- `src/perf/perf_npu_core.cpp`：核心周期推进、外部指令喂入、DMA/DDR 连接
+- `src/perf/decoder.cpp`：opcode 分类、指令行数和 DMA 分发策略
+- `src/perf/inst_queue.cpp`：指令队列、发射、retire 和 ISR 更新
+- `src/perf/event_sync_unit.cpp`：资源同步与相关性控制
+- `src/perf/func_units/`：DMA、SA、ACC、SFU、GEMV 功能单元
+- `src/perf/hw_utilization.cpp`：利用率与带宽统计
+- `npux-mlir/model_test/runtime/`：当前分支预期的 NPU runtime 适配层
+
+---
+
+## License
+
+本项目使用 Apache License 2.0，详见 `LICENSE`。
