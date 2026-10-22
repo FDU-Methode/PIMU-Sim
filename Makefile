@@ -7,11 +7,11 @@ CXX = g++
 CXXFLAGS = -std=c++17 -O2 -Wall -Wextra -g
 
 # Include Directories
-INCLUDES = -I./include -I./external/DRAMsim3/src
+INCLUDES = -I./include
 
 # Library Paths & Linked Libraries
 # LIBS = -L./external/DRAMsim3 -ldramsim3 -lpthread
-LIBS = -L./external/DRAMsim3 -Wl,-rpath,'$$ORIGIN/../external/DRAMsim3' -ldramsim3 -lpthread
+LIBS = -lpthread
 
 # Source & Build Directories
 SRC_DIR = src
@@ -43,7 +43,7 @@ build: $(TARGET)
 	@echo "Or run with './$(TARGET) <config_file>'"
 
 # Compile Rules
-$(TARGET): $(OBJS) $(DRAMSIM3_LIB)
+$(TARGET): $(OBJS)
 	@mkdir -p $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
 

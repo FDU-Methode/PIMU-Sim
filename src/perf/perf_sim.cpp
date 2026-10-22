@@ -1,18 +1,19 @@
+#include <stdexcept>
 #include "../../include/perf/perf_sim.hpp"
 
 PerfSim::PerfSim(const Config& cfg) 
 : SimBase(cfg), max_sim_cycle(cfg.max_sim_cycle), cycle(0){
     logger_.log("Initializing NPU Simulator...");
 
-    if (cfg.ddr_mode == 1) {
-        logger_.log("Creating Analytical DDR...");
-        std::cout << "Creating Analytical DDR..." << std::endl;
-        ddr = std::make_unique<AnalyticalDDR>(this, cfg, logger_);
-    } else {
-        logger_.log("Creating Detailed DDR...");
-        std::cout << "Creating Detailed DDR..." << std::endl;
-        ddr = std::make_unique<DetailDDR>(this, cfg, logger_);
+    if (cfg.ddr_mode != 1) {
+        throw std::invalid_argument(
+            "PIMU-Sim supports AnalyticalDDR only; set ddr_mode = 1"
+        );
     }
+
+    logger_.log("Creating Analytical DDR...");
+    std::cout << "Creating Analytical DDR..." << std::endl;
+    ddr = std::make_unique<AnalyticalDDR>(this, cfg, logger_);
 
     logger_.log("Creating NPU Core...");
     std::cout << "Creating NPU Core..." << std::endl;

@@ -4,7 +4,6 @@
 #include "../sim_base.hpp"
 #include "base_module.hpp"
 #include "analytical_ddr.hpp"
-#include "detail_ddr.hpp"
 #include "perf_npu_core.hpp"
 
 class PerfSim : public SimBase{
