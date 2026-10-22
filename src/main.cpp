@@ -1,41 +1,36 @@
+#include <exception>
 #include <iostream>
 #include <memory>
 
 #include "../include/config.hpp"
-#include "../include/func_sim.hpp"
 #include "../include/perf/perf_sim.hpp"
 
 int main(int argc, char* argv[]){
     // --- Process Configuration and Arguments ---
     if (argc != 2) {
-        std::cerr << "Usage: " << argv[0] << std::endl;
+        std::cerr << "Usage: " << argv[0] << " <config_file>" << std::endl;
         return 1;
     }
 
-    std::string cfg_file = argv[1];
+    try {
+        const Config cfg = Config::from_file(argv[1]);
 
-    Config cfg = Config::from_file(cfg_file);
+        if(cfg.simulator_type != SimMode::PERFORMANCE) {
+            std::cerr << "Only PERFORMANCE mode is supported.\n";
+            return 1;
+        }
 
-    int max_sim_cycle = cfg.max_sim_cycle;
-    std::string inst_file = cfg.inst_file;
-    std::string log_file = cfg.log_file;
-    std::cout << "Starting to create simulator... Max sim cycle = " << max_sim_cycle << std::endl;
+        PerfSim simulator(cfg);
+        simulator.run();
 
-    // --- Initialize Simulator ---
-    std::unique_ptr<SimBase> simulator;
+        if(!simulator.getCore()->getStats().isDone) {
+            std::cerr << "Simulation did not reach DONE.\n";
+            return 2;
+        }
 
-    std::cout << "Initializing simulator in mode: " 
-          << (cfg.simulator_type == SimMode::FUNCTIONAL ? "FUNCTIONAL" : "PERFORMANCE") 
-          << std::endl;
-
-    if (cfg.simulator_type == SimMode::FUNCTIONAL){
-        simulator = std::make_unique<FuncSim>(cfg);
-    } else{
-        simulator = std::make_unique<PerfSim>(cfg);
+        return 0;
+    } catch (const std::exception& e) {
+        std::cerr << "npu_sim: " << e.what() << '\n';
+        return 1;
     }
-
-    // --- Run Simulation ---
-    simulator->run();
-
-    return 0;
 }

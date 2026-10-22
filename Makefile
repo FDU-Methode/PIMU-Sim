@@ -1,66 +1,85 @@
-########################################################
-# NPU Simulator Makefile
-########################################################
-
-# Compiler Config
+# Compiler configuration
 CXX = g++
 CXXFLAGS = -std=c++17 -O2 -Wall -Wextra -g
+CPPFLAGS = -I./include
+LDLIBS = -lpthread
 
-# Include Directories
-INCLUDES = -I./include
-
-# Library Paths & Linked Libraries
-# LIBS = -L./external/DRAMsim3 -ldramsim3 -lpthread
-LIBS = -lpthread
-
-# Source & Build Directories
+# Directories
 SRC_DIR = src
 BUILD_DIR = build
 
-# Top Selection
-TOP = smolvlm2_decode
+# Sources
+ALL_SRCS := $(sort $(shell find $(SRC_DIR) -name '*.cpp'))
+
+CLI_SRC := $(SRC_DIR)/main.cpp
+
+CORE_SRCS := $(filter-out \
+	$(CLI_SRC) \
+	$(SRC_DIR)/func_sim.cpp, \
+	$(ALL_SRCS))
+
+# Separate object directories
+CORE_OBJS := $(patsubst \
+	$(SRC_DIR)/%.cpp, \
+	$(BUILD_DIR)/core/%.o, \
+	$(CORE_SRCS))
+
+CLI_OBJ := $(BUILD_DIR)/cli/main.o
+
+# Automatically generated header dependencies
+DEPS := $(CORE_OBJS:.o=.d) $(CLI_OBJ:.o=.d)
+
+# Output targets
+CORE_LIB := $(BUILD_DIR)/libpimu_sim.so
+TARGET := $(BUILD_DIR)/npu_sim
+
+# CLI run configuration
+TOP ?= smolvlm2_decode
 TOP_CFG := ./config/$(TOP)_cfg.txt
-LOG_FILE := ./log/tb_$(TOP)_log.txt
-
-# Source Files & Object Files
-SRCS = $(shell find $(SRC_DIR) -name "*.cpp")
-OBJS = $(patsubst $(SRC_DIR)/%.cpp, $(BUILD_DIR)/%.o, $(SRCS))
-
-# Final Excutable
-TARGET = $(BUILD_DIR)/npu_sim
-
-########################################################
-# Build Rules
-########################################################
-
-# Default Target: Build & Run
-all: build run
-
-# Build Only
-build: $(TARGET)
-	@echo "Build complete! Generated npu simulator: $(TARGET)"
-	@echo "Run example programs with 'make run'"
-	@echo "Or run with './$(TARGET) <config_file>'"
-
-# Compile Rules
-$(TARGET): $(OBJS)
-	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^ $(LIBS)
-
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) $(INCLUDES) -c $< -o $@
-
-# Run Only (Requires Build First)
-run: $(TARGET)
-	@echo "Running NPU Simulator... (TOP=$(TOP), CFG=$(TOP_CFG))"
-	./$(TARGET) $(TOP_CFG)
-
-# Clean Build
-clean:
-	rm -rf $(BUILD_DIR)
-	@if [ -f "$(LOG_FILE)" ]; then \
-		: > "$(LOG_FILE)"; \
-	fi
 
 .PHONY: all build run clean
+
+# Default: build only
+all: build
+
+build: $(CORE_LIB) $(TARGET)
+
+# Build the shared simulator library
+$(CORE_LIB): $(CORE_OBJS)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) \
+		-shared \
+		-Wl,-z,defs \
+		-Wl,-soname,libpimu_sim.so \
+		-o $@ $(CORE_OBJS) $(LDLIBS)
+
+# Build the CLI and link it against the simulator library
+$(TARGET): $(CLI_OBJ) $(CORE_LIB)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CXXFLAGS) $(LDFLAGS) \
+		-o $@ $(CLI_OBJ) \
+		-L$(BUILD_DIR) -lpimu_sim \
+		-Wl,-rpath,'$$ORIGIN' \
+		$(LDLIBS)
+
+# Compile simulator sources as position-independent code
+$(BUILD_DIR)/core/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) \
+		-fPIC -MMD -MP \
+		-c $< -o $@
+
+# Compile the CLI separately
+$(CLI_OBJ): $(CLI_SRC)
+	@mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) \
+		-MMD -MP \
+		-c $< -o $@
+
+run: $(TARGET)
+	./$(TARGET) $(TOP_CFG)
+
+clean:
+	rm -rf $(BUILD_DIR)
+
+-include $(DEPS)
