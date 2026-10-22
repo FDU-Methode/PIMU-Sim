@@ -5,19 +5,12 @@
 #include <cstddef>
 #include <queue>
 #include "../config.hpp"
-
-struct Inst {
-    uint64_t high = 0;  // bits [127:64]
-    uint64_t low = 0;   // bits [63:  0]
-};
-
+#include "../instruction.hpp"
 
 class InstCache {
 private:
     int inst_cache_size;
     std::queue<Inst> inst_cache;
-
-
 
 public:
     InstCache(const Config& cfg);

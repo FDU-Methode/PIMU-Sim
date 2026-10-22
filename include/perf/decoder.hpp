@@ -4,6 +4,7 @@
 #include <cstdint>
 #include "../util.hpp"
 #include "../logger.hpp"
+#include "../instruction.hpp"
 #include "inst_cache.hpp"
 #include "inst_queue.hpp"
 

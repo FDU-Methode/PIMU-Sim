@@ -8,7 +8,7 @@
 #include "../util.hpp"
 #include "../config.hpp"
 #include "../logger.hpp"
-#include "inst_cache.hpp"
+#include "../instruction.hpp"
 #include "event_sync_unit.hpp"
 
 class PerfNpuCore;
