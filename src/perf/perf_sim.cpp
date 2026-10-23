@@ -1,8 +1,13 @@
 #include <stdexcept>
+#include <utility>
 #include "../../include/perf/perf_sim.hpp"
 
 PerfSim::PerfSim(const Config& cfg) 
 : SimBase(cfg), max_sim_cycle(cfg.max_sim_cycle), cycle(0){
+    if(cfg.simulator_type != SimMode::PERFORMANCE || cfg.max_sim_cycle <= 0) {
+        throw std::invalid_argument("PERFORMANCE mode and positive max_sim_cycle are required");
+    }
+
     logger_.log("Initializing NPU Simulator...");
 
     if (cfg.ddr_mode != 1) {
@@ -30,7 +35,24 @@ PerfSim::PerfSim(const Config& cfg)
     std::cout << "NPU Simulator Initialized" << std::endl;
 }
 
+void PerfSim::loadProgram(Program program) {
+    if(run_started_) {
+        throw std::logic_error("Create a new PerfSim for another Program");
+    }
+    core->loadProgram(std::move(program));
+}
+
 void PerfSim::run() {
+    if(run_started_) {
+        throw std::logic_error("This PerfSim supports one run only");
+    }
+
+    if(!core->hasProgram()) {
+        throw std::logic_error("Call loadProgram() before run()");
+    }
+
+    run_started_ = true;
+
     logger_.log("================================================");
     logger_.log("Starting Simulation...\n");
     std::cout << "Starting Simulation..." << std::endl;

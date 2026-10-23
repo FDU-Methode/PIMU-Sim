@@ -1,6 +1,5 @@
 #include <exception>
 #include <iostream>
-#include <memory>
 
 #include "../include/config.hpp"
 #include "../include/perf/perf_sim.hpp"
@@ -15,18 +14,11 @@ int main(int argc, char* argv[]){
     try {
         const Config cfg = Config::from_file(argv[1]);
 
-        if(cfg.simulator_type != SimMode::PERFORMANCE) {
-            std::cerr << "Only PERFORMANCE mode is supported.\n";
-            return 1;
-        }
-
         PerfSim simulator(cfg);
-        simulator.run();
 
-        if(!simulator.getCore()->getStats().isDone) {
-            std::cerr << "Simulation did not reach DONE.\n";
-            return 2;
-        }
+        std::cout << "Simulator initialized; no Program executed.\n"
+                  << "Submit Program through loadProgram(),"
+                  << "then call run()." << std::endl;
 
         return 0;
     } catch (const std::exception& e) {

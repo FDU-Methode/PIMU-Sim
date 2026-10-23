@@ -21,7 +21,6 @@ struct Config{
 
     std::map<std::string, uint32_t> reg_addr_map;
     // Simulation Config
-    std::string inst_file = "./benchmarks/tb_test/test.txt";
     std::string log_file = "./log/tb_test_log.txt";
     bool enable_log = false;
 

@@ -18,4 +18,6 @@ struct Program {
     }
 };
 
+void validateProgram(const Program& program);
+
 #endif

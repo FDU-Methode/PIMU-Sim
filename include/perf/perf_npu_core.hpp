@@ -3,7 +3,6 @@
 
 #include <vector>
 #include <algorithm>
-#include <fstream>
 #include "base_module.hpp"
 #include "perf_func_unit.hpp"
 #include "scratchpad.hpp"
@@ -13,6 +12,7 @@
 #include "inst_queue.hpp"
 #include "decoder.hpp"
 #include "event_sync_unit.hpp"
+#include "../program.hpp"
 #include "../regfile.hpp"
 
 class PerfSim;
@@ -55,12 +55,15 @@ private:
     uint64_t opcode;
     enum State {IDLE, BUSY, DONE} state;
 
-    size_t pc;
-    int fetched_inst_num;
-    int simulated_inst_num;
-    int inst_file_line_num;
-    bool inst_file_done = false;
-    std::ifstream inst_ifs;
+    Program program_;
+
+    std::size_t next_word_ = 0;
+
+    int fetched_inst_num = 0;
+    int simulated_inst_num = 0;
+
+    bool program_loaded_ = false;
+    bool program_exhausted_ = true;
 
 public:
     PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger);
@@ -70,8 +73,11 @@ public:
     void sendMsg(Message& msg) override;
     bool recvMsg(Message& msg) override;
 
-    void openInstFile(const std::string& inst_file);  // Prepare to Read Inst File
-    bool loadInstToCache();   // Read From Inst File
+    void loadProgram(Program program);
+    bool hasProgram() const noexcept {
+        return program_loaded_;
+    }
+    bool loadWordToCache();   // Read From Inst File
     void handleInterrupts();  // Handle Irq
     void issueInstQueues();   // Issue Inst From InstQueue
     void retireInstQueues();  // Retire Inst To InstQueue

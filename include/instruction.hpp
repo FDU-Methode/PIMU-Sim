@@ -2,6 +2,7 @@
 #define __INSTRUCTION_HPP__
 
 #include <cstdint>
+#include <cstddef>
 #include <type_traits>
 
 // One 128-bit instruction word
@@ -25,5 +26,21 @@ static_assert(
 static_assert(
     std::is_trivially_copyable_v<InstructionWord>
 );
+
+inline std::size_t instructionWordCount(
+    std::uint8_t opcode
+) noexcept {
+    switch(opcode) {
+        case 0x01:  // MVIN
+        case 0x02:  // MVOUT
+        case 0x05:  // SFU
+            return 2;
+        case 0x03:  //SA
+        case 0x04:  //MATADD
+            return 3;
+        default:
+            return 0;
+    }
+}
 
 #endif

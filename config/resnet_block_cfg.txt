@@ -54,7 +54,6 @@ enable_power = 1
 power_file = ./config/power.txt
 
 # ---- File paths ----
-inst_file = ./benchmarks/tb_test/tb_resnet_block.txt
 enable_log = 1                 # enable log file: 1 (enable) or 0 (disable)
 log_file   = ./log/tb_resnet_block_log.txt
 

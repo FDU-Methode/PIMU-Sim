@@ -8,9 +8,10 @@
 
 class PerfSim : public SimBase{
 private:
-    std::unique_ptr<BaseModule> core;
+    std::unique_ptr<PerfNpuCore> core;
     std::unique_ptr<BaseModule> ddr;
 
+    bool run_started_ = false;
     int max_sim_cycle;
     int cycle;
     uint64_t base_tick_ps;
@@ -22,6 +23,7 @@ public:
     ~PerfSim() noexcept = default;
 
     void run() override;
+    void loadProgram(Program program);  // Outside Load Program Interface
 
     void print_stats();
     BaseModule* getCore() {return core.get();}

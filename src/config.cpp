@@ -160,7 +160,6 @@ Config Config::from_file(const std::string &path){
         else if (k == "ddr_channel_num") c.ddr_channel_num = std::stoi(v);
         else if (k == "ddr_request_queue_depth") c.ddr_request_queue_depth = std::stoi(v);
         else if (k == "max_sim_cycle") c.max_sim_cycle = std::stoi(v);
-        else if (k == "inst_file") c.inst_file = v;
         else if (k == "log_file") c.log_file = v;
         else if (k == "enable_log") c.enable_log = std::stoi(v);
         else if (k == "ddr_mode") c.ddr_mode = std::stoi(v);

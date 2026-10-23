@@ -294,14 +294,9 @@ InstType Decoder::classifyOpcode(uint8_t opcode) {
 
 
 int Decoder::getInstLineCount(uint8_t opcode) {
-    switch(opcode) {
-        case 0x01:        return 2;
-        case 0x02:        return 2;
-        case 0x03:        return 3;
-        case 0x04:        return 3;
-        case 0x05:        return 2;
-        default:          return 0;
-    }
+    return static_cast<int>(
+        instructionWordCount(opcode)
+    );
 }
 
 

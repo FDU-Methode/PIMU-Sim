@@ -54,7 +54,6 @@ enable_power = 1
 power_file = ./config/power.txt
 
 # ---- File paths ----
-inst_file = ./benchmarks/tb_test/tb_smolvlm2_prefill.txt
 enable_log = 0                 # enable log file: 1 (enable) or 0 (disable)
 log_file   = ./log/tb_smolvlm2_prefill_log.txt
 

@@ -1,54 +1,9 @@
-#include <sstream>
-#include <cctype>
 #include <stdexcept>
+#include <utility>
+
 #include "../../include/perf/perf_npu_core.hpp"
 #include "../../include/perf/perf_sim.hpp"
 #include "../../include/util.hpp"
-
-namespace {
-    std::string trim(std::string s) {
-        while (!s.empty() && std::isspace(static_cast<unsigned char>(s.front()))) s.erase(s.begin());
-        while (!s.empty() && std::isspace(static_cast<unsigned char>(s.back()))) s.pop_back();
-        return s;
-    }
-
-    Inst parse_inst(std::string str) {
-        str = trim(str);
-
-        size_t comment_pos = str.find('#');
-        if(comment_pos != std::string::npos) {
-            str = trim(str.substr(0, comment_pos));
-        }
-
-        if(str.empty()) {
-            throw std::runtime_error("empty instruction line");
-        }
-
-        size_t h_pos = str.find("'h");
-        if(h_pos != std::string::npos) {
-            str = str.substr(h_pos + 2);
-        } else if (str.find("0x") == 0 || str.find("0X") == 0) {
-            str = str.substr(2);
-        }
-
-        str.erase(std::remove(str.begin(), str.end(), '_'), str.end());
-
-        if(str.size() > 32) {
-            throw std::runtime_error("128-bit instruction is wider than 32 hex chars");
-        }
-
-        if(str.size() < 32) {
-            str = std::string(32 - str.size(), '0') + str;
-        }
-
-        Inst inst{};
-        inst.high = std::stoull(str.substr(0, 16), nullptr, 16);
-        inst.low = std::stoull(str.substr(16, 16), nullptr, 16);
-        return inst;
-    }
-
-}  // namespace
-
 
 PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     : BaseModule(sim, cfg, logger), reg_file(cfg) {
@@ -116,83 +71,70 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
     power_analyzer = std::make_unique<PowerAnalyzer>(logger, cfg);
     logger.log("  Power Analyzer created!");
 
-    logger.log("Opening instructions from file: %s", cfg.inst_file.c_str());
-    openInstFile(cfg.inst_file);
     logger.log("----------------------------------------------------");
 }
 
 
-void PerfNpuCore::openInstFile(const std::string& inst_file) {
-    if(inst_ifs.is_open()) {
-        inst_ifs.close();
+void PerfNpuCore::loadProgram(Program program) {
+    if (program_loaded_ || getCycle() != 0) {
+        throw std::logic_error(
+            "This core accepts one Program before its first run"
+        );
     }
 
-    inst_ifs.open(inst_file);
-    if(!inst_ifs.is_open()) {
-        throw std::runtime_error("Unable to open instruction file: " + inst_file);
-    }
+    // Validate before modifying core state.
+    validateProgram(program);
 
-    inst_cache->clear();
-    pc = 0;
+    program_ = std::move(program);
+
+    next_word_ = 0;
     fetched_inst_num = 0;
     simulated_inst_num = 0;
-    inst_file_line_num = 0;
-    inst_file_done = false;
 
-    logger.log("Instruction file opened successfully...");
+    inst_cache->clear();
+    _stats = Stats{};
+
+    program_loaded_ = true;
+    program_exhausted_ = false;
+
+    logger.log(
+        "Program loaded: %zu words",
+        program_.wordCount()
+    );
 }
 
 
-bool PerfNpuCore::loadInstToCache() {
-    if(inst_file_done) {
+bool PerfNpuCore::loadWordToCache() {
+    if (!program_loaded_ ||
+        program_exhausted_ ||
+        inst_cache->full()) {
         return false;
     }
 
-    if(!inst_ifs.is_open()) {
-        throw std::runtime_error("Instruction file stream is not open");
-    }
-
-    if(inst_cache->full()) {
-        logger.log("[InstLoader] Inst Cache is Full, Skip Loading This Cycle");
+    if (next_word_ == program_.wordCount()) {
+        program_exhausted_ = true;
         return false;
     }
 
-    std::string line;
-    while(std::getline(inst_ifs, line)) {
-        ++inst_file_line_num;
+    const Inst& inst = program_.words[next_word_];
 
-        std::string trimmed = trim(line);
-        if(trimmed.empty()) {
-            continue;
-        }
-
-        size_t comment_pos = trimmed.find('#');
-        if(comment_pos != std::string::npos) {
-            trimmed = trim(trimmed.substr(0, comment_pos));
-        }
-
-        if(trimmed.empty()) {
-            continue;
-        }
-
-        Inst inst = parse_inst(trimmed);
-
-        bool write_status = inst_cache->write_inst(inst);
-        if(!write_status) {
-            logger.log("[InstLoader][ERROR] Inst Cache Write Failed");
-            return false;
-        }
-
-        ++fetched_inst_num;
-        logger.log("[InstLoader] Line %d Loaded into Inst Cache, inst=0x%016llx%016llx, fetched inst num=%d, cache_size=%d", 
-            inst_file_line_num, (unsigned long long)inst.high, (unsigned long long)inst.low, fetched_inst_num, inst_cache->size());
-        return true;
+    if (!inst_cache->write_inst(inst)) {
+        throw std::runtime_error(
+            "Failed to write instruction word to InstCache"
+        );
     }
 
-    inst_file_done = true;
-    inst_ifs.close();
-    logger.log("[InstLoader] Instruction File Read Finished, total fetched = %d", fetched_inst_num);
-    return false;
+    ++next_word_;
+    ++fetched_inst_num;
+
+    logger.log(
+        "[InstLoader] Word %zu loaded: 0x%016llx%016llx",
+        next_word_,
+        static_cast<unsigned long long>(inst.high),
+        static_cast<unsigned long long>(inst.low)
+    );
+
+    return true;
 }
 
 
@@ -305,7 +247,7 @@ void PerfNpuCore::retireInstQueues() {
 
 bool PerfNpuCore::isBusy() {
     return
-        !inst_file_done ||
+        (program_loaded_ && !program_exhausted_) ||
         !inst_cache->empty() ||
         decoder->fetchBufferValid() ||
         decoder->decodeBufferValid() ||
@@ -468,7 +410,7 @@ void PerfNpuCore::tick(){
     decoder->tick();
 
     // 8. Load Inst To Cache
-    loadInstToCache();
+    loadWordToCache();
 
     // 9. Inst Retire
     retireInstQueues();
@@ -480,6 +422,9 @@ void PerfNpuCore::tick(){
 
 
 void PerfNpuCore::checkCompletion(){
+    if(!program_loaded_) {  // No need to chek completion when no program is loaded
+        return;
+    }
     if(!isBusy()) {
         _stats.isDone = true;
         _stats.cycle = getCycle();
