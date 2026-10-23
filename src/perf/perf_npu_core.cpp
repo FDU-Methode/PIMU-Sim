@@ -253,6 +253,12 @@ bool PerfNpuCore::isBusy() {
         decoder->decodeBufferValid() ||
         (decoder->currentInstType() != InstType::NONE) ||
 
+        (dma_1_inst_queue->getInstCount() != 0) ||
+        (dma_2_inst_queue->getInstCount() != 0) ||
+        (dma_3_inst_queue->getInstCount() != 0) ||
+        (sa_inst_queue->getInstCount() != 0) ||
+        (sfu_inst_queue->getInstCount() != 0) ||
+
         !dma_1_inst_queue->empty() || dma_1_inst_queue->isBusy() ||
         !dma_2_inst_queue->empty() || dma_2_inst_queue->isBusy() ||
         !dma_3_inst_queue->empty() || dma_3_inst_queue->isBusy() ||
@@ -421,21 +427,15 @@ void PerfNpuCore::tick(){
 }
 
 
-void PerfNpuCore::checkCompletion(){
-    if(!program_loaded_) {  // No need to chek completion when no program is loaded
-        return;
-    }
-    if(!isBusy()) {
-        _stats.isDone = true;
-        _stats.cycle = getCycle();
-        _stats.inst_line_num = fetched_inst_num;
-        _stats.inst_num = simulated_inst_num;
-        logger.log("NPU Core: Simulation completed at cycle %d", getCycle());
-    } else if(_cycle >= cfg.max_sim_cycle-1){
-        _stats.inst_line_num = fetched_inst_num;
-        _stats.inst_num = simulated_inst_num;
-        logger.log("NPU Core: Simulation timeout at cycle %d", getCycle());
-    }
+void PerfNpuCore::checkCompletion() {
+    _stats.cycle = getCycle();
+    _stats.inst_line_num = fetched_inst_num;
+    _stats.inst_num = simulated_inst_num;
+
+    _stats.isDone =
+        program_loaded_ &&
+        !isBusy() &&
+        sim->isDdrDrained();
 }
 
 

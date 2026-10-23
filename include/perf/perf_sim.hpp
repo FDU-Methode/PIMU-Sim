@@ -5,25 +5,34 @@
 #include "base_module.hpp"
 #include "analytical_ddr.hpp"
 #include "perf_npu_core.hpp"
+#include "../run_result.hpp"
 
 class PerfSim : public SimBase{
 private:
     std::unique_ptr<PerfNpuCore> core;
-    std::unique_ptr<BaseModule> ddr;
+    std::unique_ptr<AnalyticalDDR> ddr;
 
     bool run_started_ = false;
+    RunResult result_;
+
     int max_sim_cycle;
-    int cycle;
+
     uint64_t base_tick_ps;
     std::vector<uint64_t> ticks_per_period;
-    std::chrono::high_resolution_clock::time_point sim_start_time, sim_end_time;
-    double sim_time_us; // duration of the simulation (us)
 public:
     PerfSim(const Config& cfg);
     ~PerfSim() noexcept = default;
 
     void run() override;
     void loadProgram(Program program);  // Outside Load Program Interface
+
+    bool isDdrDrained() const noexcept {
+        return ddr->isDrained();
+    }
+
+    RunResult getResult() const {
+        return result_;
+    }
 
     void print_stats();
     BaseModule* getCore() {return core.get();}

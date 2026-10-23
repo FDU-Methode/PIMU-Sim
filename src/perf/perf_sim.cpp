@@ -3,7 +3,7 @@
 #include "../../include/perf/perf_sim.hpp"
 
 PerfSim::PerfSim(const Config& cfg) 
-: SimBase(cfg), max_sim_cycle(cfg.max_sim_cycle), cycle(0){
+: SimBase(cfg), max_sim_cycle(cfg.max_sim_cycle){
     if(cfg.simulator_type != SimMode::PERFORMANCE || cfg.max_sim_cycle <= 0) {
         throw std::invalid_argument("PERFORMANCE mode and positive max_sim_cycle are required");
     }
@@ -27,6 +27,13 @@ PerfSim::PerfSim(const Config& cfg)
     std::vector<double> freqs = {cfg.npu_freq, cfg.ddr_freq};
 
     compute_base_tick_and_multipliers(freqs, base_tick_ps, ticks_per_period);
+    for (const auto ticks : ticks_per_period) {
+        if (ticks == 0) {
+            throw std::invalid_argument(
+                "Clock configuration produces a zero tick period"
+            );
+        }
+    }
     logger_.log("Base tick = %llu ps; core_period = %llu base ticks; ddr_period = %llu base ticks",
             (unsigned long long)base_tick_ps,
             (unsigned long long)ticks_per_period[0],
@@ -36,10 +43,16 @@ PerfSim::PerfSim(const Config& cfg)
 }
 
 void PerfSim::loadProgram(Program program) {
-    if(run_started_) {
-        throw std::logic_error("Create a new PerfSim for another Program");
+    if (run_started_) {
+        throw std::logic_error(
+            "Create a new PerfSim for another Program"
+        );
     }
+
     core->loadProgram(std::move(program));
+
+    result_ = RunResult{};
+    result_.status = RunStatus::READY;
 }
 
 void PerfSim::run() {
@@ -53,96 +66,107 @@ void PerfSim::run() {
 
     run_started_ = true;
 
-    logger_.log("================================================");
-    logger_.log("Starting Simulation...\n");
-    std::cout << "Starting Simulation..." << std::endl;
-    sim_start_time = std::chrono::high_resolution_clock::now();
-    
-    bool early_termination = false;
+    result_ = RunResult{};
+    result_.status = RunStatus::RUNNING;
 
-    // 使用gcd计算出来的base tick周期，可以保证所有组件的tick周期都是base tick的整数倍
-    // 从而实现较为精确的core和ddr各组件的tick()函数调用
-    uint64_t max_base_ticks = max_sim_cycle * ticks_per_period[0]; // if core is index 0
-    uint64_t base_tick_counter = 0;
-    uint64_t core_counter = 0;
-    uint64_t ddr_counter = 0;
+    const auto start = std::chrono::steady_clock::now();
 
-    while (base_tick_counter < max_base_ticks){
-        // advance base tick
-        // call tick on modules whose counters reach their period
-        if (core_counter == 0) {
-            logger_.log("\n[Core Cycle: %d]", core->getCycle());
-            core->tick();
-            core_counter = ticks_per_period[0];
-            if (core->getStats().isDone) {
-                logger_.log("Core finished execution at cycle %d", core->getCycle());
-                early_termination = true;
-                break;
+    try{
+        const auto max_base_ticks =
+            static_cast<std::uint64_t>(max_sim_cycle) *
+            ticks_per_period[0];
+
+        std::uint64_t base_tick_counter = 0;
+        std::uint64_t core_counter = 0;
+        std::uint64_t ddr_counter = 0;
+
+        while (base_tick_counter < max_base_ticks) {
+            if (core_counter == 0) {
+                core->tick();
+                core_counter = ticks_per_period[0];
+
+                if (core->getStats().isDone) {
+                    result_.status = RunStatus::DONE;
+                    break;
+                }
             }
-        }
-        if (ddr_counter == 0) {
-            //logger_.log("[DDR Cycle: %d]", ddr->getCycle());
-            ddr->tick();
-            ddr_counter = ticks_per_period[1];
-        }
-        // decrement counters
-        core_counter--;
-        ddr_counter--;
-        base_tick_counter++;
-    }
-    sim_end_time = std::chrono::high_resolution_clock::now();
-    sim_time_us = std::chrono::duration_cast<std::chrono::microseconds>(sim_end_time - sim_start_time).count();
 
-    if (!early_termination) {
-        logger_.log("Simulation reached maximum cycle limit %d", max_sim_cycle);
-    } else {
-        logger_.log("Simulation finished early at cycle %d", core->getCycle());
+            if (ddr_counter == 0) {
+                ddr->tick();
+                ddr_counter = ticks_per_period[1];
+            }
+
+            --core_counter;
+            --ddr_counter;
+            ++base_tick_counter;
+        }
+
+        if (result_.status == RunStatus::RUNNING) {
+            result_.status = RunStatus::TIMEOUT;
+        }
+    } catch (const std::exception& e) {
+        result_.status = RunStatus::BACKEND_ERROR;
+        result_.error = e.what();
+    } catch (...) {
+        result_.status = RunStatus::BACKEND_ERROR;
+        result_.error = "Unknown exception during simulation";
     }
-    
+
+    const auto end = std::chrono::steady_clock::now();
+
+    result_.host_elapsed_us = std::chrono::duration<double, std::micro>(end - start).count();
+
+    result_.core_cycles = static_cast<std::uint64_t>(core->getCycle());
+
+    result_.ddr_cycles = static_cast<std::uint64_t>(ddr->getCycle());
+
+    result_.fetched_words = core->fetchedWordCount();
+
+    result_.assembled_packets = core->assembledPacketCount();
+
     print_stats();
 }
 
 void PerfSim::print_stats() {
-    double sim_time_s = sim_time_us / 1000000.0;
-    int sim_inst_line_num = core->getStats().inst_line_num;
-    int sim_inst_num = core->getStats().inst_num;
-    //double ips = (double)(sim_inst_num * 1000000) / sim_time_us;
-    double ips = sim_inst_num / (sim_time_us / 1000000.0);
-    int sim_cycles = core->getCycle();
-    bool early_termination = (sim_cycles < max_sim_cycle);
-    
-    logger_.log("================================================");
-    logger_.log("Simulation Finished!");
-    logger_.log("Simulation Statistics:");
-    logger_.log("  Simulation time: %3f s", sim_time_s);
-    logger_.log("  Maximum cycle limit: %d", max_sim_cycle);
-    logger_.log("  Early termination: %s", early_termination ? "Yes" : "No");
-    logger_.log("  Final state: %s", core->getStats().isDone ? "DONE" : "RUNNING");
-    logger_.log("  Total cycles: %d", sim_cycles);
-    logger_.log("  Total simulated instruction lines: %d", sim_inst_line_num);
-    logger_.log("  Total simulated instructions: %d", sim_inst_num);
-    logger_.log("  Simulated instructions per second: %3f", ips);
+    const auto& r = result_;
 
-    std::cout << "================================================" << std::endl;
-    std::cout << "Simulation Statistics:" << std::endl;
-    std::cout << "  Total cycles: " <<core->getCycle() << std::endl;
-    std::cout << "  Maximum cycle limit: " << max_sim_cycle << std::endl;
-    std::cout << "  Simulation time: " << sim_time_s << " s" << std::endl;
-    std::cout << "  Total simulated instruction lines: " << sim_inst_line_num << std::endl;
-    std::cout << "  Total simulated instructions: " << sim_inst_num << std::endl;
-    std::cout << "  Simulated instructions per second: " << ips << std::endl;
+    logger_.log(
+        "Final status: %s",
+        toString(r.status)
+    );
 
-    if(auto* perf_core = dynamic_cast<PerfNpuCore*>(core.get())) {
-        if(HardWareUtilizationTracker* util_tracker = perf_core->getUtilTracker()) {
-            util_tracker->report();
-        }
-        if (cfg_.enable_power) {
-            if (PowerAnalyzer* power_analyzer = perf_core->getPowerAnalyzer()) {
-                power_analyzer->report();
-            }
-        }
+    std::cout
+        << "Simulation result:\n"
+        << "  Status: "
+        << toString(r.status) << '\n'
+        << "  Core cycles: "
+        << r.core_cycles << '\n'
+        << "  DDR cycles: "
+        << r.ddr_cycles << '\n'
+        << "  Fetched words: "
+        << r.fetched_words << '\n'
+        << "  Assembled packets: "
+        << r.assembled_packets << '\n'
+        << "  Host elapsed (us): "
+        << r.host_elapsed_us << '\n';
+
+    if (!r.error.empty()) {
+        std::cout
+            << "  Error: " << r.error << '\n';
+
+        logger_.log(
+            "Backend error: %s",
+            r.error.c_str()
+        );
     }
 
-    // TODO
-    // DDR带宽利用率
+    if (auto* tracker = core->getUtilTracker()) {
+        tracker->report();
+    }
+
+    if (cfg_.enable_power) {
+        if (auto* power = core->getPowerAnalyzer()) {
+            power->report();
+        }
+    }
 }

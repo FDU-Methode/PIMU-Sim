@@ -77,7 +77,7 @@ public:
     bool hasProgram() const noexcept {
         return program_loaded_;
     }
-    bool loadWordToCache();   // Read From Inst File
+    bool loadWordToCache();   // Load one word from Program
     void handleInterrupts();  // Handle Irq
     void issueInstQueues();   // Issue Inst From InstQueue
     void retireInstQueues();  // Retire Inst To InstQueue
@@ -85,6 +85,18 @@ public:
     void checkCompletion();
 
     void addInstNum();
+
+    std::uint64_t fetchedWordCount() const noexcept {
+        return static_cast<std::uint64_t>(
+            fetched_inst_num
+        );
+    }
+
+    std::uint64_t assembledPacketCount() const noexcept {
+        return static_cast<std::uint64_t>(
+            simulated_inst_num
+        );
+    }
 
     RegFile& getRegFile() { return reg_file; }
     DMAInstQueue* getDMAInstQueue(int queue_id) {

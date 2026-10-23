@@ -5,7 +5,6 @@
 #include <queue>
 #include "../util.hpp"
 #include "base_module.hpp"
-#include "perf_sim.hpp"
 #include "../config.hpp"
 #include "../logger.hpp"
 
@@ -54,6 +53,10 @@ public:
     void sendMsg(Message& msg) override;
     bool recvMsg(Message& msg) override;
     bool tryConsumeResp(MsgType expectedMsg, Message& getMsg) override;
+
+    bool isDrained() const noexcept {
+        return request_queue.empty() && !current_request.active;
+    }
 
 private:
     void clearCurrentRequest();

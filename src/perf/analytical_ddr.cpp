@@ -1,4 +1,5 @@
 #include "../../include/perf/analytical_ddr.hpp"
+#include "../../include/perf/perf_sim.hpp"
 #include <algorithm>
 #include <cstdint>
 
