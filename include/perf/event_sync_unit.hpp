@@ -29,6 +29,15 @@ public:
     EventSyncUnit(const Config& cfg, Logger& logger);
     ~EventSyncUnit() = default;
 
+    // Check Event Sync Unit Drained
+    bool isDrained() const noexcept {
+        for(bool busy : bank_busy) {
+            if(busy) return false;
+        }
+
+        return true;
+    }
+
     int getBankId(uint32_t addr, bool is_acc);
 
     bool allowIssue(const DMAInstPacket& inst_packet);

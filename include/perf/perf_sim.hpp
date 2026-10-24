@@ -12,7 +12,6 @@ private:
     std::unique_ptr<PerfNpuCore> core;
     std::unique_ptr<AnalyticalDDR> ddr;
 
-    bool run_started_ = false;
     RunResult result_;
 
     void rebuildDevice();

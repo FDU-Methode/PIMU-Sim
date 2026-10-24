@@ -51,6 +51,9 @@ private:
     // Power
     std::unique_ptr<PowerAnalyzer> power_analyzer;
 
+    // Check Drained
+    bool hasPendingWork();
+
     bool irq;
     uint64_t opcode;
     enum State {IDLE, BUSY, DONE} state;
@@ -63,6 +66,7 @@ private:
     int simulated_inst_num = 0;
 
     bool program_loaded_ = false;
+    bool program_started_ = false;
     bool program_exhausted_ = true;
 
 public:

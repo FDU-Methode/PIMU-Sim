@@ -64,6 +64,15 @@ public:
     InstType currentInstType() { return inst_type; };
     int remainingInst() { return remaining_inst; };
 
+    // Check Decoder Drained
+    bool isDrained() const noexcept {
+        return !fetch_valid &&
+               !decode_valid &&
+               inst_type == InstType::NONE &&
+               remaining_inst == 0 &&
+               current_dma_target == DMATarget::NONE;
+    }
+
     // DMA Dispatch Option
     DMATarget selectDMATarget(uint8_t opcode, const Inst& inst);
 

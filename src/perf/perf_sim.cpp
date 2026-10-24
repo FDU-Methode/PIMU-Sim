@@ -66,16 +66,17 @@ void PerfSim::reset() {
     core_counter_ = 0;
     ddr_counter_ = 0;
 
-    run_started_ = false;
     result_ = RunResult{};
 
     logger_.log("Simulator reset: status = IDLE");
 }
 
 void PerfSim::loadProgram(Program program) {
-    if (run_started_) {
+    if (result_.status != RunStatus::IDLE &&
+        result_.status != RunStatus::READY &&
+        result_.status != RunStatus::DONE) {
         throw std::logic_error(
-            "Call reset() before loading another Program"
+            "Load requires IDLE, READY or DONE; reset after failure"
         );
     }
 
@@ -102,15 +103,11 @@ void PerfSim::advanceBaseTick() {
 }
 
 void PerfSim::run() {
-    if(run_started_) {
-        throw std::logic_error("This PerfSim supports one run only");
+    if (result_.status != RunStatus::READY || !core->hasProgram()) {
+        throw std::logic_error(
+            "Call loadProgram() successfully before run(); reset after failure"
+        );
     }
-
-    if(!core->hasProgram()) {
-        throw std::logic_error("Call loadProgram() before run()");
-    }
-
-    run_started_ = true;
 
     result_ = RunResult{};
     result_.status = RunStatus::RUNNING;
@@ -148,9 +145,9 @@ void PerfSim::run() {
 
     result_.host_elapsed_us = std::chrono::duration<double, std::micro>(end - start).count();
 
-    result_.core_cycles = static_cast<std::uint64_t>(core->getCycle());
+    result_.core_cycles = core->getCycle() - core_start;
 
-    result_.ddr_cycles = static_cast<std::uint64_t>(ddr->getCycle());
+    result_.ddr_cycles = ddr->getCycle() - ddr_start;
 
     result_.fetched_words = core->fetchedWordCount();
 
@@ -168,7 +165,7 @@ void PerfSim::print_stats() {
     );
 
     std::cout
-        << "Simulation result:\n"
+        << "Launch result:\n"
         << "  Status: "
         << toString(r.status) << '\n'
         << "  Core cycles: "
@@ -193,11 +190,13 @@ void PerfSim::print_stats() {
     }
 
     if (auto* tracker = core->getUtilTracker()) {
+        std::cout << "Session cumulative utilization and bandwidth:" << std::endl;
         tracker->report();
     }
 
     if (cfg_.enable_power) {
         if (auto* power = core->getPowerAnalyzer()) {
+            std::cout << "Session cumulative power statistics:" << std::endl;
             power->report();
         }
     }

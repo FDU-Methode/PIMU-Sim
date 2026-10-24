@@ -76,13 +76,19 @@ PerfNpuCore::PerfNpuCore(PerfSim* sim, const Config& cfg, Logger& logger)
 
 
 void PerfNpuCore::loadProgram(Program program) {
-    if (program_loaded_ || getCycle() != 0) {
+    if (program_loaded_ && program_started_ && !_stats.isDone) {
         throw std::logic_error(
-            "This core accepts one Program before its first run"
+            "Previous Program has not completed; reset is required"
         );
     }
 
-    // Validate before modifying core state.
+    if (hasPendingWork() || !sim->isDdrDrained()) {
+        throw std::logic_error(
+            "Cannot load Program while hardware has pending work"
+        );
+    }
+
+    // Validate before changing the current Program or its result
     validateProgram(program);
 
     program_ = std::move(program);
@@ -91,10 +97,11 @@ void PerfNpuCore::loadProgram(Program program) {
     fetched_inst_num = 0;
     simulated_inst_num = 0;
 
-    inst_cache->clear();
     _stats = Stats{};
+    _stats.cycle() = getCycle();
 
     program_loaded_ = true;
+    program_started_ = false;
     program_exhausted_ = false;
 
     logger.log(
@@ -246,12 +253,16 @@ void PerfNpuCore::retireInstQueues() {
 
 
 bool PerfNpuCore::isBusy() {
+    return (program_loaded_ && !program_exhausted_) || hasPendingWork();
+}
+
+
+
+bool PerfNpuCore::hasPendingWork() {
     return
-        (program_loaded_ && !program_exhausted_) ||
         !inst_cache->empty() ||
-        decoder->fetchBufferValid() ||
-        decoder->decodeBufferValid() ||
-        (decoder->currentInstType() != InstType::NONE) ||
+        !decoder->isDrained() ||
+        !event_sync_unit->isDrained() ||
 
         (dma_1_inst_queue->getInstCount() != 0) ||
         (dma_2_inst_queue->getInstCount() != 0) ||
@@ -259,25 +270,40 @@ bool PerfNpuCore::isBusy() {
         (sa_inst_queue->getInstCount() != 0) ||
         (sfu_inst_queue->getInstCount() != 0) ||
 
-        !dma_1_inst_queue->empty() || dma_1_inst_queue->isBusy() ||
-        !dma_2_inst_queue->empty() || dma_2_inst_queue->isBusy() ||
-        !dma_3_inst_queue->empty() || dma_3_inst_queue->isBusy() ||
-        !sa_inst_queue->empty()    || sa_inst_queue->isBusy()    ||
-        !sfu_inst_queue->empty()   || sfu_inst_queue->isBusy()   ||
+        !dma_1_inst_queue->empty() ||
+        dma_1_inst_queue->isBusy() ||
 
-        dma_1->isBusy()  || dma_1->isFinish() ||
-        dma_2->isBusy()  || dma_2->isFinish() ||
-        dma_3->isBusy()  || dma_3->isFinish() ||
-        sa->isBusy()     || sa->isFinish()    ||
-        acc->isBusy()    || acc->isFinish()   ||
-        sfu->isBusy()    || sfu->isFinish()   ||
-        gemv->isBusy()   || gemv->isFinish()  ||
+        !dma_2_inst_queue->empty() ||
+        dma_2_inst_queue->isBusy() ||
 
-        !outbox_.empty() || !inbox_.empty();
+        !dma_3_inst_queue->empty() ||
+        dma_3_inst_queue->isBusy() ||
+
+        !sa_inst_queue->empty() ||
+        sa_inst_queue->isBusy() ||
+
+        !sfu_inst_queue->empty() ||
+        sfu_inst_queue->isBusy() ||
+
+        dma_1->isBusy() || dma_1->isFinish() ||
+        dma_2->isBusy() || dma_2->isFinish() ||
+        dma_3->isBusy() || dma_3->isFinish() ||
+
+        sa->isBusy() || sa->isFinish() ||
+        acc->isBusy() || acc->isFinish() ||
+        sfu->isBusy() || sfu->isFinish() ||
+        gemv->isBusy() || gemv->isFinish() ||
+
+        !outbox_.empty() ||
+        !inbox_.empty();
 }
 
 
 void PerfNpuCore::tick(){
+    if(program_loaded_) {
+        program_started_ = true;
+    }
+
     logger.log("NPU Core is ticked at cycle %llu", static_cast<unsigned long long>(getCycle()));
 
     // 1. Handle Irq
