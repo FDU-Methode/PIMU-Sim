@@ -42,6 +42,38 @@ PerfSim::PerfSim(const Config& cfg)
     std::cout << "NPU Simulator Initialized" << std::endl;
 }
 
+void PerfSim::rebuildDevice() {
+    logger_.log("Creating Analytical DDR...");
+    std::cout << "Creating Analytical DDR..." << std::endl;
+
+    auto new_ddr = std::make_unique<AnalyticalDDR>(this, cfg_, logger_);
+
+    logger_.log("Creating NPU Core...");
+    std::cout << "Creating NPU Core..." << std::endl;
+
+    auto new_core = std::make_unique<PerfNpuCore>(this, cfg_, logger_);
+
+    // Construct both replacements before discarding the current device
+    core.reset();
+    ddr.reset();
+
+    ddr = std::move(new_ddr);
+    core = std::move(new_core);
+}
+
+void PerfSim::reset() {
+    if(result_.status == RunStatus::RUNNING) {
+        throw std::logic_error("Cannot reset a running PerfSim");
+    }
+
+    rebuildDevice();
+
+    run_started_ = false;
+    result_ = RunResult{};
+
+    logger_.log("Simulator reset: status = IDLE");
+}
+
 void PerfSim::loadProgram(Program program) {
     if (run_started_) {
         throw std::logic_error(

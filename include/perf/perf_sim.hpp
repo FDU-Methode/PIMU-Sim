@@ -15,6 +15,8 @@ private:
     bool run_started_ = false;
     RunResult result_;
 
+    void rebuildDevice();
+
     int max_sim_cycle;
 
     uint64_t base_tick_ps;
@@ -24,6 +26,10 @@ public:
     ~PerfSim() noexcept = default;
 
     void run() override;
+
+    // Restore the device to its initial state using the same configuration
+    void reset();
+
     void loadProgram(Program program);  // Outside Load Program Interface
 
     bool isDdrDrained() const noexcept {
