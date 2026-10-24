@@ -278,7 +278,7 @@ bool PerfNpuCore::isBusy() {
 
 
 void PerfNpuCore::tick(){
-    logger.log("NPU Core is ticked at cycle %d", getCycle());
+    logger.log("NPU Core is ticked at cycle %llu", static_cast<unsigned long long>(getCycle()));
 
     // 1. Handle Irq
     handleInterrupts();

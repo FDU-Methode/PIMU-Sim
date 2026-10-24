@@ -14,8 +14,8 @@ private:
 
     double core_freq_ghz = 1.0;
     static constexpr int UnitNum = 11;
-    int total_cycles = 0;
-    std::array<int, UnitNum> busy_cycles{};
+    std::uint64_t total_cycles = 0;
+    std::array<std::uint64_t, UnitNum> busy_cycles{};
 
     // Compute Bandwidth
     uint64_t ddr_read_bytes_total = 0;
@@ -61,8 +61,8 @@ public:
     void reset();
     void sample(const ModuleState& state);  // Sample The Status of Each Module
 
-    int totalCycles() { return total_cycles; };
-    int busyCycles(UnitType unit) { return busy_cycles[UnitTypeToIndex(unit)]; };
+    std::uint64_t totalCycles() const noexcept { return total_cycles; };
+    std::uint64_t busyCycles(UnitType unit) const { return busy_cycles[UnitTypeToIndex(unit)]; };
     double utilization(UnitType unit);
     void report();
 

@@ -17,15 +17,29 @@ private:
 
     void rebuildDevice();
 
+    void advanceBaseTick();
+
     int max_sim_cycle;
 
     uint64_t base_tick_ps;
     std::vector<uint64_t> ticks_per_period;
+
+    // Number of completed base ticks
+    std::uint64_t base_tick_counter_ = 0;
+
+    // Countdown to each clock domain's next edge
+    // Zero means this domain ticks in the current base tick
+    std::uint64_t core_counter_ = 0;
+    std::uint64_t ddr_counter_ = 0;
 public:
     PerfSim(const Config& cfg);
     ~PerfSim() noexcept = default;
 
     void run() override;
+
+    std::uint64_t baseTickCount() const noexcept {
+        return base_tick_counter_;
+    }
 
     // Restore the device to its initial state using the same configuration
     void reset();

@@ -15,7 +15,7 @@ protected:
     Logger &logger;
 
     Stats _stats;
-    int _cycle;
+    std::uint64_t _cycle;
 
 public:
     BaseModule(PerfSim *sim, const Config& cfg, Logger& logger) 
@@ -34,7 +34,7 @@ public:
     Stats getStats() const { return _stats; }
     //virtual std::map<std::string, std::string> getStats() const = 0;
     // 获取当前周期
-    int getCycle() const { return _cycle; }
+    std::uint64_t getCycle() const noexcept { return _cycle; }
 };
 
 #endif

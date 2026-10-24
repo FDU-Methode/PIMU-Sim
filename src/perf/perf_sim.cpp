@@ -16,13 +16,7 @@ PerfSim::PerfSim(const Config& cfg)
         );
     }
 
-    logger_.log("Creating Analytical DDR...");
-    std::cout << "Creating Analytical DDR..." << std::endl;
-    ddr = std::make_unique<AnalyticalDDR>(this, cfg, logger_);
-
-    logger_.log("Creating NPU Core...");
-    std::cout << "Creating NPU Core..." << std::endl;
-    core = std::make_unique<PerfNpuCore>(this, cfg, logger_);
+    rebuildDevice();
 
     std::vector<double> freqs = {cfg.npu_freq, cfg.ddr_freq};
 
@@ -68,6 +62,10 @@ void PerfSim::reset() {
 
     rebuildDevice();
 
+    base_tick_counter_ = 0;
+    core_counter_ = 0;
+    ddr_counter_ = 0;
+
     run_started_ = false;
     result_ = RunResult{};
 
@@ -77,7 +75,7 @@ void PerfSim::reset() {
 void PerfSim::loadProgram(Program program) {
     if (run_started_) {
         throw std::logic_error(
-            "Create a new PerfSim for another Program"
+            "Call reset() before loading another Program"
         );
     }
 
@@ -85,6 +83,22 @@ void PerfSim::loadProgram(Program program) {
 
     result_ = RunResult{};
     result_.status = RunStatus::READY;
+}
+
+void PerfSim::advanceBaseTick() {
+    if(core_counter_ == 0) {
+        core->tick();
+        core_counter_ = ticks_per_period[0];
+    }
+
+    if(ddr_counter_ == 0) {
+        ddr->tick();
+        ddr_counter_ = ticks_per_period[1];
+    }
+
+    --core_counter_;
+    --ddr_counter_;
+    ++base_tick_counter_;
 }
 
 void PerfSim::run() {
@@ -101,40 +115,26 @@ void PerfSim::run() {
     result_ = RunResult{};
     result_.status = RunStatus::RUNNING;
 
+    const auto core_start = core->getCycle();
+    const auto ddr_start = ddr->getCycle();
+
+    const auto budget = static_cast<std::uint64_t>(max_sim_cycle);
+
     const auto start = std::chrono::steady_clock::now();
 
     try{
-        const auto max_base_ticks =
-            static_cast<std::uint64_t>(max_sim_cycle) *
-            ticks_per_period[0];
+        while(true) {
+            advanceBaseTick();
 
-        std::uint64_t base_tick_counter = 0;
-        std::uint64_t core_counter = 0;
-        std::uint64_t ddr_counter = 0;
-
-        while (base_tick_counter < max_base_ticks) {
-            if (core_counter == 0) {
-                core->tick();
-                core_counter = ticks_per_period[0];
-
-                if (core->getStats().isDone) {
-                    result_.status = RunStatus::DONE;
-                    break;
-                }
+            if(core->getStats().isDone) {
+                result_.status = RunStatus::DONE;
+                break;
             }
 
-            if (ddr_counter == 0) {
-                ddr->tick();
-                ddr_counter = ticks_per_period[1];
+            if(core->getCycle() - core_start >= budget) {
+                result_.status = RunStatus::TIMEOUT;
+                break;
             }
-
-            --core_counter;
-            --ddr_counter;
-            ++base_tick_counter;
-        }
-
-        if (result_.status == RunStatus::RUNNING) {
-            result_.status = RunStatus::TIMEOUT;
         }
     } catch (const std::exception& e) {
         result_.status = RunStatus::BACKEND_ERROR;
