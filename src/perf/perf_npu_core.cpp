@@ -98,7 +98,7 @@ void PerfNpuCore::loadProgram(Program program) {
     simulated_inst_num = 0;
 
     _stats = Stats{};
-    _stats.cycle() = getCycle();
+    _stats.cycle = getCycle();
 
     program_loaded_ = true;
     program_started_ = false;

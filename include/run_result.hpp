@@ -41,6 +41,13 @@ struct RunResult {
     std::uint64_t fetched_words = 0;
     std::uint64_t assembled_packets = 0;
 
+    // Incremental counters for this launch.
+    ResourceCounters resources;
+
+    // Cumulative counters at the end of this launch,
+    // since the last reset.
+    ResourceCounters session_resources;
+
     double host_elapsed_us = 0.0;
 
     std::string error;

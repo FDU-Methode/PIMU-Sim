@@ -114,6 +114,7 @@ void PerfSim::run() {
 
     const auto core_start = core->getCycle();
     const auto ddr_start = ddr->getCycle();
+    const auto resource_start = core->getUtilTracker()->snapshot();
 
     const auto budget = static_cast<std::uint64_t>(max_sim_cycle);
 
@@ -152,6 +153,10 @@ void PerfSim::run() {
     result_.fetched_words = core->fetchedWordCount();
 
     result_.assembled_packets = core->assembledPacketCount();
+
+    result_.session_resources = core->getUtilTracker()->snapshot();
+
+    result_.resources = resourceDelta(result_.session_resources, resource_start);
 
     print_stats();
 }

@@ -7,13 +7,14 @@
 #include "../logger.hpp"
 #include "../util.hpp"
 #include "../config.hpp"
+#include "../perf_counters.hpp"
 
 class HardWareUtilizationTracker {
 private:
     Logger& logger;
 
     double core_freq_ghz = 1.0;
-    static constexpr int UnitNum = 11;
+    static constexpr std::size_t UnitNum = kResourceUnitSlots;
     std::uint64_t total_cycles = 0;
     std::array<std::uint64_t, UnitNum> busy_cycles{};
 
@@ -87,6 +88,35 @@ public:
 
     double avgBytesPerCycle(uint64_t bytes);
     double avgBandwidthGBps(uint64_t bytes);
+
+    ResourceCounters snapshot() const noexcept {
+        ResourceCounters result;
+
+        result.sampled_core_cycles = total_cycles;
+        result.busy_cycles = busy_cycles;
+
+        result.ddr = {
+            ddr_read_bytes_total,
+            ddr_write_bytes_total
+        };
+
+        result.spm = {
+            spm_read_bytes_total,
+            spm_write_bytes_total
+        };
+
+        result.acc_bias = {
+            acc_bias_read_bytes_total,
+            acc_bias_write_bytes_total
+        };
+
+        result.acc_data = {
+            acc_data_read_bytes_total,
+            acc_data_write_bytes_total
+        };
+
+        return result;
+    }
 };
 
 #endif
