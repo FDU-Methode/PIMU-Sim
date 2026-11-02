@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include <utility>
 #include "../../include/perf/perf_sim.hpp"
+#include "../../include/run_result_json.hpp"
 
 PerfSim::PerfSim(const Config& cfg) 
 : SimBase(cfg), max_sim_cycle(cfg.max_sim_cycle){
@@ -159,6 +160,10 @@ void PerfSim::run() {
     result_.resources = resourceDelta(result_.session_resources, resource_start);
 
     print_stats();
+}
+
+std::string PerfSim::getResultJson() const {
+    return runResultToJson(result_);
 }
 
 void PerfSim::print_stats() {

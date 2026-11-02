@@ -56,6 +56,8 @@ public:
     void print_stats();
     BaseModule* getCore() {return core.get();}
     BaseModule* getDDR() {return ddr.get();}
+
+    std::string getResultJson() const;
 };
 
 #endif

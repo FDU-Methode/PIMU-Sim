@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include "perf_counters.hpp"
 
 enum class RunStatus {
     IDLE,
