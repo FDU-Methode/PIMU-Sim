@@ -15,6 +15,11 @@ extern "C" {
 
 typedef struct PimuSimHandle PimuSimHandle;
 
+typedef struct PimuInstructionWord {
+    uint64_t high;  // bits[127:64]
+    uint64_t low;   // bits[63:0]
+} PimuInstructionWord;
+
 enum {
     PIMU_OK = 0,
     PIMU_INVALID_ARGUMENT = 1,
@@ -31,6 +36,22 @@ uint32_t pimu_sim_get_abi_version(void) PIMU_NOEXCEPT;
 int32_t pimu_sim_create(
     const char* config_path,
     PimuSimHandle** out_handle  // Need to change the handle ptr
+) PIMU_NOEXCEPT;
+
+// word_count counts 128-bit words, not complete instruction packets.
+// Copies all words before returning.
+// The caller retains ownership of words.
+int32_t pimu_sim_load_program(
+    PimuSimHandle* handle,
+    const PimuInstructionWord* words,
+    size_t word_count
+) PIMU_NOEXCEPT;
+
+// Synchronous run using max_sim_cycle from the session configuration.
+// Returns PIMU_OK only for DONE.
+// TIMEOUT and BACKEND_ERROR require reset before further execution.
+int32_t pimu_sim_run(
+    PimuSimHandle* handle
 ) PIMU_NOEXCEPT;
 
 int32_t pimu_sim_reset(

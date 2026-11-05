@@ -7,8 +7,11 @@
 #include <exception>
 #include <memory>
 #include <stdexcept>
-#include <limits>
 #include <utility>
+
+static_assert(sizeof(PimuInstructionWord) == 16);
+static_assert(offsetof(PimuInstructionWord, high) == 0);
+static_assert(offsetof(PimuInstructionWord, low) == 8);
 
 struct PimuSimHandle {
     PerfSim sim;
@@ -58,14 +61,19 @@ int32_t protect(F&& operation) noexcept {
 
 extern "C" {
 
+// GET_ABI_VERSION
 uint32_t pimu_sim_get_abi_version(void) noexcept {
     return PIMU_SIM_ABI_VERSION;
 }
 
+
+// LAST_ERROR
 const char* pimu_sim_last_error(void) noexcept {
     return last_error;
 }
 
+
+// CREATE
 int32_t pimu_sim_create(
     const char* config_path,
     PimuSimHandle** out_handle
@@ -97,6 +105,58 @@ int32_t pimu_sim_create(
     });
 }
 
+
+// LOAD_PROGRAM
+int32_t pimu_sim_load_program(
+    PimuSimHandle* handle,
+    const PimuInstructionWord* words,
+    size_t word_count
+) noexcept {
+    return protect([&]() -> int32_t {
+        if(!handle || !words || word_count == 0) {
+            return fail(PIMU_INVALID_ARGUMENT, "Invalid Program arguments");
+        }
+
+        Program program;
+        program.words.reserve(word_count);
+
+        for(size_t i = 0; i < word_count; ++i) {
+            program.words.push_back({words[i].high, words[i].low});
+        }
+
+        handle->sim.loadProgram(std::move(program));
+
+        return PIMU_OK;
+    });
+};
+
+
+// RUN
+int32_t pimu_sim_run(
+    PimuSimHandle* handle
+) noexcept {
+    return protect([&]() -> int32_t {
+        if(!handle) {
+            return fail(PIMU_INVALID_ARGUMENT, "handle is NULL");
+        }
+
+        handle->sim.run();
+
+        const auto result = handle->sim.getResult();
+
+        switch (result.status) {
+            case RunStatus::DONE: return PIMU_OK;
+            case RunStatus::TIMEOUT: return fail(PIMU_TIMEOUT, "Simulation reached max_sim_cycle");
+            case RunStatus::BACKEND_ERROR: return fail(
+                PIMU_BACKEND_ERROR, result.error.empty() ? "Simulation returned BACKEND_ERROR" : result.error.c_str()
+            );
+            default: return fail(PIMU_BACKEND_ERROR, "Unexpected status after run");
+        }
+    });
+}
+
+
+// RESET
 int32_t pimu_sim_reset(
     PimuSimHandle* handle
 ) noexcept {
@@ -114,6 +174,8 @@ int32_t pimu_sim_reset(
     });
 }
 
+
+// GET_RESULT_JSON
 int32_t pimu_sim_get_result_json(
     const PimuSimHandle* handle,
     char* dst,
@@ -151,6 +213,8 @@ int32_t pimu_sim_get_result_json(
     });
 }
 
+
+// DESTROY
 void pimu_sim_destroy(PimuSimHandle* handle) noexcept {
     last_error[0] = 0;
     delete handle;
