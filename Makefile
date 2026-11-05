@@ -11,6 +11,15 @@ BUILD_DIR = build
 # Sources
 ALL_SRCS := $(sort $(shell find $(SRC_DIR) -name '*.cpp'))
 
+NATIVE_DIR := sw/native
+
+NATIVE_SRCS := $(sort $(wildcard $(NATIVE_DIR)/*.cpp))
+
+NATIVE_OBJS := $(patsubst \
+	$(NATIVE_DIR)/%.cpp, \
+	$(BUILD_DIR)/native/%.o, \
+	$(NATIVE_SRCS))
+
 CLI_SRC := $(SRC_DIR)/main.cpp
 
 CORE_SRCS := $(filter-out \
@@ -27,7 +36,9 @@ CORE_OBJS := $(patsubst \
 CLI_OBJ := $(BUILD_DIR)/cli/main.o
 
 # Automatically generated header dependencies
-DEPS := $(CORE_OBJS:.o=.d) $(CLI_OBJ:.o=.d)
+DEPS := $(CORE_OBJS:.o=.d) \
+	$(NATIVE_OBJS:.o=.d) \
+	$(CLI_OBJ:.o=.d)
 
 # Output targets
 CORE_LIB := $(BUILD_DIR)/libpimu_sim.so
@@ -45,13 +56,13 @@ all: build
 build: $(CORE_LIB) $(TARGET)
 
 # Build the shared simulator library
-$(CORE_LIB): $(CORE_OBJS)
+$(CORE_LIB): $(CORE_OBJS) $(NATIVE_OBJS)
 	@mkdir -p $(dir $@)
 	$(CXX) $(CXXFLAGS) $(LDFLAGS) \
 		-shared \
 		-Wl,-z,defs \
 		-Wl,-soname,libpimu_sim.so \
-		-o $@ $(CORE_OBJS) $(LDLIBS)
+		-o $@ $(CORE_OBJS) $(NATIVE_OBJS) $(LDLIBS)
 
 # Build the CLI and link it against the simulator library
 $(TARGET): $(CLI_OBJ) $(CORE_LIB)
@@ -64,6 +75,13 @@ $(TARGET): $(CLI_OBJ) $(CORE_LIB)
 
 # Compile simulator sources as position-independent code
 $(BUILD_DIR)/core/%.o: $(SRC_DIR)/%.cpp
+	@mkdir -p $(dir $@)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) \
+		-fPIC -MMD -MP \
+		-c $< -o $@
+
+# Compile the native C ABI adapter
+$(BUILD_DIR)/native/%.o: $(NATIVE_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) \
 		-fPIC -MMD -MP \
